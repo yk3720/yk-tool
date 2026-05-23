@@ -1,0 +1,59 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# Node (workspace-ui-kit 等)
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# test / coverage
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Vercel
+.vercel
+
+# Python（将来 apps に置く場合）
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ログ・一時
+*.log
+tmp/
+temp/
+
+# publish: 大量 HTML は必要に応じて LFS または除外方針を後で決める
+# （現状は追跡可。除外する場合はここに publish/**/*.html 等を追加）

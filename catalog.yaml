@@ -1,6 +1,6 @@
 # yk-tool ツール台帳（論理レジストリ · 雛形）
 # 方針: c:/yk-memo/handoffs/workspace-layout/HANDOFF.md §5-2
-# バージョン詳細は各ツールの package.json / CHANGELOG.md を正とする
+# バージョン詳細は各ツールの package.json / CHANGELOG.md を正とする（CHANGELOG 雛形 2026-05-23 追加済）
 
 version: 1
 updated: "2026-05-23"
@@ -12,6 +12,7 @@ tools:
     kind: next-app
     status: forked
     version_ref: package.json
+    changelog: CHANGELOG.md
     notes: 図解管理 UI 含む。講座 ADS リポとは切り離し済み
 
   - id: flowchart-web
@@ -20,6 +21,7 @@ tools:
     kind: next-app
     status: experimental
     version_ref: package.json
+    changelog: CHANGELOG.md
 
   - id: playwright-test
     name: Playwright E2E
@@ -27,6 +29,7 @@ tools:
     kind: test-harness
     status: experimental
     version_ref: package.json
+    changelog: CHANGELOG.md
     notes: ui-kit / flowchart-web 向け E2E
 
   - id: commit-report-tool
@@ -35,6 +38,7 @@ tools:
     kind: automation
     status: experimental
     version_ref: package.json
+    changelog: CHANGELOG.md
     notes: GitHub コミット分析 → 図解 → Slack 投稿
 
 publish:

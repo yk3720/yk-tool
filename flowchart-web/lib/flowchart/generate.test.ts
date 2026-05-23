@@ -1,0 +1,67 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { parseTable } from "./parseTable";
+import { generateFlowchart } from "./generate";
+import type { FlowchartDocument } from "./types";
+
+function loadFixture(name: string): FlowchartDocument {
+  const raw = readFileSync(join(process.cwd(), "fixtures", name), "utf-8");
+  return JSON.parse(raw) as FlowchartDocument;
+}
+
+describe("parseTable", () => {
+  it("parses sample-basic into 5 nodes", () => {
+    const doc = loadFixture("sample-basic.json");
+    const { nodes } = parseTable(doc.table);
+    expect(nodes).toHaveLength(5);
+    expect(nodes.map((n) => n.id)).toEqual(["10", "20", "30", "40", "50"]);
+    const decision = nodes.find((n) => n.id === "30");
+    expect(decision?.destsDown).toEqual(["40"]);
+    expect(decision?.destsRight).toEqual(["50"]);
+  });
+});
+
+describe("generateFlowchart (golden: sample-basic)", () => {
+  it("produces placed nodes and edges for basic decision flow", () => {
+    const doc = loadFixture("sample-basic.json");
+    const result = generateFlowchart(doc.table, doc.layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.nodes).toHaveLength(5);
+    expect(result.placed).toHaveLength(5);
+    expect(result.edges.length).toBeGreaterThanOrEqual(4);
+
+    const n10 = result.placed.find((p) => p.id === "10");
+    const n30 = result.placed.find((p) => p.id === "30");
+    const n50 = result.placed.find((p) => p.id === "50");
+    expect(n10).toMatchObject({ x: 40, y: 40, shapeKind: "rounded" });
+    expect(n30?.shapeKind).toBe("diamond");
+    expect(n50?.level).toBe(1);
+    expect(n50!.x).toBeGreaterThan(n30!.x);
+
+    const yesEdge = result.edges.find(
+      (e) => e.sourceId === "30" && e.direction === "down",
+    );
+    const noEdge = result.edges.find(
+      (e) => e.sourceId === "30" && e.direction === "right",
+    );
+    expect(yesEdge?.label).toBe("Yes");
+    expect(noEdge?.label).toBe("No");
+
+    expect(result.bounds.right).toBeGreaterThan(result.bounds.left);
+    expect(result.bounds.bottom).toBeGreaterThan(result.bounds.top);
+  });
+
+  it("stops on missing connection target", () => {
+    const doc = loadFixture("sample-basic.json");
+    const bad = doc.table.map((row) =>
+      row[0] === 20 ? [20, "処理", "99", "", 0, "処理A", "", ""] : row,
+    );
+    const result = generateFlowchart(bad, doc.layout);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.errors.some((e) => e.includes("99"))).toBe(true);
+  });
+});

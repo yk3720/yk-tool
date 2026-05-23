@@ -1,0 +1,1209 @@
+<!DOCTYPE html><html lang="ja"><head><script src="//www.google.com/jsapi"></script><script>window.parent.maeExportApis_();</script>
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>進捗報告</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+     
+
+    :root {
+       
+      --sp-0:  4px;    
+      --sp-1:  8px;    
+      --sp-2: 16px;    
+      --sp-3: 24px;    
+      --sp-4: 32px;    
+      --sp-6: 48px;    
+
+       
+       
+      --fs-disp: 24px;  --lh-disp: 32px;   
+      --fs-head: 15px;  --lh-head: 24px;   
+      --fs-body: 14px;  --lh-body: 24px;   
+      --fs-sm:   13px;  --lh-sm:   16px;   
+      --fs-lbl:  12px;  --lh-lbl:  16px;   
+
+       
+      --c-page:   #f1f5f9;   
+      --c-card:   #ffffff;
+      --c-stripe: #f8fafc;   
+
+       
+      --c-t1: #1e293b;   
+      --c-t2: #475569;   
+      --c-t3: #64748b;   
+      --c-t4: #94a3b8;   
+
+       
+      --c-bd:  #e2e8f0;   
+      --c-bds: #94a3b8;   
+
+       
+      --c-gh: #1e3a5f;  --c-gth: #2d5080;   
+      --c-ph: #1c4532;  --c-pth: #276046;   
+      --c-th: #5c2d1a;  --c-tth: #7a3d25;   
+
+       
+      --sdone-bg: #dcfce7;  --sdone-c: #14532d;  --sdone-bd: #86efac;   
+      --sact-bg:  #fef3c7;  --sact-c:  #78350f;  --sact-bd:  #fcd34d;   
+      --spnd-bg:  #f3e8ff;  --spnd-c:  #581c87;  --spnd-bd:  #d8b4fe;   
+      --spl-bg:   #f1f5f9;  --spl-c:   #1e293b;  --spl-bd:   #cbd5e1;   
+      --snrpt-bg: #f0f9ff;  --snrpt-c: #0369a1;  --snrpt-bd: #7dd3fc;   
+
+       
+      --phi-bg: #fee2e2;  --phi-c: #7f1d1d;  --phi-bd: #fca5a5;   
+      --pmd-bg: #fff7ed;  --pmd-c: #7c2d12;  --pmd-bd: #fed7aa;   
+      --plo-bg: #f8fafc;  --plo-c: #475569;  --plo-bd: #e2e8f0;   
+
+       
+      --ktrbl-bg: #fff7ed;  --ktrbl-c: #7c2d12;  --ktrbl-bd: #fed7aa;   
+      --kspec-bg: #eef2ff;  --kspec-c: #312e81;  --kspec-bd: #a5b4fc;   
+
+       
+      --rod-bg: #fff1f2;  --rod-hv: #ffe4e6;  --rod-c: #be123c;
+
+       
+      --sum-done: #15803d;   
+      --sum-prog: #0369a1;   
+      --sum-trbl: #c2410c;   
+      --sum-pend: #6b21a8;   
+    }
+
+     
+    body {
+      background-color: var(--c-page);
+      color: var(--c-t1);
+      font-size: var(--fs-body);
+      line-height: var(--lh-body);
+      font-family: system-ui, 'YuGothic', 'Yu Gothic', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    }
+
+     
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+     
+    .t-disp { font-size: var(--fs-disp); line-height: var(--lh-disp); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .t-head { font-size: var(--fs-head); line-height: var(--lh-head); font-weight: 600; }
+    .t-body { font-size: var(--fs-body); line-height: var(--lh-body); font-weight: 400; }
+    .t-sm   { font-size: var(--fs-sm);   line-height: var(--lh-sm);   font-weight: 400; }
+    .t-lbl  { font-size: var(--fs-lbl);  line-height: var(--lh-lbl);  font-weight: 500; }
+    .c-t2   { color: var(--c-t2); }
+    .c-t3   { color: var(--c-t3); }
+    .c-t4   { color: var(--c-t4); }
+
+     
+    .card {
+      background: var(--c-card);
+      border: 1px solid var(--c-bd);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(30, 41, 59, .05);
+      overflow: hidden;
+    }
+
+     
+    .sec-hd { padding: var(--sp-1) var(--sp-2); color: #fff; }
+    .sec-hd.g { background: var(--c-gh); }
+    .sec-hd.p { background: var(--c-ph); }
+    .sec-hd.t { background: var(--c-th); }
+
+     
+    .rpt-tbl { width: 100%; border-collapse: collapse; }
+    .rpt-tbl-planned { min-width: 900px; }
+    .rpt-tbl-trouble { min-width: 860px; }
+    .rpt-tbl caption { caption-side: top; }
+    .rpt-tbl th,
+    .rpt-tbl td { padding: var(--sp-1) var(--sp-2); vertical-align: middle; }
+    .rpt-tbl th  { font-size: var(--fs-lbl); line-height: var(--lh-lbl); font-weight: 500; text-align: left; white-space: nowrap; color: #fff; }
+    .rpt-tbl td  { font-size: var(--fs-body); line-height: var(--lh-body); }
+    .rpt-tbl .c  { text-align: center; }
+    .rpt-tbl thead.ph { background: var(--c-pth); }
+    .rpt-tbl thead.th { background: var(--c-tth); }
+    .rpt-tbl tbody tr         { border-top: 1px solid var(--c-bd); }
+    .rpt-tbl tbody tr.even    { background: var(--c-stripe); }    
+    .rpt-tbl tbody tr:hover   { background: #f1f5f9; }
+    .rpt-tbl tbody tr.od      { background: var(--rod-bg); }
+    .rpt-tbl tbody tr.od:hover { background: var(--rod-hv); }
+
+     
+    .td-nm  { color: var(--c-t1); font-weight: 500; white-space: nowrap; }   
+    .td-dev { color: var(--c-t2); white-space: nowrap; }                       
+    .td-txt { color: var(--c-t2); font-size: var(--fs-sm); line-height: var(--lh-sm); max-width: 200px; }  
+    .td-aux { color: var(--c-t3); font-size: var(--fs-lbl); line-height: var(--lh-lbl); }  
+    .td-od  { color: var(--rod-c); font-weight: 500; }
+
+     
+    .td-clamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      overflow-wrap: break-word;
+      cursor: pointer;
+      min-width: 120px;   
+    }
+    .td-clamp[data-overflows="false"] { cursor: default; }
+    .td-clamp.expanded {
+      display: block;
+      overflow: visible;
+      cursor: pointer;
+    }
+     
+    .td-clamp[data-overflows="true"]:not(.expanded)::after {
+      content: ' ▾';
+      color: var(--c-t3);
+      font-size: var(--fs-body);
+    }
+
+     
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--sp-0) var(--sp-1);   
+      border-radius: 9999px;
+      font-size: var(--fs-lbl);
+      line-height: var(--lh-lbl);
+      font-weight: 500;
+      border: 1px solid;
+      white-space: nowrap;
+    }
+    .bdg.sq { border-radius: 4px; }
+
+     
+    .bdg-done { background: var(--sdone-bg);  color: var(--sdone-c);  border-color: var(--sdone-bd); }
+    .bdg-act  { background: var(--sact-bg);   color: var(--sact-c);   border-color: var(--sact-bd); }
+    .bdg-pnd  { background: var(--spnd-bg);   color: var(--spnd-c);   border-color: var(--spnd-bd); }
+    .bdg-pl   { background: var(--spl-bg);    color: var(--spl-c);    border-color: var(--spl-bd); }
+    .bdg-nrpt { background: var(--snrpt-bg);  color: var(--snrpt-c);  border-color: var(--snrpt-bd); }  
+
+     
+    .bdg-hi { background: var(--phi-bg); color: var(--phi-c); border-color: var(--phi-bd); }
+    .bdg-md { background: var(--pmd-bg); color: var(--pmd-c); border-color: var(--pmd-bd); }
+    .bdg-lo { background: var(--plo-bg); color: var(--plo-c); border-color: var(--plo-bd); }
+
+     
+    .bdg-trbl { background: var(--ktrbl-bg); color: var(--ktrbl-c); border-color: var(--ktrbl-bd); border-left: 3px solid #ea580c; }
+    .bdg-spec { background: var(--kspec-bg); color: var(--kspec-c); border-color: var(--kspec-bd); }
+
+     
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--sp-0) var(--sp-2);   
+      border-radius: 9999px;
+      font-size: var(--fs-lbl);
+      line-height: var(--lh-lbl);
+      font-weight: 500;
+      border: 1px solid var(--c-bd);
+      background: var(--c-card);
+      color: var(--c-t2);
+      cursor: pointer;
+      transition: background .12s, color .12s, border-color .12s;
+      white-space: nowrap;
+      min-height: 32px;   
+    }
+    .filter-btn:hover  { background: var(--c-stripe); border-color: var(--c-bds); }
+    .filter-btn.active { background: var(--c-gh); color: #fff; border-color: var(--c-gh); }
+
+     
+    .prog-track { flex: 1; height: 8px; background: var(--c-bd); border-radius: 9999px; overflow: hidden; min-width: 40px; }
+    .prog-fill  { height: 8px; background: var(--c-pth); border-radius: 9999px; }
+
+     
+    .gantt-row[data-done="1"] { opacity: .5; }
+
+     
+    @media (max-width: 639px) {
+       
+      .rpt-tbl-planned { min-width: 500px; }
+      .rpt-tbl-trouble { min-width: 480px; }
+
+       
+      .td-dev,
+      .td-nm {
+        white-space: normal;
+        min-width: 72px;
+        max-width: 100px;
+      }
+
+       
+      .td-txt  { min-width: 160px; max-width: none; }
+      .td-clamp { min-width: 160px; }
+
+       
+      .rpt-tbl-planned th:nth-child(1),
+      .rpt-tbl-planned td:nth-child(1),
+      .rpt-tbl-planned th:nth-child(8),
+      .rpt-tbl-planned td:nth-child(8),
+      .rpt-tbl-planned th:nth-child(10),
+      .rpt-tbl-planned td:nth-child(10) { display: none; }
+
+       
+      .rpt-tbl-trouble th:nth-child(1),
+      .rpt-tbl-trouble td:nth-child(1),
+      .rpt-tbl-trouble th:nth-child(10),
+      .rpt-tbl-trouble td:nth-child(10) { display: none; }
+    }
+
+     
+    @media print {
+      .td-clamp {
+        display: block !important;
+        -webkit-line-clamp: unset !important;
+        overflow: visible !important;
+        cursor: default !important;
+      }
+      .td-clamp::after { display: none !important; }
+      .filter-btn,
+      #expandAllBtn,
+      #hideDoneToggle,
+      label[for="hideDoneToggle"],
+      label:has(#hideDoneToggle) { display: none !important; }
+    }
+
+     
+    .search-highlight {
+      background: #fef08a;   
+      color: #713f12;        
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+    .search-input {
+      border: 1px solid var(--c-bd);
+      border-radius: 9999px;
+      padding: var(--sp-0) var(--sp-2);
+      font-size: var(--fs-lbl);
+      line-height: var(--lh-lbl);
+      color: var(--c-t1);
+      background: var(--c-card);
+      outline: none;
+      min-width: 160px;
+      min-height: 32px;
+      transition: border-color .12s;
+    }
+    .search-input:focus {
+      border-color: var(--c-bds);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0}.relative{position:relative}.flex{display:flex}.grid{display:grid}.w-full{width:100%}.shrink-0{flex-shrink:0}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-between{justify-content:space-between}.overflow-x-auto{overflow-x:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-nowrap{white-space:nowrap}.p-4{padding:1rem}@media (min-width: 640px){.sm\:order-3{order:3}.sm\:contents{display:contents}.sm\:w-40{width:10rem}.sm\:flex-1{flex:1 1 0%}.sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:p-6{padding:1.5rem}}</style></head>
+<body class="p-4 sm:p-6">
+
+
+<script>
+var PLANNED_DATA = [{"no":1,"device":"成形加工装置","subject":"手動操作","situation":"全ﾕﾆｯﾄ動作確認OK","result":"","registered":"2026/01/01","start":"2026/02/01","deadline":"2026/02/04","status":"対応中","priority":"中","current":10,"total":10},{"no":2,"device":"成形加工装置","subject":"原点復帰","situation":"全ﾕﾆｯﾄ動作確認OK","result":"","registered":"2026/01/01","start":"2026/02/05","deadline":"2026/02/09","status":"対応中","priority":"中","current":5,"total":10},{"no":3,"device":"成形加工装置","subject":"自動運転","situation":"ﾕﾆｯﾄ5まで動作確認終了","result":"","registered":"2026/01/01","start":"2026/02/10","deadline":"2026/02/14","status":"対応中","priority":"中","current":5,"total":10},{"no":4,"device":"成形加工装置","subject":"異常","situation":"未確認","result":"","registered":"2026/01/01","start":"2026/02/15","deadline":"2026/02/19","status":"対応中","priority":"中","current":4,"total":10},{"no":5,"device":"成形加工装置","subject":"設定","situation":"未確認","result":"","registered":"2026/01/01","start":"2026/02/20","deadline":"2026/02/24","status":"対応中","priority":"中","current":2,"total":10},{"no":6,"device":"成形加工装置","subject":"流動確認","situation":"未確認","result":"","registered":"2026/01/01","start":"2026/02/25","deadline":"2026/02/28","status":"対応中","priority":"中","current":2,"total":10},{"no":11,"device":"ﾚｰｻﾞ加工装置","subject":"手動操作","situation":"全ﾕﾆｯﾄ動作確認OK","result":"","registered":"2026/02/01","start":"2026/03/01","deadline":"2026/03/04","status":"対応中","priority":"中","current":30,"total":20},{"no":12,"device":"ﾚｰｻﾞ加工装置","subject":"原点復帰","situation":"ﾕﾆｯﾄ5まで動作確認終了","result":"","registered":"2026/02/01","start":"2026/03/05","deadline":"2026/03/09","status":"対応中","priority":"中","current":20,"total":20},{"no":13,"device":"ﾚｰｻﾞ加工装置","subject":"自動運転","situation":"未確認","result":"","registered":"2026/02/01","start":"2026/03/10","deadline":"2026/03/14","status":"対応中","priority":"中","current":40,"total":20},{"no":14,"device":"ﾚｰｻﾞ加工装置","subject":"異常","situation":"未確認","result":"","registered":"2026/02/01","start":"2026/03/15","deadline":"2026/03/19","status":"対応中","priority":"中","current":45,"total":20},{"no":15,"device":"ﾚｰｻﾞ加工装置","subject":"設定","situation":"未確認","result":"","registered":"2026/02/01","start":"2026/03/20","deadline":"2026/03/24","status":"対応中","priority":"中","current":2,"total":20},{"no":16,"device":"ﾚｰｻﾞ加工装置","subject":"流動確認","situation":"未確認","result":"","registered":"2026/02/01","start":"2026/03/25","deadline":"2026/03/28","status":"対応中","priority":"中","current":34,"total":20}];
+var TROUBLE_DATA = [{"no":7,"category":"不具合","device":"成形加工装置","subject":"センサー誤検知","situation":"塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中。","result":"配線が間違っていた","registered":"2026/04/28","deadline":"2026/04/28","status":"完了","priority":"高"},{"no":8,"category":"不具合","device":"成形加工装置","subject":"センサー誤検知","situation":"塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中。","result":"光軸があっていない","registered":"2026/04/29","deadline":"2026/04/28","status":"完了","priority":"高"},{"no":9,"category":"不具合","device":"成形加工装置","subject":"ﾓｰﾀ異音","situation":"ｻｰﾎﾞがハンチングする","result":"ｹﾞｲﾝ調整があっていあい","registered":"2026/04/30","deadline":"2026/04/28","status":"確認中","priority":"高"},{"no":10,"category":"不具合","device":"成形加工装置","subject":"センサー誤検知","situation":"塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.","result":"","registered":"2026/04/26","deadline":"2026/04/28","status":"確認中","priority":"高"},{"no":17,"category":"不具合","device":"ﾚｰｻﾞ加工装置","subject":"印字ずれ","situation":"ﾚｰｻﾞの印字制度がわるい","result":"","registered":"2026/02/01","deadline":"2026/04/28","status":"確認中","priority":"高"},{"no":18,"category":"不具合","device":"ﾚｰｻﾞ加工装置","subject":"ｴﾗｼﾘﾝﾀﾞ動作不良","situation":"ｴｱｼﾘﾝﾀﾞが動作しない","result":"","registered":"2026/02/01","deadline":"2026/05/10","status":"完了","priority":"高"},{"no":19,"category":"特記事項","device":"ﾚｰｻﾞ加工装置","subject":"製品","situation":"製品がない","result":"","registered":"","deadline":"","status":"","priority":""},{"no":20,"category":"特記事項","device":"ﾚｰｻﾞ加工装置","subject":"配線","situation":"配線がきたない","result":"","registered":"","deadline":"","status":"","priority":""}];
+</script>
+
+
+<div class="card flex items-center justify-between" style="padding: var(--sp-2); margin-bottom: var(--sp-2); gap: var(--sp-2);">
+  <h1 id="reportTitle" class="t-head" style="flex: 1;">【進捗報告】成形加工装置 / ﾚｰｻﾞ加工装置</h1>
+  <span class="t-lbl c-t3" style="flex-shrink: 0;">2026/05/02</span>
+</div>
+
+
+<div class="grid grid-cols-2 sm:grid-cols-4" style="gap: var(--sp-2); margin-bottom: var(--sp-2);">
+
+  <div class="card" style="margin-bottom: 0; border-color: #bbf7d0; padding: var(--sp-2); text-align: center;">
+    <div class="t-lbl c-t3" style="margin-bottom: var(--sp-0);">定期 完了</div>
+    <div class="t-disp" style="color: var(--sum-done);">
+      <span id="sumDone">0</span><span class="t-body c-t3"> / <span id="sumTotal">12</span>件</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 0; border-color: #bae6fd; padding: var(--sp-2); text-align: center;">
+    <div class="t-lbl c-t3" style="margin-bottom: var(--sp-0);">定期 対応中</div>
+    <div class="t-disp" style="color: var(--sum-prog);">
+      <span id="sumProg">12</span><span class="t-body c-t3">件</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 0; border-color: #fed7aa; padding: var(--sp-2); text-align: center;">
+    <div class="t-lbl c-t3" style="margin-bottom: var(--sp-0);">トラブル系 対応中</div>
+    <div class="t-disp" style="color: var(--sum-trbl);">
+      <span id="sumTrblProg">0</span><span class="t-body c-t3">件</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 0; border-color: #e9d5ff; padding: var(--sp-2); text-align: center;">
+    <div class="t-lbl c-t3" style="margin-bottom: var(--sp-0);">トラブル系 確認中</div>
+    <div class="t-disp" style="color: var(--sum-pend);">
+      <span id="sumTrblPend">3</span><span class="t-body c-t3">件</span>
+    </div>
+  </div>
+
+</div>
+
+
+<div class="card" style="padding: var(--sp-2); margin-bottom: var(--sp-2);">
+  <div class="flex flex-wrap items-center" style="gap: var(--sp-2); margin-bottom: var(--sp-1);">
+    <input type="search" id="tableSearch" class="search-input" placeholder="🔍 テーブル内を検索…" aria-label="テーブル内を検索">
+    <div class="flex flex-wrap items-center" style="gap: var(--sp-1); flex: 1;">
+      <span class="t-lbl c-t3" style="flex-shrink: 0;" id="deviceFilterLabel">装置：</span>
+      <div id="deviceFilterBar" class="flex flex-wrap" role="toolbar" aria-labelledby="deviceFilterLabel" style="gap: var(--sp-1);">
+        <button class="filter-btn active" data-device="" aria-pressed="true">全装置</button>
+      <button class="filter-btn" data-device="成形加工装置" aria-pressed="false">成形加工装置</button><button class="filter-btn" data-device="ﾚｰｻﾞ加工装置" aria-pressed="false">ﾚｰｻﾞ加工装置</button></div>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center" style="gap: var(--sp-2);">
+    <label class="flex items-center" style="gap: var(--sp-1); cursor: pointer; width: fit-content;">
+      <input type="checkbox" id="hideDoneToggle" style="width: 16px; height: 16px; accent-color: var(--c-ph);">
+      <span class="t-lbl c-t2">完了済みを非表示</span>
+    </label>
+    <button id="expandAllBtn" class="filter-btn" aria-pressed="false">▸ 長文を全て展開</button>
+  </div>
+  
+  <span id="filterStatus" aria-live="polite" class="sr-only"></span>
+</div>
+
+
+<div class="card" style="margin-bottom: var(--sp-2);">
+  <div class="sec-hd g t-head">ガントチャート</div>
+  <div style="padding: var(--sp-2) var(--sp-2) var(--sp-1);">
+
+    
+    <div class="flex flex-wrap items-center" style="gap: var(--sp-2); margin-bottom: var(--sp-2);" aria-hidden="true">
+      <span class="flex items-center" style="gap: var(--sp-0);">
+        <span style="display:inline-block;width:16px;height:8px;background:#cbd5e1;border-radius:2px;"></span>
+        <span class="t-lbl c-t3">計画期間</span>
+      </span>
+      <span class="flex items-center" style="gap: var(--sp-0);">
+        <span style="display:inline-block;width:16px;height:8px;background:var(--c-pth);border-radius:2px;opacity:.85;"></span>
+        <span class="t-lbl c-t3">進捗</span>
+      </span>
+      <span class="flex items-center" style="gap: var(--sp-0);">
+        <span style="display:inline-block;width:2px;height:16px;background:#be123c;"></span>
+        <span class="t-lbl c-t3">本日</span>
+      </span>
+    </div>
+    <p class="t-lbl c-t4" style="margin-bottom: var(--sp-2);">赤い縦線は報告書生成日（当日）を示します。バーは列 H「開始予定日」〜列 I「完了予定日」の期間を表します。</p>
+
+    
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 手動操作 進捗100%（10/10） 2026/02/01〜2026/02/04">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="手動操作">
+          成形加工装置 · 手動操作        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/01 〜 2026/02/04        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:0%;width:3.33%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:0%;width:3.33%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 原点復帰 進捗50%（5/10） 2026/02/05〜2026/02/09">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="原点復帰">
+          成形加工装置 · 原点復帰        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/05 〜 2026/02/09        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:4.44%;width:4.45%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:4.44%;width:2.23%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 自動運転 進捗50%（5/10） 2026/02/10〜2026/02/14">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="自動運転">
+          成形加工装置 · 自動運転        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/10 〜 2026/02/14        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:10%;width:4.4399999999999995%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:10%;width:2.22%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 異常 進捗40%（4/10） 2026/02/15〜2026/02/19">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="異常">
+          成形加工装置 · 異常        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/15 〜 2026/02/19        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:15.56%;width:4.4399999999999995%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:15.56%;width:1.78%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 設定 進捗20%（2/10） 2026/02/20〜2026/02/24">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="設定">
+          成形加工装置 · 設定        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/20 〜 2026/02/24        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:21.11%;width:4.449999999999999%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:21.11%;width:0.89%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="成形加工装置" data-done="0" aria-label="成形加工装置 流動確認 進捗20%（2/10） 2026/02/25〜2026/02/28">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="流動確認">
+          成形加工装置 · 流動確認        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/02/25 〜 2026/02/28        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:26.67%;width:3.3299999999999983%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:26.67%;width:0.67%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 手動操作 進捗100%（20/20） 2026/03/01〜2026/03/04">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="手動操作">
+          ﾚｰｻﾞ加工装置 · 手動操作        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/01 〜 2026/03/04        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:31.11%;width:3.3299999999999983%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:31.11%;width:3.33%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 原点復帰 進捗100%（20/20） 2026/03/05〜2026/03/09">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="原点復帰">
+          ﾚｰｻﾞ加工装置 · 原点復帰        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/05 〜 2026/03/09        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:35.56%;width:4.439999999999998%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:35.56%;width:4.44%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 自動運転 進捗100%（20/20） 2026/03/10〜2026/03/14">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="自動運転">
+          ﾚｰｻﾞ加工装置 · 自動運転        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/10 〜 2026/03/14        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:41.11%;width:4.450000000000003%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:41.11%;width:4.45%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 異常 進捗100%（20/20） 2026/03/15〜2026/03/19">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="異常">
+          ﾚｰｻﾞ加工装置 · 異常        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/15 〜 2026/03/19        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:46.67%;width:4.439999999999998%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:46.67%;width:4.44%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 設定 進捗10%（2/20） 2026/03/20〜2026/03/24">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="設定">
+          ﾚｰｻﾞ加工装置 · 設定        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/20 〜 2026/03/24        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:52.22%;width:4.450000000000003%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:52.22%;width:0.45%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+                                            <div class="gantt-row flex flex-col sm:flex-row sm:items-center" style="gap: var(--sp-1); margin-bottom: var(--sp-2);" data-device="ﾚｰｻﾞ加工装置" data-done="0" aria-label="ﾚｰｻﾞ加工装置 流動確認 進捗100%（20/20） 2026/03/25〜2026/03/28">
+      <div class="flex justify-between items-center sm:contents">
+        <div class="w-full sm:w-40 t-sm td-nm truncate shrink-0" title="流動確認">
+          ﾚｰｻﾞ加工装置 · 流動確認        </div>
+        <div class="t-lbl c-t3 whitespace-nowrap shrink-0 sm:order-3">
+          2026/03/25 〜 2026/03/28        </div>
+      </div>
+      <div class="w-full sm:flex-1 relative" style="height: 16px; background: #f1f5f9; border-radius: 4px; overflow: hidden;" aria-hidden="true">
+        <div style="position:absolute;top:0;height:100%;background:#cbd5e1;border-radius:4px;left:57.78%;width:3.3299999999999983%;"></div>
+        <div style="position:absolute;top:0;height:100%;background:#276046;opacity:.85;border-radius:4px 0 0 4px;left:57.78%;width:3.33%;"></div>
+        <div style="position:absolute;top:0;height:100%;width:2px;background:#be123c;z-index:10;left:100%;"></div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div id="ganttEmpty" class="t-lbl c-t3" style="display: none; padding: var(--sp-2); text-align: center;">
+    フィルター条件に一致するデータがありません
+  </div>
+  
+  <div class="flex justify-between t-lbl c-t4" style="padding: 0 var(--sp-2) var(--sp-1);">
+            <span>2026/02/01</span>
+    <span>2026/03/28</span>
+  </div>
+</div>
+
+
+<div class="card" style="margin-bottom: var(--sp-2);">
+  <div class="sec-hd p t-head">定期作業</div>
+  <div class="overflow-x-auto">
+    <table class="rpt-tbl rpt-tbl-planned">
+      <caption class="sr-only">定期作業一覧</caption>
+      <thead class="ph">
+        <tr>
+          <th class="c" scope="col" style="width: 40px;">No</th>
+          <th scope="col">設備名</th>
+          <th scope="col">件名</th>
+          <th scope="col">状況</th>
+          <th scope="col">結果</th>
+          <th scope="col">起票日</th>
+          <th scope="col">完了予定日</th>
+          <th scope="col">進捗率</th>
+          <th scope="col">ステータス</th>
+          <th scope="col">優先度</th>
+        </tr>
+      </thead>
+      <tbody>
+                                                                <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">1</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">手動操作</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">全ﾕﾆｯﾄ動作確認OK</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/04</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">10/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">2</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">原点復帰</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">全ﾕﾆｯﾄ動作確認OK</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/09</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="進捗50%">
+                <div class="prog-fill" style="width: 50%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">5/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">3</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">自動運転</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ﾕﾆｯﾄ5まで動作確認終了</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/14</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" aria-label="進捗50%">
+                <div class="prog-fill" style="width: 50%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">5/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">4</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">異常</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/19</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" aria-label="進捗40%">
+                <div class="prog-fill" style="width: 40%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">4/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">5</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">設定</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/24</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" aria-label="進捗20%">
+                <div class="prog-fill" style="width: 20%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">2/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">6</td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">流動確認</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/01/01</td>
+          <td class="whitespace-nowrap td-od">2026/02/28</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" aria-label="進捗20%">
+                <div class="prog-fill" style="width: 20%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">2/10</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">11</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">手動操作</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">全ﾕﾆｯﾄ動作確認OK</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/04</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">20/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">12</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">原点復帰</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ﾕﾆｯﾄ5まで動作確認終了</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/09</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">20/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">13</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">自動運転</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/14</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">20/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">14</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">異常</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/19</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">20/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">15</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">設定</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/24</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100" aria-label="進捗10%">
+                <div class="prog-fill" style="width: 10%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">2/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                                                        <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">16</td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">流動確認</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">未確認</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/03/28</td>
+          <td style="width: 128px;">
+                        <div class="flex items-center" style="gap: var(--sp-1);">
+              <div class="prog-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="進捗100%">
+                <div class="prog-fill" style="width: 100%;"></div>
+              </div>
+              <span class="td-aux whitespace-nowrap">20/20</span>
+            </div>
+                      </td>
+          <td><span class="bdg bdg-act">対応中</span></td>
+          <td><span class="bdg sq bdg-md">中</span></td>
+        </tr>
+                <tr class="filter-empty-row" style="display: none;">
+          <td colspan="10" class="td-aux t-sm" style="text-align:center;padding:var(--sp-2);">フィルター条件に一致するデータがありません</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="card" style="margin-bottom: var(--sp-4);">
+  <div class="sec-hd t t-head">不具合対策 / 特記事項</div>
+  <div class="overflow-x-auto">
+    <table class="rpt-tbl rpt-tbl-trouble">
+      <caption class="sr-only">不具合・特記事項一覧</caption>
+      <thead class="th">
+        <tr>
+          <th class="c" scope="col" style="width: 40px;">No</th>
+          <th scope="col">種別</th>
+          <th scope="col">設備名</th>
+          <th scope="col">件名</th>
+          <th scope="col">状況</th>
+          <th scope="col">結果</th>
+          <th scope="col">起票日</th>
+          <th scope="col">完了予定日</th>
+          <th scope="col">ステータス</th>
+          <th scope="col">優先度</th>
+        </tr>
+      </thead>
+      <tbody>
+                                        <tr data-device="成形加工装置" data-done="1" class="">
+          <td class="c td-aux">7</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">センサー誤検知</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="true" title="全文を表示するにはクリックしてください">塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中。</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">配線が間違っていた</div></td>
+          <td class="td-aux whitespace-nowrap">2026/04/28</td>
+          <td class="whitespace-nowrap td-aux">2026/04/28</td>
+          <td><span class="bdg bdg-done">完了</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="成形加工装置" data-done="1" class="even">
+          <td class="c td-aux">8</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">センサー誤検知</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="true" title="全文を表示するにはクリックしてください">塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中。</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">光軸があっていない</div></td>
+          <td class="td-aux whitespace-nowrap">2026/04/29</td>
+          <td class="whitespace-nowrap td-aux">2026/04/28</td>
+          <td><span class="bdg bdg-done">完了</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">9</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">ﾓｰﾀ異音</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ｻｰﾎﾞがハンチングする</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ｹﾞｲﾝ調整があっていあい</div></td>
+          <td class="td-aux whitespace-nowrap">2026/04/30</td>
+          <td class="whitespace-nowrap td-od">2026/04/28</td>
+          <td><span class="bdg bdg-pnd">確認中</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="成形加工装置" data-done="0" class="od">
+          <td class="c td-aux">10</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">成形加工装置</td>
+          <td class="td-nm">センサー誤検知</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="true" title="全文を表示するにはクリックしてください">塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.塗布工程のワーク検知用光電センサー（E3Z-D61）が正常品搬送中に断続的にNG出力。塗布直後の反射率変化が原因の可能性があり、センサーメーカーに確認中.</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/04/26</td>
+          <td class="whitespace-nowrap td-od">2026/04/28</td>
+          <td><span class="bdg bdg-pnd">確認中</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="od">
+          <td class="c td-aux">17</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">印字ずれ</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ﾚｰｻﾞの印字制度がわるい</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-od">2026/04/28</td>
+          <td><span class="bdg bdg-pnd">確認中</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="ﾚｰｻﾞ加工装置" data-done="1" class="even">
+          <td class="c td-aux">18</td>
+          <td><span class="bdg sq bdg-trbl">不具合</span></td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">ｴﾗｼﾘﾝﾀﾞ動作不良</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">ｴｱｼﾘﾝﾀﾞが動作しない</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap">2026/02/01</td>
+          <td class="whitespace-nowrap td-aux">2026/05/10</td>
+          <td><span class="bdg bdg-done">完了</span></td>
+          <td><span class="bdg sq bdg-hi">高</span></td>
+        </tr>
+                                <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="">
+          <td class="c td-aux">19</td>
+          <td><span class="bdg sq bdg-spec">特記事項</span></td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">製品</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">製品がない</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap"></td>
+          <td class="whitespace-nowrap td-aux"></td>
+          <td><span class="bdg bdg-pl"></span></td>
+          <td><span class="c-t4 t-lbl">—</span></td>
+        </tr>
+                                <tr data-device="ﾚｰｻﾞ加工装置" data-done="0" class="even">
+          <td class="c td-aux">20</td>
+          <td><span class="bdg sq bdg-spec">特記事項</span></td>
+          <td class="td-dev">ﾚｰｻﾞ加工装置</td>
+          <td class="td-nm">配線</td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">配線がきたない</div></td>
+          <td class="td-txt"><div class="td-clamp" data-overflows="false">—</div></td>
+          <td class="td-aux whitespace-nowrap"></td>
+          <td class="whitespace-nowrap td-aux"></td>
+          <td><span class="bdg bdg-pl"></span></td>
+          <td><span class="c-t4 t-lbl">—</span></td>
+        </tr>
+                <tr class="filter-empty-row" style="display: none;">
+          <td colspan="10" class="td-aux t-sm" style="text-align:center;padding:var(--sp-2);">フィルター条件に一致するデータがありません</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<script>
+(function () {
+   
+  var seen = {}, allDevices = [];
+  var allData = PLANNED_DATA.concat(TROUBLE_DATA);
+  for (var i = 0; i < allData.length; i++) {
+    var d = allData[i].device;
+    if (d && !seen[d]) { seen[d] = true; allDevices.push(d); }
+  }
+  allDevices.sort();
+
+  var bar = document.getElementById('deviceFilterBar');
+  allDevices.forEach(function (device) {
+    var btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.device = device;
+    btn.textContent = device;
+    btn.setAttribute('aria-pressed', 'false');   
+    btn.addEventListener('click', function () { activateBtn(btn); applyFilter(); });
+    bar.appendChild(btn);
+  });
+
+   
+  var titleEl = document.getElementById('reportTitle');
+  if (allDevices.length > 0) {
+    titleEl.textContent = '【進捗報告】' + allDevices.join(' / ');
+  }
+
+  var allBtn = bar.querySelector('[data-device=""]');
+  allBtn.addEventListener('click', function () { activateBtn(allBtn); applyFilter(); });
+  document.getElementById('hideDoneToggle').addEventListener('change', applyFilter);
+
+   
+  function activateBtn(target) {
+    bar.querySelectorAll('.filter-btn').forEach(function (b) {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    target.classList.add('active');
+    target.setAttribute('aria-pressed', 'true');
+  }
+
+   
+  function isDone_(s) { return s === '完了' || s === '済'; }
+
+   
+  function updateSummary(activeDevice) {
+    var filtPl = activeDevice
+      ? PLANNED_DATA.filter(function (r) { return r.device === activeDevice; })
+      : PLANNED_DATA;
+    var filtTr = activeDevice
+      ? TROUBLE_DATA.filter(function (r) { return r.device === activeDevice; })
+      : TROUBLE_DATA;
+
+    document.getElementById('sumDone').textContent =
+      filtPl.filter(function (r) { return isDone_(r.status); }).length;
+    document.getElementById('sumTotal').textContent = filtPl.length;
+    document.getElementById('sumProg').textContent =
+      filtPl.filter(function (r) { return r.status === '対応中'; }).length;
+    document.getElementById('sumTrblProg').textContent =
+      filtTr.filter(function (r) { return r.status === '対応中'; }).length;
+    document.getElementById('sumTrblPend').textContent =
+      filtTr.filter(function (r) { return r.status === '確認中'; }).length;
+  }
+
+   
+  function applyFilter() {
+    var activeBtn = bar.querySelector('.filter-btn.active');
+    var activeDevice = activeBtn ? activeBtn.dataset.device : '';
+    var hideDone = document.getElementById('hideDoneToggle').checked;
+
+     
+    document.querySelectorAll('tr[data-device]').forEach(function (row) {
+      var deviceMatch = !activeDevice || row.dataset.device === activeDevice;
+      var doneHide = hideDone && row.dataset.done === '1';
+      row.style.display = (deviceMatch && !doneHide) ? '' : 'none';
+    });
+
+     
+    document.querySelectorAll('.gantt-row').forEach(function (row) {
+      var deviceMatch = !activeDevice || row.dataset.device === activeDevice;
+      var doneHide = hideDone && row.dataset.done === '1';
+      row.style.display = (deviceMatch && !doneHide) ? '' : 'none';
+    });
+
+     
+    var ganttEmpty = document.getElementById('ganttEmpty');
+    if (ganttEmpty) {
+      var ganttRowEls = document.querySelectorAll('.gantt-row');
+      var ganttVisible = Array.from(ganttRowEls).filter(function (r) {
+        return r.style.display !== 'none';
+      }).length;
+      ganttEmpty.style.display = (ganttRowEls.length > 0 && ganttVisible === 0) ? '' : 'none';
+    }
+
+     
+    var totalVisible = 0;
+    document.querySelectorAll('tbody').forEach(function (tbody) {
+      var dataRows = Array.from(tbody.querySelectorAll('tr[data-device]'));
+      var visibleCount = dataRows.filter(function (r) {
+        return r.style.display !== 'none';
+      }).length;
+      totalVisible += visibleCount;
+      var emptyRow = tbody.querySelector('.filter-empty-row');
+      if (emptyRow) {
+        emptyRow.style.display = (dataRows.length > 0 && visibleCount === 0) ? '' : 'none';
+      }
+    });
+
+     
+    updateSummary(activeDevice);
+
+     
+    var label = activeDevice || '全装置';
+    if (hideDone) label += '（完了を除く）';
+    document.getElementById('filterStatus').textContent =
+      label + ': ' + totalVisible + '件表示中';
+  }
+
+   
+  function initClamp() {
+    document.querySelectorAll('.td-clamp').forEach(function (el) {
+       
+      var overflows = el.scrollHeight > el.clientHeight + 2;
+      el.dataset.overflows = overflows ? 'true' : 'false';
+      if (overflows) {
+        el.title = '全文を表示するにはクリックしてください';
+        el.addEventListener('click', function () {
+          var isExpanded = el.classList.toggle('expanded');
+          el.dataset.overflows = isExpanded ? 'false' : 'true';
+          el.title = isExpanded ? 'クリックして折りたたむ' : '全文を表示するにはクリックしてください';
+        });
+      }
+    });
+  }
+
+   
+  var expandAllBtn = document.getElementById('expandAllBtn');
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', function () {
+      var isExpanded = expandAllBtn.getAttribute('aria-pressed') === 'true';
+      var newExpanded = !isExpanded;
+      expandAllBtn.setAttribute('aria-pressed', String(newExpanded));
+      expandAllBtn.classList.toggle('active', newExpanded);
+      expandAllBtn.textContent = newExpanded ? '▴ 全て折りたたむ' : '▸ 長文を全て展開';
+
+      document.querySelectorAll('.td-clamp[data-overflows]').forEach(function (el) {
+        if (newExpanded) {
+          el.classList.add('expanded');
+          el.dataset.overflows = 'false';
+          if (el.title) el.title = 'クリックして折りたたむ';
+        } else {
+          el.classList.remove('expanded');
+           
+          var overflows = el.scrollHeight > el.clientHeight + 2;
+          el.dataset.overflows = overflows ? 'true' : 'false';
+          if (el.title) el.title = overflows ? '全文を表示するにはクリックしてください' : '';
+        }
+      });
+    });
+  }
+
+   
+  function runClampWhenReady() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(initClamp);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runClampWhenReady);
+  } else {
+    runClampWhenReady();
+  }
+   
+  window.addEventListener('load', initClamp);
+
+   
+  var searchInput = document.getElementById('tableSearch');
+  if (searchInput) {
+    var searchTimer = null;
+
+     
+    function highlightText(node, query) {
+      if (node.nodeType === 3) {   
+        var idx = node.nodeValue.toLowerCase().indexOf(query);
+        if (idx === -1) return false;
+        var before = document.createTextNode(node.nodeValue.slice(0, idx));
+        var mark   = document.createElement('mark');
+        mark.className = 'search-highlight';
+        mark.textContent = node.nodeValue.slice(idx, idx + query.length);
+        var after  = document.createTextNode(node.nodeValue.slice(idx + query.length));
+        node.parentNode.replaceChild(after, node);
+        node.parentNode.insertBefore(mark, after);
+        node.parentNode.insertBefore(before, mark);
+        return true;
+      }
+      return false;
+    }
+
+    function clearHighlights(root) {
+      root.querySelectorAll('mark.search-highlight').forEach(function (mark) {
+        mark.parentNode.replaceChild(document.createTextNode(mark.textContent), mark);
+      });
+       
+      root.normalize();
+    }
+
+    function applySearch() {
+      var query = searchInput.value.trim().toLowerCase();
+
+       
+      document.querySelectorAll('tr[data-device]').forEach(function (row) {
+        clearHighlights(row);
+      });
+
+      if (!query) {
+         
+        applyFilter();
+        return;
+      }
+
+       
+      document.querySelectorAll('tr[data-device]').forEach(function (row) {
+        var text = row.textContent.toLowerCase();
+        var hit  = text.includes(query);
+        if (hit) {
+           
+          row.querySelectorAll('td').forEach(function (td) {
+             
+            var walker = document.createTreeWalker(td, NodeFilter.SHOW_TEXT, null, false);
+            var nodes = [];
+            var n;
+            while ((n = walker.nextNode())) { nodes.push(n); }
+            nodes.forEach(function (tn) { highlightText(tn, query); });
+          });
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+       
+      document.querySelectorAll('tbody').forEach(function (tbody) {
+        var dataRows = Array.from(tbody.querySelectorAll('tr[data-device]'));
+        var visibleCount = dataRows.filter(function (r) { return r.style.display !== 'none'; }).length;
+        var emptyRow = tbody.querySelector('.filter-empty-row');
+        if (emptyRow) {
+          emptyRow.style.display = (dataRows.length > 0 && visibleCount === 0) ? '' : 'none';
+        }
+      });
+    }
+
+    searchInput.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(applySearch, 200);   
+    });
+
+     
+    searchInput.addEventListener('search', applySearch);
+  }
+})();
+</script>
+
+
+
+</body></html>

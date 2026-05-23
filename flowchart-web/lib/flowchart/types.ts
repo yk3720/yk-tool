@@ -1,0 +1,97 @@
+/** 表の1行（セル配列） */
+export type FlowTableRow = (string | number | null | undefined)[];
+
+export type LayoutConfig = {
+  width: number;
+  heightMin: number;
+  gapV: number;
+  gapH: number;
+  baseLeft: number;
+  baseTop: number;
+};
+
+export const DEFAULT_LAYOUT: LayoutConfig = {
+  width: 160,
+  heightMin: 60,
+  gapV: 30,
+  gapH: 100,
+  baseLeft: 40,
+  baseTop: 40,
+};
+
+export type ShapeType = "端子" | "処理" | "判断" | "入出力" | "手動入力";
+
+export type FlowNode = {
+  id: string;
+  type: ShapeType;
+  fullText: string;
+  destsDown: string[];
+  destsRight: string[];
+  level: number;
+  rowIndex: number;
+};
+
+export type ShapeKind =
+  | "rectangle"
+  | "diamond"
+  | "rounded"
+  | "parallelogram"
+  | "manual";
+
+export type PlacedNode = FlowNode & {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  shapeKind: ShapeKind;
+};
+
+export type ConnectorSite = "top" | "bottom" | "left" | "right";
+
+export type FlowEdge = {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  direction: "down" | "right";
+  sourceSide: ConnectorSite;
+  targetSide: ConnectorSite;
+  route: "straight" | "elbow";
+  label?: "Yes" | "No";
+};
+
+export type FlowchartDocument = {
+  version: 1;
+  title?: string;
+  table: FlowTableRow[];
+  layout: LayoutConfig;
+  themeId?: string;
+  createdAt: string;
+};
+
+export type Bounds = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+export type ParseResult = {
+  nodes: FlowNode[];
+  rowMap: Map<number, FlowNode[]>;
+  colCount: number;
+};
+
+export type GenerateSuccess = {
+  ok: true;
+  nodes: FlowNode[];
+  placed: PlacedNode[];
+  edges: FlowEdge[];
+  bounds: Bounds;
+};
+
+export type GenerateFailure = {
+  ok: false;
+  errors: string[];
+};
+
+export type GenerateResult = GenerateSuccess | GenerateFailure;

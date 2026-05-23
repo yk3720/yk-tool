@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# Playwright artifacts
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Google session (local only — GIT_WORKFLOW / PLAYWRIGHT_RULES)
+auth/session.json
+
+# env
+.env
+.env.*

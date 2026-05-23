@@ -2,6 +2,20 @@
 
 表データからフローチャートを自動生成する Web アプリ（`yk-tool` リポジトリ内）。
 
+## 図モダリティ（YK 横断）
+
+本アプリは **表 JSON → React Flow**（レイアウト自動）。**Mermaid `.mmd` の出力・インポートは Phase 外**（ロードマップ上も非目標）。
+
+| やりたいこと | 選ぶもの | SSOT |
+|--------------|----------|------|
+| 表・CSV · ブラウザ編集 · PNG/SVG 即出力 | **本アプリ（flowchart-web）** | 本 README · `lib/flowchart/` |
+| テキスト版管理 · Git · MD/ADR 埋め込み | **Mermaid DSL** | [`MERMAID_RULES.md`](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md) §1.5 · [`creating-mermaid-yk`](c:/yk-skill/.claude/skills/creating-mermaid-yk/SKILL.md) |
+| Excel 連携デスクトップツール | **Python（MZ 系）** | [`PYTHON_RULES.md`](c:/yk-skill/rule/40_python/PYTHON_RULES.md) |
+
+**索引:** [`RULE_INDEX.md`](c:/yk-skill/rule/RULE_INDEX.md) No 45（Mermaid）· 本ツールは `yk-tool/catalog.yaml` の `flowchart-web`
+
+**併用:** 概要を `.mmd`、実務編集を本アプリ、は可。ノード定義の正本は **1 つ**に決めて ADR または README に明記すること。
+
 ## 企画 SSOT
 
 `c:\yk-memo\00.ai-driven-school\フローチャートアプリ\`

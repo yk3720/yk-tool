@@ -19,7 +19,10 @@ YK ワークスペースの **生成物・アプリ** 用リポジトリ。
 
 ## Git
 
-- **push 先:** 本リポジトリ（`yk-tool`）の remote のみ（ui-kit 改造版もここに含める）
+- **remote:** `https://github.com/yk3720/yk-tool.git`（`yk-memo` · `yk-skill` と同じアカウント）
+- **push 先:** 本リポジトリのみ（ui-kit 改造版もここに含める）
 - **講座用 ADS リポ**（`git.ai-driven-school-portal.com/ADS/workspace-ui-kit`）とは切り離し済み（移行時に実施）
+
+初回 push 前に GitHub で空リポ `yk-tool` を作成してから `git push -u origin main`。
 
 恒久方針: `c:/yk-memo/YK_WORKSPACE_LAYOUT_HANDOFF.md`

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Node.js 入門 - Techmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --techmap-primary: #1e3a5f;
+      --techmap-accent: #0ea5e9;
+      --techmap-gradient: linear-gradient(135deg, #1e3a5f 0%, #0ea5e9 100%);
+    }
+    body { font-family: 'Noto Sans JP', 'Inter', sans-serif; }
+    .header-gradient { background: var(--techmap-gradient); }
+    .section-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .term-explain {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border-left: 4px solid #0ea5e9;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .term-word { color: #0369a1; }
+    .badge-essential {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      font-family: Consolas, 'Fira Code', monospace;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+    .ref-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      color: #0ea5e9;
+      transition: background 0.15s;
+    }
+    .ref-link:hover { background: #e0f2fe; }
+    .toc {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 50;
+      min-width: 180px;
+    }
+    @media (max-width: 1280px) { .toc { display: none; } }
+    .pdf-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--techmap-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+      z-index: 100;
+    }
+    .analogy-box {
+      border: 1px solid #cbd5e1;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      margin: 1rem 0;
+      background: #f8fafc;
+    }
+    .flow-diagram {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      padding: 1.5rem;
+      background: #f1f5f9;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+    }
+    .flow-node {
+      background: white;
+      border: 2px solid #0ea5e9;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      color: #0c4a6e;
+    }
+    .flow-arrow { color: #64748b; font-weight: bold; }
+    @media print {
+      .toc, .pdf-btn { display: none !important; }
+      body { background: white; }
+      .section-card {
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .header-gradient {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      a[href]::after { content: none; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <nav class="toc" aria-label="目次">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">目次</p>
+    <ul class="space-y-1 text-sm">
+      <li><a href="#summary" class="text-gray-600 hover:text-sky-600">ひとことで言えば</a></li>
+      <li><a href="#why" class="text-gray-600 hover:text-sky-600">なぜ生まれたか</a></li>
+      <li><a href="#three" class="text-gray-600 hover:text-sky-600">まず理解する3つ</a></li>
+      <li><a href="#architecture" class="text-gray-600 hover:text-sky-600">主要概念</a></li>
+      <li><a href="#pitfalls" class="text-gray-600 hover:text-sky-600">落とし穴</a></li>
+      <li><a href="#glossary" class="text-gray-600 hover:text-sky-600">用語集</a></li>
+      <li><a href="#next" class="text-gray-600 hover:text-sky-600">次に学ぶ</a></li>
+      <li><a href="#references" class="text-gray-600 hover:text-sky-600">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <header class="header-gradient text-white py-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">Techmap</span>
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">ランタイム</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold">Node.js をマップする</h1>
+      <p class="mt-2 text-lg opacity-90">サーバー上で動く JavaScript と、その周辺の考え方</p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+
+    <section id="summary" class="section-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="map" class="w-6 h-6 text-sky-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">ひとことで言えば</h2>
+          <p class="text-gray-500">まずここだけ押さえる</p>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-xl p-6">
+        <p class="text-xl font-bold text-sky-900">Node.js（ノード・ジェイエス）は、ブラウザ外で JavaScript を実行するための<strong>ランタイム環境</strong>である。エンジンは Chrome と同じ V8（ブイエイト）を使う。</p>
+        <p class="mt-3 text-gray-700">対象読者は、プログラミング基礎と HTTP のざっくりしたイメージを持つ理系エンジニア。カバー範囲は「サーバー・CLI・ビルドツールの土台」まで。フレームワーク固有の話は別マップに譲る。</p>
+      </div>
+
+      <div class="term-explain mt-6">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-sky-500 flex-shrink-0"></i>
+          <div>
+            <div class="term-word text-xl font-bold">V8（ブイエイト）とは？</div>
+            <p class="text-gray-700 mt-2">Google が開発した <strong>JavaScript エンジン</strong>。ソースを機械語に近い形へ JIT コンパイルして高速実行する。Node はこのエンジンを「ブラウザの外」に持ち出し、ファイル I/O やソケットなど OS 機能と結び付けた。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="why" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">なぜ Node.js は生まれたのか？</h2>
+      <p class="text-gray-700 leading-relaxed">2000年代後半、Web のフロントは JavaScript、サーバーは別言語という<strong>二重の言語スタック</strong>が普通だった。Ajax 以降、リアルタイム性や同時接続の扱いが重くなり、「同じ言語で I/O 多めのサーバーを書けないか」という動機が強まった。</p>
+      <p class="text-gray-700 leading-relaxed mt-3">Node は <strong>イベント駆動・ノンブロッキング I/O</strong> を前面に出し、1 プロセスあたりのスレッド数を抑えつつ大量の接続をさばく設計を選んだ。解決したかった課題は「C10k 問題に近い同時接続」と「フロントとバックの言語分裂」の両方である。</p>
+    </section>
+
+    <section id="three" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">まず理解する3つ</h2>
+      <p class="text-gray-500 mb-6">ここが腹落ちすれば、メモの内容は自分の言葉に置き換えられる。</p>
+      <ol class="space-y-6">
+        <li class="flex gap-4">
+          <span class="badge-essential flex-shrink-0 h-fit">1</span>
+          <div>
+            <h3 class="font-bold text-lg text-gray-800">非同期イベント駆動</h3>
+            <p class="text-gray-700 mt-1">I/O 完了を「待ち続けて CPU を占有しない」。イベント（コールバック・Promise など）で次の処理に進む。チャットや SSE、WebSocket 的な<strong>多接続・待ち時間多め</strong>に強い。</p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <span class="badge-essential flex-shrink-0 h-fit">2</span>
+          <div>
+            <h3 class="font-bold text-lg text-gray-800">シングルスレッドとイベントループ</h3>
+            <p class="text-gray-700 mt-1">JavaScript 実行は基本 1 本のメインスレッド上。タイマー・I/O 完了・マイクロタスクのキューを回すのが<strong>イベントループ</strong>。重い CPU 計算はメインスレッドを塞ぐので別戦略が要る。</p>
+          </div>
+        </li>
+        <li class="flex gap-4">
+          <span class="badge-essential flex-shrink-0 h-fit">3</span>
+          <div>
+            <h3 class="font-bold text-lg text-gray-800">npm（エヌピーエム）</h3>
+            <p class="text-gray-700 mt-1"><strong>Node Package Manager（ノード・パッケージ・マネージャ）</strong>。公開パッケージのレジストリと CLI で、依存関係を宣言的に取り込む。フロントのビルドチェーンもここから組むことが多い。</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section id="architecture" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">主要概念とアーキテクチャ</h2>
+
+      <div class="term-explain">
+        <div class="flex items-start gap-4">
+          <i data-lucide="cpu" class="w-8 h-8 text-sky-500 flex-shrink-0"></i>
+          <div>
+            <div class="term-word text-xl font-bold">API（Application Programming Interface：アプリケーション プログラミング インタフェース）</div>
+            <p class="text-gray-700 mt-2">ここでは「HTTP で JSON を返すサーバー」など、プログラム同士が契約として共有する<strong>インタフェース</strong>の意味。Node は Express や Fastify などで HTTP API を組み立てる典型例が多い。</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="font-bold text-gray-800 mt-8 mb-3">ざっくりデータの流れ（概念図）</h3>
+      <div class="flow-diagram" role="img" aria-label="リクエストからレスポンスまでの流れ">
+        <span class="flow-node">クライアント</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">OS / libuv</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">イベントキュー</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">V8（JS 実行）</span>
+        <span class="flow-arrow">→</span>
+        <span class="flow-node">レスポンス</span>
+      </div>
+      <p class="text-sm text-gray-600 mt-2">libuv（リブユーブイ）は、非同期 I/O とスレッドプールなどを担う C ライブラリ。メモの「シングルスレッド」と「効率的な I/O」の橋渡しをする層である。</p>
+
+      <h3 class="font-bold text-gray-800 mt-8 mb-3">たとえ話（構造の対応を意識する）</h3>
+
+      <div class="analogy-box">
+        <p class="font-semibold text-sky-800 flex items-center gap-2"><i data-lucide="utensils-crossed" class="w-5 h-5"></i> 非同期 I/O とレストランのウェイター</p>
+        <p class="text-gray-700 mt-2">ウェイターが一品の調理完了までキッチン前で立ち尽くさず、注文を渡したら<strong>他のテーブルに戻る</strong>。料理が上がったら「ピックアップ」で対応する。これがノンブロッキング I/O に近い。対応関係：ウェイター＝メインスレッド、キッチン＝OS／ディスク／ネットワーク、ピックアップ＝コールバック／Promise の解決。</p>
+      </div>
+
+      <div class="analogy-box">
+        <p class="font-semibold text-sky-800 flex items-center gap-2"><i data-lucide="circle-dot" class="w-5 h-5"></i> イベントループと回転寿司のレーン</p>
+        <p class="text-gray-700 mt-2"><strong>1 本のレーン</strong>（メインスレッド）に皿（タスク）が流れてくる。客（ランタイム）は順に取り分けるが、長時間かかる皿（CPU 重い同期処理）はレーン全体を詰まらせる。対応：重い処理は Worker スレッドや別プロセスに逃がす設計が必要になる。</p>
+      </div>
+
+      <div class="analogy-box">
+        <p class="font-semibold text-sky-800 flex items-center gap-2"><i data-lucide="package" class="w-5 h-5"></i> npm と部品カタログ＋物流</p>
+        <p class="text-gray-700 mt-2"><code class="bg-slate-200 px-1 rounded">package.json</code> が BOM に相当し、<code class="bg-slate-200 px-1 rounded">node_modules</code> が現場に届いた部品置き場。バージョン範囲とロックファイル（例：package-lock）で再現性を担保する、という見方が実務では効く。</p>
+      </div>
+
+      <h3 class="font-bold text-gray-800 mt-8 mb-3">メモにあった「活用シーン」を位置づける</h3>
+      <ul class="list-disc pl-6 text-gray-700 space-y-2">
+        <li><strong>Web サーバー・API</strong>：HTTP サーバーとして JSON を返す、BFF（Backend for Frontend）など。</li>
+        <li><strong>フロントのビルド</strong>：React / Vue などのトランスパイル・バンドルは Node 上の CLI が標準。</li>
+        <li><strong>IoT</strong>：リソース制約デバイスではなく、ゲートウェイや開発用ホストで Node を使う例が多い（現場では制約に応じて他言語も検討）。</li>
+      </ul>
+
+      <h3 class="font-bold text-gray-800 mt-8 mb-3">コード例</h3>
+      <p class="text-gray-700 mb-3">次のコードは、HTTP で「Hello」を返す最小のサーバーを起動する。リクエストごとにコールバックが呼ばれ、ブロックせずに次の接続を受け付けられる。</p>
+      <pre class="code-block"><code>// Node に組み込みの http モジュールを使う
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+  res.end('Hello from Node.js\n');
+});
+
+server.listen(3000, () =&gt; {
+  console.log('listening on http://localhost:3000');
+});</code></pre>
+    </section>
+
+    <section id="pitfalls" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">初心者がはまりやすい落とし穴</h2>
+      <ul class="space-y-4 text-gray-700">
+        <li class="flex gap-3">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500 flex-shrink-0"></i>
+          <div><strong>CPU バウンドをメインスレッドで回す</strong>：画像の大量リサイズや巨大 JSON の同期パースでイベントループが止まり、全体の応答性が死ぬ。Worker、別サービス、ネイティブ拡張などで逃がす。</div>
+        </li>
+        <li class="flex gap-3">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500 flex-shrink-0"></i>
+          <div><strong>コールバック地獄とエラー処理の漏れ</strong>：古いスタイルの入れ子は読みにくい。async/await と try/catch、または Promise の .catch で統一する習慣が安全。</div>
+        </li>
+        <li class="flex gap-3">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-amber-500 flex-shrink-0"></i>
+          <div><strong>npm 依存の供給連鎖</strong>：パッケージ数が爆発し脆弱性や悪意あるスクリプトのリスクが増える。ロックファイルのコミット、監査（npm audit）、必要最小限の依存を心がける。</div>
+        </li>
+      </ul>
+    </section>
+
+    <section id="glossary" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">専門用語集</h2>
+      <dl class="space-y-4 text-gray-700">
+        <div>
+          <dt class="font-bold text-sky-900">ランタイム（runtime）</dt>
+          <dd>プログラムを実行するための土台（VM・標準 API・イベントループなどの総体）。</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-sky-900">イベントループ（event loop）</dt>
+          <dd>コールバックやマイクロタスクを順に消化し、I/O 完了と JS 実行を接続する仕組み。→ 「まず理解する3つ」の項参照。</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-sky-900">ノンブロッキング I/O（non-blocking I/O）</dt>
+          <dd>ディスクやネットの待ちでスレッドを占有しない I/O モデル。完了は後から通知される。</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-sky-900">libuv</dt>
+          <dd>Node が内部で使う非同期 I/O ライブラリ。タイマーやファイル、ネットワークの抽象化を担う。</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-sky-900">CommonJS / ES Modules</dt>
+          <dd>JavaScript のモジュール形式。Node は歴史的に <code class="bg-slate-100 px-1 rounded">require</code> が主流で、現行は <code class="bg-slate-100 px-1 rounded">import</code> も設定により利用可能。</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-sky-900">npx（エヌピーエックス）</dt>
+          <dd>ローカルまたは一時的にパッケージの CLI を実行するための npm に付属のコマンド。</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="next" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">次に学ぶと良いもの</h2>
+      <ul class="space-y-3 text-gray-700">
+        <li><strong>Express / Fastify</strong>：HTTP API を現実的な規模で組むためのフレームワーク。</li>
+        <li><strong>TypeScript + Node</strong>：型で契約を明示し、大規模化しやすくする。</li>
+        <li><strong>ストリームとバックプレッシャ</strong>：大きなペイロードをメモリ効率よく扱う Node 固有の強み。</li>
+      </ul>
+    </section>
+
+    <section id="references" class="section-card">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">参考文献・URL</h2>
+      <div class="space-y-2">
+        <a class="ref-link" href="https://nodejs.org/en/docs/" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="w-4 h-4"></i> Node.js 公式ドキュメント</a>
+        <a class="ref-link" href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="w-4 h-4"></i> Introduction to Node.js（公式 Learn）</a>
+        <a class="ref-link" href="https://v8.dev/" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="w-4 h-4"></i> V8 プロジェクト公式</a>
+        <a class="ref-link" href="https://docs.npmjs.com/" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="w-4 h-4"></i> npm 公式ドキュメント</a>
+        <a class="ref-link" href="https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick" target="_blank" rel="noopener noreferrer"><i data-lucide="external-link" class="w-4 h-4"></i> イベントループ（公式 Learn）</a>
+      </div>
+    </section>
+  </main>
+
+  <button type="button" class="pdf-btn" onclick="window.print()">
+    <i data-lucide="download" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

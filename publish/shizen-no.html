@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自然農 Techmap — 不耕起・無農薬・無化学肥料で土を育てる農法</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+
+    /* TOC sidebar */
+    #toc-sidebar {
+      position: fixed;
+      top: 5rem;
+      left: 1rem;
+      width: 13rem;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      z-index: 50;
+    }
+    @media (max-width: 1280px) {
+      #toc-sidebar { display: none; }
+    }
+
+    /* PDF button */
+    #pdf-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 100;
+    }
+
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+
+    /* Term box */
+    .term-box {
+      border-left: 3px solid #16a34a;
+      background: #f0fdf4;
+      padding: 0.6rem 1rem;
+      margin: 0.8rem 0;
+      border-radius: 0 6px 6px 0;
+    }
+
+    /* Comparison table highlight */
+    .highlight-row { background: #f0fdf4; }
+
+    /* Section break for print */
+    @media print {
+      #pdf-btn, #toc-sidebar { display: none !important; }
+      section { break-inside: avoid; }
+      .no-print { display: none !important; }
+    }
+
+    /* Active TOC link */
+    .toc-link.active { color: #16a34a; font-weight: 600; }
+
+    /* Card hover */
+    .card-hover:hover { transform: translateY(-2px); transition: transform 0.2s; }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+  <!-- ===== HEADER ===== -->
+  <header class="bg-gradient-to-r from-green-800 to-green-600 text-white py-10 px-6 shadow-lg">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-3 mb-3">
+        <i data-lucide="sprout" class="w-8 h-8 text-green-200"></i>
+        <span class="text-green-200 text-sm font-medium tracking-widest uppercase">Techmap</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold mb-2">自然農</h1>
+      <p class="text-green-100 text-lg">不耕起・無農薬・無化学肥料で土を育てる農法 — 川口由一が体系化した実践哲学</p>
+      <div class="mt-4 flex flex-wrap gap-3 text-sm">
+        <span class="bg-green-700 bg-opacity-60 px-3 py-1 rounded-full">農業・食</span>
+        <span class="bg-green-700 bg-opacity-60 px-3 py-1 rounded-full">持続可能性</span>
+        <span class="bg-green-700 bg-opacity-60 px-3 py-1 rounded-full">土壌生態系</span>
+        <span class="bg-green-700 bg-opacity-60 px-3 py-1 rounded-full">川口由一 / 福岡正信</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== TOC SIDEBAR ===== -->
+  <nav id="toc-sidebar" class="bg-white border border-stone-200 rounded-xl shadow-sm p-4 text-sm">
+    <p class="font-semibold text-stone-500 text-xs tracking-widest uppercase mb-3">目次</p>
+    <ul class="space-y-2">
+      <li><a href="#summary" class="toc-link text-stone-600 hover:text-green-700 block">ひとことで言えば</a></li>
+      <li><a href="#history" class="toc-link text-stone-600 hover:text-green-700 block">なぜ生まれたのか</a></li>
+      <li><a href="#core3" class="toc-link text-stone-600 hover:text-green-700 block">まず理解する3つ</a></li>
+      <li><a href="#concepts" class="toc-link text-stone-600 hover:text-green-700 block">主要概念・比較</a></li>
+      <li><a href="#pitfalls" class="toc-link text-stone-600 hover:text-green-700 block">落とし穴</a></li>
+      <li><a href="#glossary" class="toc-link text-stone-600 hover:text-green-700 block">専門用語集</a></li>
+      <li><a href="#next" class="toc-link text-stone-600 hover:text-green-700 block">次に学ぶと良いもの</a></li>
+      <li><a href="#refs" class="toc-link text-stone-600 hover:text-green-700 block">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-16">
+
+    <!-- 1. ひとことで言えば -->
+    <section id="summary">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="circle-check-big" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">ひとことで言えば</h2>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
+        <p class="text-xl font-semibold text-green-900 leading-relaxed">
+          「土を耕さず、農薬・化学肥料を使わず、草と虫を排除せず、自然の物質循環に乗った栽培」を体系化した農法。
+        </p>
+        <p class="mt-4 text-stone-700">
+          川口由一（1939–2023）が奈良県桜井市で数十年かけて確立。技術メソッドではなく
+          <strong>「問題を招かない設計思想」</strong>として語られることが多く、実践哲学の色が強い。
+        </p>
+      </div>
+
+      <div class="mt-6 grid md:grid-cols-3 gap-4">
+        <div class="bg-white border border-stone-200 rounded-xl p-4 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2 text-green-700">
+            <i data-lucide="users" class="w-5 h-5"></i>
+            <span class="font-semibold text-sm">対象読者</span>
+          </div>
+          <p class="text-sm text-stone-600">帰農・移住を検討している人、有機農業と自然農の違いを整理したい人、農業の持続可能性に興味があるエンジニア・研究者</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2 text-green-700">
+            <i data-lucide="map" class="w-5 h-5"></i>
+            <span class="font-semibold text-sm">カバーする範囲</span>
+          </div>
+          <p class="text-sm text-stone-600">自然農の原則・歴史、自然農法（福岡）との違い、慣行農法との比較、帰農学校「瀬戸内まいふぁーむ」</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2 text-green-700">
+            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+            <span class="font-semibold text-sm">前提知識</span>
+          </div>
+          <p class="text-sm text-stone-600">農業の基礎知識は不要。生物・生態系・持続可能性への素養があると理解が深まる</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. なぜ生まれたのか -->
+    <section id="history">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="history" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">なぜ生まれたのか</h2>
+      </div>
+
+      <!-- Timeline -->
+      <div class="relative pl-8 space-y-6 border-l-2 border-green-200">
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow"></div>
+          <div class="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs text-stone-400 font-medium uppercase tracking-wide mb-1">1960年代〜</p>
+            <h3 class="font-bold text-stone-800 mb-2">慣行農業の普及と弊害</h3>
+            <p class="text-sm text-stone-600">
+              高度経済成長期に化学農薬・化学肥料・耕起機械による<strong>高収量化</strong>が農業の主流となった。
+              川口由一は中学卒業後に就農し、約23年間この慣行農法を実践した農家の一人だった。
+              農薬散布による体調不良、土壌劣化の感覚が蓄積していた。
+            </p>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow"></div>
+          <div class="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs text-stone-400 font-medium uppercase tracking-wide mb-1">1975〜1978年頃</p>
+            <h3 class="font-bold text-stone-800 mb-2">転機：複合汚染と福岡正信との出会い</h3>
+            <p class="text-sm text-stone-600">
+              有吉佐和子の著書『<strong>複合汚染</strong>』（1975年）が農薬・食品添加物の問題を告発。
+              川口はこれを契機に農薬の危険性を再認識した、と伝えられる。
+              同時期、福岡正信の<strong>自然農法</strong>（不耕起・無肥料・無農薬・無除草を掲げた農法）に触れ、
+              自身の実践の方向性を定めていった。
+            </p>
+            <div class="term-box mt-3">
+              <span class="text-xs font-bold text-green-800">用語：福岡正信（1913–2008）</span>
+              <p class="text-xs text-stone-600 mt-1">四国愛媛出身の農哲学者。『わら一本の革命』（1975年）で「何もしない農法」を提唱。粘土団子・麦稲輪作・直播が代名詞。川口の自然農は福岡思想を受け継ぎつつ、地域適合のため独自に体系化した点が異なる。</p>
+            </div>
+            <div class="term-box mt-2">
+              <span class="text-xs font-bold text-green-800">補足：「自然農法」には別系譜がある（岡田茂吉系）</span>
+              <p class="text-xs text-stone-600 mt-1">日本では「自然農法」という語は岡田茂吉（1882–1955、MOA系・世界救世教の流れ）が戦前〜戦後に用いたものと、福岡正信系の2つの大きな系譜が存在する。名称が同じでも哲学・技術は別物。インターネットや書籍を調べるときは系譜を確認すること。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow"></div>
+          <div class="bg-white border border-stone-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs text-stone-400 font-medium uppercase tracking-wide mb-1">1978〜1991年</p>
+            <h3 class="font-bold text-stone-800 mb-2">試行錯誤と体系化</h3>
+            <p class="text-sm text-stone-600">
+              転換初期は米作りが数年失敗するなど苦労が続いた。
+              奈良の気候・土壌に合わせた試行錯誤を経て、「不耕起・無農薬・無化学肥料・草を活かす」を
+              基本原則とした<strong>自然農</strong>として体系化した。
+              1991年、奈良県の「<strong>赤目自然農塾</strong>」を開講し、実践教育を開始。
+            </p>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 rounded-full bg-amber-500 border-2 border-white shadow"></div>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 shadow-sm">
+            <p class="text-xs text-amber-600 font-medium uppercase tracking-wide mb-1">2023年6月</p>
+            <h3 class="font-bold text-stone-800 mb-2">川口由一、逝去</h3>
+            <p class="text-sm text-stone-600">
+              川口由一は2023年6月に逝去。その後も赤目自然農塾は弟子たちによって継続されており、
+              各地の実践者・帰農学校に思想が引き継がれている。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. まず理解する3つ -->
+    <section id="core3">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="layers" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">まず理解する3つ</h2>
+      </div>
+      <p class="text-stone-500 mb-6">これだけ分かれば「自然農とは何か」の入門が完了する核心概念。</p>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        <!-- 1 -->
+        <div class="bg-white border-2 border-green-200 rounded-2xl p-6 shadow-sm card-hover">
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <span class="font-bold text-green-700">1</span>
+          </div>
+          <h3 class="font-bold text-lg mb-2">不耕起</h3>
+          <p class="text-sm text-stone-600">
+            土を耕さない。菌根菌の菌糸は主に表層5〜15cmに密集しており、プラウ耕で物理的に断裂する。
+            深耕では嫌気性層が地表に露出し好気性微生物が大量死滅する。
+            こうして<strong>土壌生物ネットワークが壊滅</strong>すると、外部から化学肥料を投入しなければ
+            作物が育たない状態（外部依存ループ）が固定化される。
+            不耕起はその連鎖を断ち切る第一歩。
+          </p>
+          <div class="mt-3 text-xs text-stone-400 flex items-center gap-1">
+            <i data-lucide="lightbulb" class="w-3 h-3"></i>
+            <span>たとえ：「OSを再インストールしないで自然に安定させる」</span>
+          </div>
+        </div>
+        <!-- 2 -->
+        <div class="bg-white border-2 border-green-200 rounded-2xl p-6 shadow-sm card-hover">
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <span class="font-bold text-green-700">2</span>
+          </div>
+          <h3 class="font-bold text-lg mb-2">草・虫を敵にしない</h3>
+          <p class="text-sm text-stone-600">
+            除草剤・殺虫剤で一掃するのではなく、
+            草の根が土を耕し、虫が生態系の食物連鎖を支える<strong>資源</strong>として機能する視点。
+            「作物より草が高くなる前に刈って根元に敷く」ことで被覆材・有機物に転換する。
+          </p>
+          <div class="mt-3 text-xs text-stone-400 flex items-center gap-1">
+            <i data-lucide="lightbulb" class="w-3 h-3"></i>
+            <span>たとえ：「エラーログを消すのではなく監視対象にする」</span>
+          </div>
+        </div>
+        <!-- 3 -->
+        <div class="bg-white border-2 border-green-200 rounded-2xl p-6 shadow-sm card-hover">
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <span class="font-bold text-green-700">3</span>
+          </div>
+          <h3 class="font-bold text-lg mb-2">無農薬・無化学肥料（外部依存ゼロ化）</h3>
+          <p class="text-sm text-stone-600">
+            外から化学資材を持ち込まない。土地固有の物質循環（落葉・枯草・微生物・雨水）だけで
+            収支が合う設計を目指す。短期的には収量・手間にコストが出るが、
+            長期的に<strong>土壌資本が積み上がる</strong>という投資モデル。
+          </p>
+          <div class="mt-3 text-xs text-stone-400 flex items-center gap-1">
+            <i data-lucide="lightbulb" class="w-3 h-3"></i>
+            <span>たとえ：「外部ライブラリに依存せず標準ライブラリだけで設計する」</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 主要概念・アーキテクチャ -->
+    <section id="concepts">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="git-branch" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">主要概念・比較</h2>
+      </div>
+
+      <!-- 4-1: 3流派の概念図 -->
+      <h3 class="font-bold text-lg mb-4">農法の系譜：3つの立場</h3>
+      <div class="overflow-x-auto mb-8">
+        <div class="flex items-start gap-0 min-w-[600px]">
+          <!-- 慣行農法 -->
+          <div class="flex-1 bg-red-50 border border-red-200 rounded-l-2xl p-5">
+            <p class="font-bold text-red-800 text-center mb-3">慣行農法</p>
+            <ul class="text-xs text-red-700 space-y-1">
+              <li class="flex gap-1"><i data-lucide="x" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>耕起あり</li>
+              <li class="flex gap-1"><i data-lucide="x" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>化学農薬あり</li>
+              <li class="flex gap-1"><i data-lucide="x" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>化学肥料あり</li>
+              <li class="flex gap-1"><i data-lucide="x" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>除草剤あり</li>
+              <li class="flex gap-1 mt-2 text-red-600 font-semibold"><i data-lucide="trending-up" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>高収量・安定</li>
+            </ul>
+          </div>
+          <!-- 矢印 -->
+          <div class="flex flex-col items-center justify-center self-stretch px-2">
+            <i data-lucide="arrow-right" class="w-5 h-5 text-stone-400"></i>
+            <p class="text-xs text-stone-400 rotate-0 mt-1 text-center" style="writing-mode:vertical-rl;text-orientation:mixed">影響・反発</p>
+          </div>
+          <!-- 自然農法 福岡 -->
+          <div class="flex-1 bg-amber-50 border border-amber-200 p-5">
+            <p class="font-bold text-amber-800 text-center mb-3">自然農法（福岡正信）</p>
+            <ul class="text-xs text-amber-700 space-y-1">
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>不耕起</li>
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>無農薬</li>
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>無肥料</li>
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>無除草（草を刈ることも原則しない）</li>
+              <li class="flex gap-1 mt-2 text-amber-700 font-semibold"><i data-lucide="alert-circle" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>土地依存で再現性にばらつき</li>
+            </ul>
+          </div>
+          <!-- 矢印 -->
+          <div class="flex flex-col items-center justify-center self-stretch px-2">
+            <i data-lucide="arrow-right" class="w-5 h-5 text-stone-400"></i>
+            <p class="text-xs text-stone-400 mt-1 text-center" style="writing-mode:vertical-rl;text-orientation:mixed">体系化</p>
+          </div>
+          <!-- 自然農 川口 -->
+          <div class="flex-1 bg-green-50 border-2 border-green-400 rounded-r-2xl p-5">
+            <p class="font-bold text-green-800 text-center mb-3">自然農（川口由一）</p>
+            <ul class="text-xs text-green-700 space-y-1">
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>不耕起</li>
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>無農薬</li>
+              <li class="flex gap-1"><i data-lucide="check" class="w-3 h-3 mt-0.5 flex-shrink-0 text-green-600"></i>無化学肥料</li>
+              <li class="flex gap-1 text-amber-700"><i data-lucide="minus" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>草は「刈って根元に敷く」積極管理（完全無除草ではない）</li>
+              <li class="flex gap-1 mt-2 text-green-700 font-semibold"><i data-lucide="book-open" class="w-3 h-3 mt-0.5 flex-shrink-0"></i>教育・実践体系あり</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-2: 自然農 vs 慣行農法 詳細比較 -->
+      <h3 class="font-bold text-lg mb-4">自然農 vs 慣行農法：詳細比較</h3>
+      <div class="overflow-x-auto mb-8">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-stone-800 text-white">
+              <th class="px-4 py-3 text-left rounded-tl-lg">観点</th>
+              <th class="px-4 py-3 text-left">自然農</th>
+              <th class="px-4 py-3 text-left rounded-tr-lg">慣行農法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-stone-200 highlight-row">
+              <td class="px-4 py-3 font-semibold">耕起</td>
+              <td class="px-4 py-3 text-green-700">不耕起（土壌構造を維持）</td>
+              <td class="px-4 py-3 text-red-700">年1〜数回の深耕・トラクター</td>
+            </tr>
+            <tr class="border-b border-stone-200">
+              <td class="px-4 py-3 font-semibold">農薬</td>
+              <td class="px-4 py-3 text-green-700">使用しない（原則）</td>
+              <td class="px-4 py-3 text-red-700">殺虫剤・殺菌剤・除草剤を使用</td>
+            </tr>
+            <tr class="border-b border-stone-200 highlight-row">
+              <td class="px-4 py-3 font-semibold">肥料</td>
+              <td class="px-4 py-3 text-green-700">化学肥料なし。必要に応じ米ぬか等の有機物で「補う」</td>
+              <td class="px-4 py-3 text-red-700">窒素・リン・カリウムの化学肥料を定量施肥</td>
+            </tr>
+            <tr class="border-b border-stone-200">
+              <td class="px-4 py-3 font-semibold">収量・安定性</td>
+              <td class="px-4 py-3 text-amber-700">慣行より低い傾向。転換期は特に変動大</td>
+              <td class="px-4 py-3 text-green-700">高収量・年間収量の予測が立てやすい</td>
+            </tr>
+            <tr class="border-b border-stone-200 highlight-row">
+              <td class="px-4 py-3 font-semibold">草管理の労働量</td>
+              <td class="px-4 py-3 text-red-700">除草剤なしのため手作業が多い</td>
+              <td class="px-4 py-3 text-green-700">除草剤で効率化できる</td>
+            </tr>
+            <tr class="border-b border-stone-200">
+              <td class="px-4 py-3 font-semibold">外部コスト</td>
+              <td class="px-4 py-3 text-green-700">農薬・化学肥料費が不要</td>
+              <td class="px-4 py-3 text-red-700">農薬・肥料・機械費が高コスト</td>
+            </tr>
+            <tr class="border-b border-stone-200 highlight-row">
+              <td class="px-4 py-3 font-semibold">環境負荷</td>
+              <td class="px-4 py-3 text-green-700">生物多様性・土壌炭素に優しい</td>
+              <td class="px-4 py-3 text-red-700">農薬流出・地下水汚染・土壌劣化リスク</td>
+            </tr>
+            <tr class="border-b border-stone-200">
+              <td class="px-4 py-3 font-semibold">規模適性</td>
+              <td class="px-4 py-3 text-amber-700">小規模・多品目向き</td>
+              <td class="px-4 py-3 text-green-700">大規模・単一品目向き</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-semibold rounded-bl-lg">流通・販売</td>
+              <td class="px-4 py-3 text-amber-700">直販・産直・顔の見える販路が必要</td>
+              <td class="px-4 py-3 text-green-700 rounded-br-lg">JA・市場流通と相性が良い</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4-3: たとえ話 -->
+      <h3 class="font-bold text-lg mb-4">たとえ話で理解する</h3>
+      <div class="space-y-4">
+
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="server" class="w-4 h-4 text-blue-600"></i>
+            <span class="font-bold text-blue-800">たとえ1：不耕起 ＝ サーバーの無停止運用</span>
+          </div>
+          <p class="text-sm text-stone-700">
+            慣行農法の耕起は「毎年OSを再インストールしてクリーンな環境から再構築する」ようなもの。
+            確かに既知の問題はリセットできるが、長年かけて構築されたミドルウェアの設定・キャッシュ・セッション情報（＝土壌微生物・菌根菌のネットワーク）がすべて消える。
+            <strong>不耕起とは「壊さずに積み上げる」という運用哲学</strong>だ。
+          </p>
+        </div>
+
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="recycle" class="w-4 h-4 text-purple-600"></i>
+            <span class="font-bold text-purple-800">たとえ2：草を活かす ＝ ログを削除せず監視・活用するシステム設計</span>
+          </div>
+          <p class="text-sm text-stone-700">
+            除草剤で草を一掃するのは「ログファイルをcron で定期削除して問題を見えなくする」戦略に近い。
+            短期的には「きれいな状態」だが、ディスク容量（≒土壌の有機物量）が空になり、異常の予兆（≒病害虫の早期発見）も消える。
+            自然農では草を<strong>刈って根元に敷く</strong>ことで、有機物・被覆材・微生物の餌に転換する——
+            つまり<strong>「副産物をシステムの入力として循環させる設計」</strong>だ。
+            草はノイズではなく、生態系を構成するデータストリームの一部として扱う。
+          </p>
+        </div>
+
+        <div class="bg-orange-50 border border-orange-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="trending-up" class="w-4 h-4 text-orange-600"></i>
+            <span class="font-bold text-orange-800">たとえ3：自然農の収量モデル ＝ 技術的負債と長期投資のトレードオフ</span>
+          </div>
+          <p class="text-sm text-stone-700">
+            慣行農法は「外部APIコール（化学肥料・農薬）で短期パフォーマンスを最大化するアーキテクチャ」。
+            自然農は「外部依存を排除し、土壌資本（≒内部キャッシュ・内製ライブラリ）を育てる長期投資」。
+            転換後数年は収量が落ちるが（リファクタリング期のスローダウン）、
+            <strong>土壌の自律的な肥沃化</strong>が進むと安定した生産が可能になる。
+            どちらが正解かはビジネスモデル（農業の規模・販路・価値観）に依存する。
+          </p>
+        </div>
+
+        <div class="bg-teal-50 border border-teal-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="shield" class="w-4 h-4 text-teal-600"></i>
+            <span class="font-bold text-teal-800">たとえ4：農薬を使わない ＝ ファイアウォールで遮断するか、OSの堅牢化で守るか</span>
+          </div>
+          <p class="text-sm text-stone-700">
+            農薬（殺虫剤・殺菌剤）は「外部からの攻撃をファイアウォールで遮断する」戦略。
+            自然農は「土壌・生態系そのものを強く健全に保つことで、病害虫が爆発しにくい環境を作る」戦略。
+            完璧な防壁を維持するコスト（農薬代・耐性菌問題）と、
+            <strong>根本的な免疫設計（生態系バランス）</strong>のどちらに投資するかという話に近い。
+          </p>
+        </div>
+      </div>
+
+      <!-- 4-4: 瀬戸内まいふぁーむ -->
+      <h3 class="font-bold text-lg mt-10 mb-4">帰農学校「瀬戸内まいふぁーむ」</h3>
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="school" class="w-6 h-6 text-green-700"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-lg text-green-800">瀬戸内まいふぁーむ（広島県東広島市）</h4>
+            <p class="text-sm text-stone-500 mb-4">代表：高内実 / JR寺家駅から車6分</p>
+            <div class="grid md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p class="font-semibold text-stone-700 mb-1">特徴</p>
+                <ul class="text-stone-600 space-y-1">
+                  <li class="flex gap-1"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>「タカウチ式自然農法」として体系化（福岡流ベース＋江戸農法・天体農法を含む）</li>
+                  <li class="flex gap-1"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>1年間通しの帰農学校（毎年10〜11月に募集）</li>
+                  <li class="flex gap-1"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>「江戸農書を読む会」主宰。YouTube発信あり</li>
+                </ul>
+              </div>
+              <div>
+                <p class="font-semibold text-stone-700 mb-1">注意点</p>
+                <ul class="text-stone-600 space-y-1">
+                  <li class="flex gap-1"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>川口系「自然農」ではなく福岡系「自然農法」がベース</li>
+                  <li class="flex gap-1"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>農業相談目的の個人訪問・圃場見学はNG（有料講座外）</li>
+                  <li class="flex gap-1"><i data-lucide="alert-circle" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>詳細は公式LINEで確認要</li>
+                </ul>
+              </div>
+            </div>
+            <div class="mt-4 bg-stone-50 rounded-lg p-3">
+              <p class="text-xs text-stone-500">高内実氏は1996年に福岡正信の著書に感銘を受けて師事。翌年から自然農法を実践し稲作・畑作を継続。「江戸農法（江戸時代の農書に基づく実践）」と「天体農法（月の満ち欠けを栽培計画に活用）」を独自に統合している点が特色。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 落とし穴 -->
+    <section id="pitfalls">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="triangle-alert" class="w-6 h-6 text-amber-500"></i>
+        <h2 class="text-2xl font-bold">初心者がはまりやすい落とし穴</h2>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex gap-4 bg-red-50 border border-red-200 rounded-xl p-5">
+          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-red-600 font-bold text-sm">1</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800 mb-1">「型を完コピ」すると失敗する</h3>
+            <p class="text-sm text-stone-700">
+              福岡の粘土団子・直播、川口の特定の刈り草手順を<strong>土地・気候を無視して模倣</strong>すると失敗しやすい。
+              川口自身も「形にとらわれるな。土地と対話しながら自分の農を作れ」と繰り返し述べていた。
+              <strong>回避策</strong>：まず小さい畝で1作試し、観察データを積む。
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 bg-red-50 border border-red-200 rounded-xl p-5">
+          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-red-600 font-bold text-sm">2</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800 mb-1">「無農薬＝楽」という誤解</h3>
+            <p class="text-sm text-stone-700">
+              農薬を使わないとは「手間を省く」ことでも「何もしない」ことでもない。
+              草管理・病害虫の観察・土壌状態の把握に<strong>より多くの観察時間と知識</strong>が必要になる。
+              特に転換初期は慣行より労働集約的になりやすい。
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 bg-red-50 border border-red-200 rounded-xl p-5">
+          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-red-600 font-bold text-sm">3</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800 mb-1">「自然農」「自然農法」「自然栽培」「有機」を混同する</h3>
+            <p class="text-sm text-stone-700">
+              これらは<strong>定義も哲学も法的位置づけも異なる</strong>。
+              有機JAS（国家認証）は農薬・化学肥料の使用基準を定めるが、耕起を禁じてはいない。
+              自然農は国の統一ラベルがなく、実践者ごとに定義が揺れる。
+              人に勧める・表示する場合は正確な定義の確認が必要。
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 bg-red-50 border border-red-200 rounded-xl p-5">
+          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-red-600 font-bold text-sm">4</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800 mb-1">収量・収入の転換期リスクを見落とす</h3>
+            <p class="text-sm text-stone-700">
+              慣行農法から転換後、土壌微生物叢の安定には<strong>3〜7年かかる</strong>とされる（土壌・作物依存）。
+              転換直後は慣行比で収量が60〜80%程度になる事例報告がある一方、品目・気候・土壌によって差は大きい。
+              就農・移住と同時に自然農を始める場合は、この転換期の生活費確保計画が別途不可欠。
+              <strong>回避策</strong>：副業・アルバイト・給付金（新規就農者支援制度）の活用を転換前に計画する。
+            </p>
+          </div>
+        </div>
+
+        <div class="flex gap-4 bg-red-50 border border-red-200 rounded-xl p-5">
+          <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-red-600 font-bold text-sm">5</span>
+          </div>
+          <div>
+            <h3 class="font-bold text-red-800 mb-1">「自然に任せれば全部うまくいく」というロマン化</h3>
+            <p class="text-sm text-stone-700">
+              自然農は「何も考えずに放置する農法」ではない。
+              草の管理タイミング・種まきの適期・作物と草の競合バランスなど、
+              <strong>緻密な観察に基づく判断の連続</strong>だ。
+              「楽になりたくて自然農にした」という動機だけでは挫折しやすい。
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 専門用語集 -->
+    <section id="glossary">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="book-open" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">専門用語集</h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">不耕起</p>
+          <p class="text-sm text-stone-600 mt-1">土を掘り返さない農法。土壌微生物・菌根菌・ミミズなどの生態ネットワークを維持する。関連：<span class="text-green-600">自然農・パーマカルチャー</span></p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">菌根菌（きんこんきん）</p>
+          <p class="text-sm text-stone-600 mt-1">植物の根と共生する糸状菌。リン吸収を助け、土壌水分・栄養の輸送ネットワークを形成する。耕起で断裂しやすい。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">有機JAS</p>
+          <p class="text-sm text-stone-600 mt-1">農林水産省が定める有機農産物の国家認証。農薬・化学肥料を「一定基準で使わない」ことを要件とするが、耕起は禁じていない。自然農とは別物。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">赤目自然農塾</p>
+          <p class="text-sm text-stone-600 mt-1">川口由一が1991年に奈良県赤目で開講した自然農の実践道場。全国から多くの実践者・帰農者が学んだ。川口逝去後も継続運営。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">自然農法（福岡正信）</p>
+          <p class="text-sm text-stone-600 mt-1">不耕起・無肥料・無農薬・無除草の4原則を掲げた農法。粘土団子・直播・麦稲輪作が代名詞。川口の自然農はこれを受け継ぎ地域適合させた。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">慣行農法</p>
+          <p class="text-sm text-stone-600 mt-1">化学農薬・化学肥料・耕起機械を組み合わせた現代農業の主流。高収量・安定性が強みだが、環境負荷・外部コスト依存が課題。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">マルチング（被覆）</p>
+          <p class="text-sm text-stone-600 mt-1">刈り草・ワラ・枯葉などで土の表面を覆う技術。水分保持・温度調節・草の発芽抑制・微生物の餌となる有機物供給を兼ねる。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">自然栽培</p>
+          <p class="text-sm text-stone-600 mt-1">農薬・化学肥料を使わない栽培の総称的な呼び名。法的定義はなく、自然農・自然農法と混用されやすい。文脈に応じて定義を確認すること。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">土壌炭素（SOC: Soil Organic Carbon）</p>
+          <p class="text-sm text-stone-600 mt-1">土壌中の有機炭素量。高いほど保水力・微生物活性・地力が高い傾向。不耕起・有機物循環で増加しやすく、CO₂固定の観点からも注目。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">帰農（きのう）</p>
+          <p class="text-sm text-stone-600 mt-1">農業から離れた生活をしていた人が農業に戻ること、または都市生活者が農村・農業に転じること。近年は「新規就農」と組み合わせて語られることが多い。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">岡田茂吉系「自然農法」（MOA自然農法）</p>
+          <p class="text-sm text-stone-600 mt-1">世界救世教の開祖・岡田茂吉（1882–1955）が提唱した農法。農薬・化学肥料を使わない点は共通だが、哲学・組織・実践方法は福岡系・川口系と異なる。「自然農法」という語を検索すると複数の系譜がヒットするため注意が必要。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">天体農法</p>
+          <p class="text-sm text-stone-600 mt-1">月の満ち欠け・惑星の運行サイクルを農作業のカレンダーに活用する農法思想。ビオダイナミック農法（シュタイナー思想ベース）と類似するが、流派によって解釈が異なる。瀬戸内まいふぁーむでは「タカウチ式自然農法」の一要素として組み込まれている。科学的エビデンスは限定的。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-4 shadow-sm">
+          <p class="font-bold text-green-800">江戸農法（えどのうほう）</p>
+          <p class="text-sm text-stone-600 mt-1">江戸時代の農書（宮崎安貞『農業全書』など）に記録された農業技術・知恵。化学肥料のない時代の有機物循環・田畑輪換・播種時期の知見を現代に応用しようとする試み。瀬戸内まいふぁーむでは「江戸農書を読む会」として研究・実践が行われている。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 次に学ぶと良いもの -->
+    <section id="next">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="compass" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">次に学ぶと良いもの</h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="leaf" class="w-5 h-5 text-green-600"></i>
+            <span class="font-bold">パーマカルチャー</span>
+          </div>
+          <p class="text-sm text-stone-600">自然農の思想と近接する設計思想。農・建築・水・エネルギーを一体的に扱うシステム設計論。ビル・モリソン（1928–2016）が提唱。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="flask-conical" class="w-5 h-5 text-purple-600"></i>
+            <span class="font-bold">土壌科学・微生物生態学</span>
+          </div>
+          <p class="text-sm text-stone-600">自然農の「なぜ」を科学的に理解するための土台。菌根菌・放線菌・線虫・土壌炭素サイクルを学ぶと実践の解像度が上がる。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="sun" class="w-5 h-5 text-amber-500"></i>
+            <span class="font-bold">ビオダイナミック農法</span>
+          </div>
+          <p class="text-sm text-stone-600">シュタイナー思想に基づく農法。特殊な有機製剤（牛糞堆肥を牛の角に詰めるなど）と天体カレンダーを使用。無農薬有機系だが哲学は異なる。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="globe" class="w-5 h-5 text-teal-600"></i>
+            <span class="font-bold">再生農業（リジェネラティブ農業）</span>
+          </div>
+          <p class="text-sm text-stone-600">土壌炭素の回復・生物多様性向上を目的とした農法群。不耕起・被覆作物・輪作を組み合わせ、科学的エビデンスを重視。企業・投資家の関心が高まっている。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="scale" class="w-5 h-5 text-blue-600"></i>
+            <span class="font-bold">有機農業と有機JAS</span>
+          </div>
+          <p class="text-sm text-stone-600">自然農と比較するために必須の制度理解。有機JASの要件（使用可能農薬・肥料の種類・認証取得費用・販売表示ルール）を把握すると議論が整理しやすい。</p>
+        </div>
+        <div class="bg-white border border-stone-200 rounded-xl p-5 card-hover shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="book" class="w-5 h-5 text-red-500"></i>
+            <span class="font-bold">農業経営・直販の仕組み</span>
+          </div>
+          <p class="text-sm text-stone-600">自然農で生計を立てるには、慣行流通に乗らない販路設計が必要。CSA（Community Supported Agriculture）・農家レストラン・産直ECなどの実例を学ぶ。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 参考文献 -->
+    <section id="refs">
+      <div class="flex items-center gap-3 mb-6">
+        <i data-lucide="link" class="w-6 h-6 text-green-600"></i>
+        <h2 class="text-2xl font-bold">参考文献・URL</h2>
+      </div>
+      <div class="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-4">
+
+        <div>
+          <p class="font-semibold text-stone-700 mb-2 text-sm">公式サイト・学習の入口</p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://akame-shizennoh.com/" target="_blank" rel="noopener" class="text-green-700 hover:underline">赤目自然農塾 公式サイト</a>
+              <span class="text-stone-400">— 川口由一が開講した本家。川口系自然農の一次情報として最も信頼性が高い</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://setouchimyfarm.com/" target="_blank" rel="noopener" class="text-green-700 hover:underline">瀬戸内まいふぁーむ 公式サイト</a>
+              <span class="text-stone-400">— 福岡系ベースの帰農学校。広島県東広島市。天体農法・江戸農法も統合</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://setouchimyfarm.com/free/kinougakkou" target="_blank" rel="noopener" class="text-green-700 hover:underline">瀬戸内まいふぁーむ 帰農学校ページ</a>
+              <span class="text-stone-400">— 1年間コースの概要（毎年10〜11月募集）</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="font-semibold text-stone-700 mb-2 text-sm">Wikipedia・百科事典</p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://ja.wikipedia.org/wiki/%E5%B7%9D%E5%8F%A3%E7%94%B1%E4%B8%80" target="_blank" rel="noopener" class="text-blue-700 hover:underline">川口由一 — Wikipedia（日本語）</a>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://ja.wikipedia.org/wiki/%E8%87%AA%E7%84%B6%E8%BE%B2%E6%B3%95" target="_blank" rel="noopener" class="text-blue-700 hover:underline">自然農法 — Wikipedia（日本語）</a>
+              <span class="text-stone-400">— 岡田茂吉系・福岡系の歴史的系譜</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="font-semibold text-stone-700 mb-2 text-sm">書籍</p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <i data-lucide="book" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>
+              <span class="text-stone-700">川口由一 『完全版 川口由一 自然農』（ワン・パブリッシング）— 川口の実践・哲学の集大成</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="book" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>
+              <span class="text-stone-700">福岡正信 『わら一本の革命』（春秋社）— 自然農法の原典。川口の出発点</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="book" class="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5"></i>
+              <span class="text-stone-700">有吉佐和子 『複合汚染』（新潮社）— 農薬問題の告発書。川口の転機となった1冊</span>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <p class="font-semibold text-stone-700 mb-2 text-sm">外部記事・参考</p>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"></i>
+              <a href="https://www.nippon.com/ja/people/e00120/" target="_blank" rel="noopener" class="text-green-700 hover:underline">nippon.com「楽園をつくる自然農家：川口由一」</a>
+              <span class="text-stone-400">— 英語圏向け紹介記事（日本語版あり）</span>
+            </li>
+          </ul>
+        </div>
+
+        <p class="text-xs text-stone-400 mt-4 pt-4 border-t border-stone-100">
+          「自然農」は法的定義のある統一用語ではなく、実践者・団体で解釈が異なる場合があります。帰農・就農などの重要な判断には、最新の公式情報・農業改良普及所・新規就農相談センターへの確認を推奨します。
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="bg-stone-800 text-stone-400 py-8 px-6 mt-16">
+    <div class="max-w-4xl mx-auto text-sm">
+      <p>自然農 Techmap — 2026年3月生成</p>
+      <p class="mt-1">情報は公開情報に基づく整理です。実践・投資判断は一次情報を必ず確認してください。</p>
+    </div>
+  </footer>
+
+  <!-- ===== PDF BUTTON ===== -->
+  <button id="pdf-btn" onclick="window.print()"
+    class="bg-green-700 hover:bg-green-800 text-white px-5 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium transition-colors">
+    <i data-lucide="download" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <script>
+    lucide.createIcons();
+
+    // TOC active link
+    const sections = document.querySelectorAll('section[id]');
+    const tocLinks = document.querySelectorAll('.toc-link');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          tocLinks.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.toc-link[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(s => observer.observe(s));
+  </script>
+</body>
+</html>

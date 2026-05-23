@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>コンテキストエンジニアリング — AIエージェントのための情報設計技術 | Techmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      section { break-inside: avoid; }
+    }
+    .term-box {
+      background: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 0.375rem 0.375rem 0;
+    }
+    .analogy-box {
+      background: #fefce8;
+      border-left: 4px solid #eab308;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 0.375rem 0.375rem 0;
+    }
+    .toc-sidebar {
+      position: fixed;
+      top: 2rem;
+      left: 1rem;
+      width: 190px;
+      font-size: 0.75rem;
+    }
+    @media (max-width: 1280px) {
+      .toc-sidebar { display: none; }
+    }
+    .section-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      background: #1e40af;
+      color: white;
+      border-radius: 9999px;
+      font-weight: bold;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    body { font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- TOC Sidebar -->
+  <nav class="toc-sidebar no-print bg-white rounded-xl shadow-md p-4">
+    <p class="font-bold text-gray-600 mb-3 text-xs uppercase tracking-wide">目次</p>
+    <ul class="space-y-1 text-gray-500">
+      <li><a href="#summary" class="hover:text-blue-600 block py-0.5">1. ひとことで言えば</a></li>
+      <li><a href="#why" class="hover:text-blue-600 block py-0.5">2. なぜ生まれたのか</a></li>
+      <li><a href="#three" class="hover:text-blue-600 block py-0.5">3. まず理解する3つ</a></li>
+      <li><a href="#concepts" class="hover:text-blue-600 block py-0.5">4. 主要概念</a></li>
+      <li><a href="#pitfalls" class="hover:text-blue-600 block py-0.5">5. 落とし穴</a></li>
+      <li><a href="#glossary" class="hover:text-blue-600 block py-0.5">6. 専門用語集</a></li>
+      <li><a href="#next" class="hover:text-blue-600 block py-0.5">7. 次に学ぶもの</a></li>
+      <li><a href="#refs" class="hover:text-blue-600 block py-0.5">8. 参考文献</a></li>
+    </ul>
+  </nav>
+
+  <!-- PDF Button -->
+  <button onclick="window.print()" class="no-print fixed bottom-6 right-6 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 z-50 text-sm">
+    <i data-lucide="file-down" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <div class="max-w-3xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex items-center gap-2 text-sm text-blue-600 mb-4 font-medium">
+        <i data-lucide="cpu" class="w-4 h-4"></i>
+        <span>Techmap — AIエンジニアリング</span>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-3 leading-tight">
+        コンテキストエンジニアリング
+      </h1>
+      <p class="text-xl text-gray-400 mb-5">Context Engineering for AI Agents</p>
+      <div class="flex gap-2 flex-wrap">
+        <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">LLM</span>
+        <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">AIエージェント</span>
+        <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">Anthropic</span>
+        <span class="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full">2025年9月29日</span>
+      </div>
+
+      <!-- 前提定義ボックス -->
+      <div class="mt-6 bg-gray-100 rounded-xl p-4 border border-gray-200">
+        <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">この図解で使う基本用語</p>
+        <div class="space-y-1 text-sm text-gray-600">
+          <p><strong>AIエージェント</strong>：LLMがツールをループ内で自律的に使い続けるシステム。単発の質問応答ではなく、複数ステップのタスクを自律実行する。</p>
+          <p><strong>コンテキストウィンドウ</strong>：LLMが1回の推論で参照できるトークン列の最大長（例：200,000トークン）。この範囲内に収まる情報しかモデルは「見えない」。</p>
+          <p><strong>トークン</strong>：LLMが扱うテキストの最小単位。日本語では1〜2文字程度、英語では1単語が目安。</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== 1. ひとことで言えば ========== -->
+    <section id="summary" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">1</span>ひとことで言えば
+      </h2>
+      <div class="bg-blue-900 text-white rounded-2xl p-7 mb-6">
+        <p class="text-lg font-semibold leading-relaxed">
+          「AIエージェントに<span class="underline decoration-yellow-400 decoration-2">何を・いつ・どれだけ渡すか</span>」を戦略的に設計する技術。<br>
+          プロンプトの書き方よりも、モデルに渡す<strong>情報全体のキュレーション</strong>が品質を決める。
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 text-blue-700 mb-2 font-semibold text-sm">
+            <i data-lucide="users" class="w-4 h-4"></i>対象読者
+          </div>
+          <p class="text-sm text-gray-600">LLM / エージェントシステムを構築する実務エンジニア</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 text-green-700 mb-2 font-semibold text-sm">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>カバー範囲
+          </div>
+          <p class="text-sm text-gray-600">システムプロンプト設計・ツール設計・長期タスクの記憶管理</p>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 text-orange-600 mb-2 font-semibold text-sm">
+            <i data-lucide="x-circle" class="w-4 h-4"></i>カバー外
+          </div>
+          <p class="text-sm text-gray-600">モデルのファインチューニング・RAGの実装詳細（概念的な位置づけは扱う）</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 2. なぜ生まれたのか ========== -->
+    <section id="why" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">2</span>なぜ生まれたのか
+      </h2>
+
+      <!-- 時代の変化 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-5">
+        <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i data-lucide="trending-up" class="w-4 h-4 text-blue-600"></i>
+          プロンプトエンジニアリングからの進化
+        </h3>
+        <div class="flex flex-col md:flex-row gap-3 items-stretch">
+          <div class="flex-1 bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">2022〜2024年頃</p>
+            <p class="font-bold text-gray-700 mb-2">プロンプトエンジニアリング</p>
+            <p class="text-sm text-gray-600">「どんな言葉で指示するか」を最適化。単発の分類・テキスト生成が主なユースケース。</p>
+          </div>
+          <div class="flex items-center justify-center text-gray-300 px-2">
+            <i data-lucide="arrow-right" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1 bg-blue-50 rounded-lg p-4 border border-blue-200">
+            <p class="text-xs text-blue-400 uppercase tracking-wide mb-1">2025年〜</p>
+            <p class="font-bold text-blue-700 mb-2">コンテキストエンジニアリング</p>
+            <p class="text-sm text-gray-600">「何をモデルに渡すか・全体」を最適化。複数ターン・長期タスクが当たり前になった。</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 mt-4">コンテキストとは、LLMがサンプリング時に参照するトークンの集合全体のこと。システムプロンプト・ツール定義・メッセージ履歴・外部データをすべて含む。</p>
+      </div>
+
+      <!-- Context Rot -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-5">
+        <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-orange-500"></i>
+          解決したかった根本問題：コンテキスト汚染（Context Rot）
+        </h3>
+        <p class="text-gray-600 text-sm mb-4">
+          LLMはTransformerアーキテクチャ上、全トークン間のペアワイズ注意計算（メモリ・計算コストが <strong>O(n²)</strong>）が必要。これはコストの問題だが、それとは独立した別の問題として、<strong>注意スコアのSoftmax正規化</strong>によってトークン数が増えると各トークンへの相対的な重みが希薄化する。さらにLLMの学習データには短いシーケンスのほうが多く、長距離依存の学習が十分でないという訓練分布の問題も重なる。これらが合わさって情報想起精度の低下を引き起こす。「ヘイスタック（Needle-in-a-Haystack）」型ベンチマークで実証されており、<strong>全モデルに共通して現れる特性</strong>。
+        </p>
+
+        <!-- 疑似コード -->
+        <p class="text-xs text-gray-400 mb-2">このコードがやること：Softmax正規化によって注意の「相対的な希薄化」が起きる仕組みを示す（概念的な擬似コード）</p>
+        <div class="bg-gray-900 rounded-xl p-4 text-green-400 font-mono text-sm mb-4">
+          <p class="text-gray-400 text-xs mb-1"># 各トークンへの注意重みはSoftmaxで正規化される（合計=1.0に）</p>
+          <p>scores = [dot(Q[i], K[j]) / sqrt(d_k) for j in range(n)]</p>
+          <p>weights = softmax(scores)  <span class="text-yellow-400"># sum(weights) == 1.0</span></p>
+          <p class="text-yellow-400"># → nが増えると1トークンあたりに配分される重みが相対的に減少</p>
+          <p class="text-gray-400 text-xs mt-2"># ※ O(n²)はメモリ・計算コストの問題（別の話）</p>
+        </div>
+
+        <div class="analogy-box">
+          <p class="text-sm font-bold text-yellow-800 mb-1">たとえ話①：100人の全体会議と発言の重み</p>
+          <p class="text-sm text-gray-700">会議の議事録に「重要度の合計を1.0に正規化して配分する」ルールがあるとする。2人の会議なら各発言に0.5ずつ配分できるが、100人になると各発言への配分は0.01。重要な発言でも埋もれる。LLMのSoftmax正規化された注意重みも、これと同じ構造でトークンが増えるほど1トークンあたりの重みが薄まる。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 3. まず理解する3つ ========== -->
+    <section id="three" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2 flex items-center">
+        <span class="section-number">3</span>まず理解する3つ
+      </h2>
+      <p class="text-gray-500 text-sm mb-6 ml-11">この3つを押さえれば、コンテキストエンジニアリングの本質を掴める。</p>
+
+      <div class="space-y-4">
+        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-blue-500">
+          <div class="flex items-start gap-4">
+            <span class="text-4xl font-black text-blue-100 leading-none">01</span>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800 mb-2">コンテキスト汚染（Context Rot）</h3>
+              <p class="text-sm text-gray-600">コンテキストウィンドウ内のトークン数が増えるほどモデルの情報想起精度が低下する現象。ソフトな性能曲線として現れ、ハードな「崖」ではなく<strong>全モデルに共通するグラデーション</strong>として確認されている。コンテキストを「有限の貴重なリソース」として扱う根本的な理由。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-green-500">
+          <div class="flex items-start gap-4">
+            <span class="text-4xl font-black text-green-100 leading-none">02</span>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800 mb-2">注意予算（Attention Budget）</h3>
+              <p class="text-sm text-gray-600 mb-3">LLMが持つ「注意資源の総量」は有限。新しいトークンを追加するたびに予算が消耗される。人間のワーキングメモリと対応する概念。コンテキストエンジニアリングの本質は、この有限な予算を<strong>高品質なトークンだけに集中させる</strong>設計。</p>
+              <div class="term-box">
+                <p class="text-xs font-bold text-sky-700 mb-0.5">用語：Attention（注意機構）</p>
+                <p class="text-xs text-gray-600">Transformerにおける、各トークンが他のトークンへの関連度スコアを計算する仕組み。クエリ（Q）・キー（K）・バリュー（V）行列の内積演算で実現される。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-6 shadow-sm border-l-4 border-purple-500">
+          <div class="flex items-start gap-4">
+            <span class="text-4xl font-black text-purple-100 leading-none">03</span>
+            <div class="flex-1">
+              <h3 class="font-bold text-gray-800 mb-2">ジャストインタイム取得（Just-in-time Retrieval）</h3>
+              <p class="text-sm text-gray-600">全データを事前にコンテキストへ埋め込むのではなく、軽量な識別子（ファイルパス・URL・クエリ文字列）を保持し、<strong>必要なタイミングでツールを使って動的に取得</strong>する戦略。実行時のコスト増と引き換えに、コンテキスト汚染を大幅に抑制できる。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 4. 主要概念・アーキテクチャ ========== -->
+    <section id="concepts" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">4</span>主要概念・アーキテクチャ
+      </h2>
+
+      <!-- 4-A: コンテキストの構成要素 -->
+      <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <i data-lucide="layers" class="w-5 h-5 text-blue-600"></i>
+        A. コンテキストの構成要素と設計原則
+      </h3>
+      <p class="text-sm text-gray-500 mb-4">基本指針：<strong>求める結果の確率を最大化する、最小限の高品質トークンの集合を見つける</strong></p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 mb-3 font-bold text-gray-700">
+            <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>システムプロンプト
+          </div>
+          <p class="text-xs text-gray-500 mb-1">Goldilocks Zone（ちょうどよい粒度）を狙う：</p>
+          <p class="text-xs text-gray-400 mb-3">※童話『3匹のくまと少女』で「熱すぎず冷たすぎない、ちょうどよい」を意味する用語</p>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3 h-3 text-red-400 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">過剰：if-elseロジックをハードコード → 脆くなる</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <i data-lucide="x" class="w-3 h-3 text-red-400 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">不足：高レベルすぎて曖昧 → モデルが迷う</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">最小限かつ十分。XMLタグ等でセクション分け</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 mb-3 font-bold text-gray-700">
+            <i data-lucide="wrench" class="w-4 h-4 text-green-600"></i>ツール設計
+          </div>
+          <p class="text-xs text-gray-500 mb-3">エージェントと情報空間をつなぐ「契約」：</p>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">機能の重複なし・自己完結・エラー耐性あり</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">「どちらのツールを使うか迷う」設計はNG</span>
+            </div>
+            <div class="flex items-start gap-2">
+              <i data-lucide="check" class="w-3 h-3 text-green-500 mt-1 flex-shrink-0"></i>
+              <span class="text-gray-600">入力パラメータは明確・非曖昧な命名</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 mb-3 font-bold text-gray-700">
+            <i data-lucide="list" class="w-4 h-4 text-purple-600"></i>Few-shotサンプル（例示）
+          </div>
+          <p class="text-sm text-gray-600">エッジケースを羅列するのではなく、<strong>多様で典型的なサンプル</strong>をキュレーションする。LLMにとって例は「千の言葉に値する絵」。</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div class="flex items-center gap-2 mb-3 font-bold text-gray-700">
+            <i data-lucide="message-square" class="w-4 h-4 text-orange-600"></i>メッセージ履歴
+          </div>
+          <p class="text-sm text-gray-600">そのまま積み上げず、不要なツール呼び出し結果は随時クリアする。コンテキストを「情報が密で引き締まった状態」に保つことが重要。</p>
+        </div>
+      </div>
+
+      <div class="analogy-box mb-8">
+        <p class="text-sm font-bold text-yellow-800 mb-1">たとえ話②：引越しの荷造り</p>
+        <p class="text-sm text-gray-700">新居に全ての荷物を持っていく人はいない。「今すぐ必要なもの」だけを手荷物に、残りは必要になったら取り寄せる。コンテキストエンジニアリングはこの「荷造りの意思決定」に相当する。何をコンテキストという手荷物に入れるかが品質を左右する。</p>
+      </div>
+
+      <!-- 4-B: 長期タスク -->
+      <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+        B. 長期タスク（Long-horizon Tasks）への対応技術
+      </h3>
+      <p class="text-sm text-gray-500 mb-4">コンテキストウィンドウを超える長時間タスク（大規模コード移行・長期リサーチなど）のための3技術：</p>
+
+      <!-- フローチャート -->
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
+        <div class="flex flex-col items-center gap-3">
+          <div class="bg-gray-800 text-white text-sm px-5 py-2 rounded-lg font-medium">長期エージェントタスク開始</div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-gray-400"></i>
+          <div class="bg-orange-100 text-orange-800 text-sm px-5 py-2 rounded-lg border border-orange-200 font-medium">コンテキストウィンドウが上限に近づく</div>
+          <i data-lucide="arrow-down" class="w-4 h-4 text-gray-400"></i>
+          <div class="text-sm text-gray-400 font-medium">3つのアプローチから選択・組み合わせ</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full mt-1">
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-200">
+              <div class="flex items-center gap-2 mb-2 font-bold text-blue-700 text-sm">
+                <i data-lucide="compress" class="w-4 h-4"></i>① コンパクション
+              </div>
+              <p class="text-xs text-gray-600 mb-2">会話を要約して新ウィンドウへ引き継ぐ</p>
+              <p class="text-xs text-blue-600 font-semibold">向き：往復の多い会話型タスク</p>
+            </div>
+            <div class="bg-green-50 rounded-xl p-4 border border-green-200">
+              <div class="flex items-center gap-2 mb-2 font-bold text-green-700 text-sm">
+                <i data-lucide="pencil" class="w-4 h-4"></i>② 構造的メモ取り
+              </div>
+              <p class="text-xs text-gray-600 mb-2">外部ファイルに書き出し、後で参照</p>
+              <p class="text-xs text-green-600 font-semibold">向き：明確なマイルストーンがある開発</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-4 border border-purple-200">
+              <div class="flex items-center gap-2 mb-2 font-bold text-purple-700 text-sm">
+                <i data-lucide="git-branch" class="w-4 h-4"></i>③ マルチエージェント
+              </div>
+              <p class="text-xs text-gray-600 mb-2">専門サブエージェントが分担し、サマリーのみ返す</p>
+              <p class="text-xs text-purple-600 font-semibold">向き：並列探索が有効なリサーチ</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- コンパクション詳細 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="compress" class="w-4 h-4 text-blue-600"></i>
+          コンパクションの実装パターン（Claude Codeの例）
+        </h4>
+        <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+          <div class="bg-green-50 p-3 rounded-lg">
+            <p class="font-bold text-green-700 mb-2">保持するもの</p>
+            <ul class="text-gray-600 space-y-1 text-xs">
+              <li>• アーキテクチャ上の決定事項</li>
+              <li>• 未解決のバグ・課題</li>
+              <li>• 直近5ファイルの内容</li>
+              <li>• 実装方針・制約</li>
+            </ul>
+          </div>
+          <div class="bg-red-50 p-3 rounded-lg">
+            <p class="font-bold text-red-700 mb-2">削除するもの</p>
+            <ul class="text-gray-600 space-y-1 text-xs">
+              <li>• 古いツール呼び出しの生の結果</li>
+              <li>• 冗長・重複したメッセージ</li>
+              <li>• 試行錯誤の詳細ログ</li>
+            </ul>
+          </div>
+        </div>
+        <div class="term-box">
+          <p class="text-xs font-bold text-sky-700 mb-0.5">Tool result clearing（ツール結果クリア）</p>
+          <p class="text-xs text-gray-600">最も軽量なコンパクション手法。古いツール呼び出し結果のみを除去する。Claude Developer Platformで機能としてリリース済み。</p>
+        </div>
+      </div>
+
+      <!-- 構造的メモ取り詳細 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="pencil" class="w-4 h-4 text-green-600"></i>
+          構造的メモ取り（Agentic Memory）の実例
+        </h4>
+        <p class="text-sm text-gray-600 mb-3">エージェントがコンテキスト外部のファイルに定期的にノートを書き出し、後のターンで参照する手法。</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <p class="font-semibold text-gray-700 mb-1">Claude Codeの例</p>
+            <p class="text-xs text-gray-500">TODOリストや<code class="bg-gray-200 px-1 rounded">CLAUDE.md</code>ファイルを随時更新し、長期的な作業状態を管理する。</p>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <p class="font-semibold text-gray-700 mb-1">ポケモン実験の例</p>
+            <p class="text-xs text-gray-500">Claude がポケモンをプレイ。数千ステップにわたり戦略メモを自律的に維持。コンテキストリセット後も作戦を継続できた。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="analogy-box mb-6">
+        <p class="text-sm font-bold text-yellow-800 mb-1">たとえ話③：プロジェクトの引き継ぎドキュメント</p>
+        <p class="text-sm text-gray-700">長期プロジェクトで担当者が交代するとき、全メール・全議事録を渡すのではなく「現状・残タスク・決定済み事項」をまとめた引き継ぎ書を作る。コンパクションはこの作業をエージェントが自動で行うもの。</p>
+      </div>
+
+      <!-- JIT取得詳細 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="search" class="w-4 h-4 text-purple-600"></i>
+          ジャストインタイム取得とハイブリッド戦略
+        </h4>
+        <div class="flex flex-col md:flex-row gap-4 mb-4 text-sm">
+          <div class="flex-1 bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <p class="font-semibold text-gray-700 mb-1">事前取得型（RAG等）</p>
+            <p class="text-xs text-gray-500">速いが古いインデックスや無関係な情報を埋め込むリスクがある</p>
+          </div>
+          <div class="flex items-center text-gray-300 text-xs">＋</div>
+          <div class="flex-1 bg-purple-50 rounded-lg p-3 border border-purple-200">
+            <p class="font-semibold text-purple-700 mb-1">JIT型（ツールで動的取得）</p>
+            <p class="text-xs text-gray-500">遅いが常に最新。コンテキスト汚染を最小化できる</p>
+          </div>
+          <div class="flex items-center text-gray-300 text-xs">=</div>
+          <div class="flex-1 bg-blue-50 rounded-lg p-3 border border-blue-200">
+            <p class="font-semibold text-blue-700 mb-1">ハイブリッド戦略</p>
+            <p class="text-xs text-gray-500">Claude Codeが採用。CLAUDE.mdは事前投入、ファイル探索はglob/grepでJIT</p>
+          </div>
+        </div>
+        <div class="analogy-box">
+          <p class="text-sm font-bold text-yellow-800 mb-1">たとえ話④：図書館の利用方法</p>
+          <p class="text-sm text-gray-700">全蔵書を暗記してから仕事をする人はいない。タイトルと棚番号（識別子）を覚えておき、必要なときだけ本を取りに行く。これがJIT取得の構造。</p>
+        </div>
+      </div>
+
+      <!-- マルチエージェント詳細 -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="git-branch" class="w-4 h-4 text-purple-600"></i>
+          マルチエージェントアーキテクチャの構造
+        </h4>
+        <p class="text-sm text-gray-600 mb-4">1つのエージェントが全タスクを抱えるのでなく、専門化したサブエージェントにサブタスクを委譲する。各サブエージェントはクリーンなコンテキストで深掘りし、<strong>1,000〜2,000トークン程度の凝縮サマリーだけ</strong>を親エージェントに返す。</p>
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 mb-4">
+          <div class="flex flex-col gap-2 items-center text-sm">
+            <div class="bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold w-full text-center">親エージェント（オーケストレーター）</div>
+            <p class="text-xs text-gray-400">タスクを分解・委譲 → サマリーを受け取り統合</p>
+            <div class="flex gap-3 w-full">
+              <div class="flex-1 bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                <p class="font-semibold text-purple-700 text-xs mb-1">サブエージェントA</p>
+                <p class="text-xs text-gray-500">コード調査<br>〜数万トークン探索</p>
+                <p class="text-xs text-purple-600 mt-1">↓ サマリー 1-2K tokens</p>
+              </div>
+              <div class="flex-1 bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                <p class="font-semibold text-purple-700 text-xs mb-1">サブエージェントB</p>
+                <p class="text-xs text-gray-500">ドキュメント調査<br>〜数万トークン探索</p>
+                <p class="text-xs text-purple-600 mt-1">↓ サマリー 1-2K tokens</p>
+              </div>
+              <div class="flex-1 bg-purple-50 border border-purple-200 rounded-lg p-3 text-center">
+                <p class="font-semibold text-purple-700 text-xs mb-1">サブエージェントC</p>
+                <p class="text-xs text-gray-500">テスト調査<br>〜数万トークン探索</p>
+                <p class="text-xs text-purple-600 mt-1">↓ サマリー 1-2K tokens</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500">Anthropicの社内マルチエージェントリサーチシステムで、単一エージェントより複雑なリサーチタスクにおいて大幅な性能改善が確認されている。</p>
+      </div>
+    </section>
+
+    <!-- ========== 5. 落とし穴 ========== -->
+    <section id="pitfalls" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">5</span>初心者がはまりやすい落とし穴
+      </h2>
+
+      <div class="space-y-4">
+        <div class="bg-red-50 rounded-xl p-5 border border-red-100">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">① プロンプトにルールを詰め込みすぎる</h3>
+              <p class="text-sm text-gray-600 mb-1">エッジケースを想定するたびにシステムプロンプトへ追記し続ける。結果としてプロンプトが肥大化し、コンテキスト汚染を自ら引き起こす。</p>
+              <p class="text-xs text-gray-500 italic mb-2">例：注文処理エージェントに「日本語の場合は〜、英語の場合は〜、返金は〜、クレームは〜、キャンセルは〜」と数十ルールを追記していくうちに、本来の注文処理ロジックへの注意が薄れ、ルール矛盾が多発した。</p>
+              <p class="text-sm text-green-700 font-semibold">回避策：まず最小限のプロンプトでテスト。失敗パターンに応じて追記（最初から完璧を目指さない）。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-xl p-5 border border-red-100">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">② ツールセットを膨らませる</h3>
+              <p class="text-sm text-gray-600 mb-1">機能の幅を広げようと多数のツールを追加した結果、「どのツールを呼ぶべきか」がモデルにとって曖昧になる。人間が迷う設計でエージェントが迷わないはずがない。</p>
+              <p class="text-xs text-gray-500 italic mb-2">例：ECサイトエージェントで「キャンセル」「返品」「返金」「注文変更」を別々のツールとして定義したところ、モデルがキャンセルと返品を頻繁に混同し、誤った操作を実行した。1つの「注文状態変更」ツールに統合することで解決。</p>
+              <p class="text-sm text-green-700 font-semibold">回避策：ツールの責務を明確に分離し、機能の重複を徹底排除。最小限のツールセットで動作検証してから拡張する。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-xl p-5 border border-red-100">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">③「コンテキストウィンドウが大きければOK」という思い込み</h3>
+              <p class="text-sm text-gray-600 mb-2">100万トークンのコンテキストウィンドウが利用可能でも、コンテキスト汚染の問題は消えない。大容量でも長くなるほど精度は低下する。</p>
+              <p class="text-sm text-green-700 font-semibold">回避策：ウィンドウサイズに関わらず、渡す情報の品質管理を怠らない。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-red-50 rounded-xl p-5 border border-red-100">
+          <div class="flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">④ コンパクションを積極的にしすぎる</h3>
+              <p class="text-sm text-gray-600 mb-2">「削れるだけ削る」とサマリーが粗くなり、後から見ると重要な判断の根拠が消えていることがある。重要性は文脈が進まないと分からない情報が存在する。</p>
+              <p class="text-sm text-green-700 font-semibold">回避策：まずリコール最大化を優先。それから不要な内容を精度改善のために削るアプローチで調整する。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 6. 専門用語集 ========== -->
+    <section id="glossary" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">6</span>専門用語集
+      </h2>
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b border-gray-200">
+            <tr>
+              <th class="text-left p-4 font-semibold text-gray-500 w-2/5">用語</th>
+              <th class="text-left p-4 font-semibold text-gray-500">定義</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr>
+              <td class="p-4 font-semibold text-gray-800 align-top">コンテキストエンジニアリング<br><span class="text-xs font-normal text-gray-400">Context Engineering</span></td>
+              <td class="p-4 text-gray-600 text-sm">LLM推論時に最適なトークン集合をキュレーション・維持するための戦略の総体。プロンプト・ツール・履歴・外部データを含む全体を対象とする。</td>
+            </tr>
+            <tr class="bg-gray-50/50">
+              <td class="p-4 font-semibold text-gray-800 align-top">コンテキスト汚染<br><span class="text-xs font-normal text-gray-400">Context Rot</span></td>
+              <td class="p-4 text-gray-600 text-sm">コンテキスト内のトークン数増加に伴い、モデルの情報想起精度が低下する現象。Needle-in-a-Haystack（ヘイスタック）型ベンチマークで実証済み。</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-gray-800 align-top">注意予算<br><span class="text-xs font-normal text-gray-400">Attention Budget</span></td>
+              <td class="p-4 text-gray-600 text-sm">「Softmax正規化により、コンテキストが長くなるほど1トークンあたりの注意重みが希薄化する」という現象を説明するためにAnthropicが使うメタファー。論文に定義された正式な技術用語ではなく、設計上の意思決定に使う比喩的枠組み。</td>
+            </tr>
+            <tr class="bg-gray-50/50">
+              <td class="p-4 font-semibold text-gray-800 align-top">コンパクション<br><span class="text-xs font-normal text-gray-400">Compaction</span></td>
+              <td class="p-4 text-gray-600 text-sm">コンテキストウィンドウの上限に達した際、会話履歴を要約して新コンテキストとして再起動する技術。Claude Codeが実装の代表例。</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-gray-800 align-top">JIT取得<br><span class="text-xs font-normal text-gray-400">Just-in-time Retrieval</span></td>
+              <td class="p-4 text-gray-600 text-sm">全データを事前埋め込みせず、実行時に軽量な識別子をもとにツールで動的に取得する戦略。コンテキスト汚染を抑制しつつ大規模データを扱える。</td>
+            </tr>
+            <tr class="bg-gray-50/50">
+              <td class="p-4 font-semibold text-gray-800 align-top">段階的探索<br><span class="text-xs font-normal text-gray-400">Progressive Disclosure</span></td>
+              <td class="p-4 text-gray-600 text-sm">エージェントが探索を通じて徐々にコンテキストを発見するアプローチ（JIT取得と同じ考え方）。ファイルサイズ・命名規則・タイムスタンプをシグナルとして次の探索を判断する。</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-gray-800 align-top">サブエージェント<br><span class="text-xs font-normal text-gray-400">Sub-agent</span></td>
+              <td class="p-4 text-gray-600 text-sm">マルチエージェントアーキテクチャにおいて、特定サブタスクを担当する専門エージェント。独自のクリーンなコンテキストで深掘りし、1-2Kトークンのサマリーのみを親エージェントに返す。</td>
+            </tr>
+            <tr class="bg-gray-50/50">
+              <td class="p-4 font-semibold text-gray-800 align-top">Few-shotプロンプティング<br><span class="text-xs font-normal text-gray-400">Few-shot Prompting</span></td>
+              <td class="p-4 text-gray-600 text-sm">期待する入出力のサンプルをコンテキストに含めることでモデルの出力を誘導する手法。多様で典型的な例のキュレーションが品質を左右する。</td>
+            </tr>
+            <tr>
+              <td class="p-4 font-semibold text-gray-800 align-top">MCP<br><span class="text-xs font-normal text-gray-400">Model Context Protocol（モデルコンテキストプロトコル）</span></td>
+              <td class="p-4 text-gray-600 text-sm">モデルが外部ツール・データソースと標準的に接続するためのプロトコル。コンテキスト外部の情報を動的に取り込む仕組みの一つ。</td>
+            </tr>
+            <tr class="bg-gray-50/50">
+              <td class="p-4 font-semibold text-gray-800 align-top">Needle-in-a-Haystack<br><span class="text-xs font-normal text-gray-400">ヘイスタック型ベンチマーク</span></td>
+              <td class="p-4 text-gray-600 text-sm">長いコンテキストの中に特定の情報（針）を埋め込み、モデルが正確に参照できるかを評価するベンチマーク手法。コンテキスト汚染の実証に広く使われる。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== 7. 次に学ぶと良いもの ========== -->
+    <section id="next" class="mb-14">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">7</span>次に学ぶと良いもの
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="database" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">RAG（Retrieval-Augmented Generation）</h3>
+              <p class="text-sm text-gray-600">ベクトルDB等による埋め込みベースの事前取得システム。JIT取得と組み合わせてハイブリッド戦略を構築する際の核心技術。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="plug" class="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">MCP（Model Context Protocol）</h3>
+              <p class="text-sm text-gray-600">ツール接続の標準化プロトコル。エージェントの情報空間をプラグイン的に拡張する仕組みを理解する。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="git-merge" class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">マルチエージェントシステム設計</h3>
+              <p class="text-sm text-gray-600">オーケストレーター・サブエージェント間の通信設計、タスク分解戦略、エラー回復の仕組みを学ぶ。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="terminal" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">Claude Code の実装パターン</h3>
+              <p class="text-sm text-gray-600">Anthropicが実際のコーディングエージェントでコンテキストエンジニアリングをどう実装しているかを具体的に把握する。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="bar-chart-2" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">Needle-in-a-Haystack ベンチマーク</h3>
+              <p class="text-sm text-gray-600">コンテキスト汚染を定量評価する手法。どのモデルがどの長さで性能低下するかを実測する評価フレームワーク。</p>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors">
+          <div class="flex items-start gap-3">
+            <i data-lucide="brain" class="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h3 class="font-bold text-gray-800 mb-1">LLMの外部メモリ管理</h3>
+              <p class="text-sm text-gray-600">Sonnet 4.5のmemory toolなど、コンテキスト外の永続ストレージへエージェントが情報を書き出す仕組みの設計パターン。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 8. 参考文献 ========== -->
+    <section id="refs" class="mb-12">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+        <span class="section-number">8</span>参考文献・URL
+      </h2>
+      <div class="space-y-3">
+        <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Effective context engineering for AI agents — Anthropic Engineering</p>
+            <p class="text-xs text-gray-400 mt-0.5">本テックマップの元記事。2025年9月29日公開。</p>
+          </div>
+        </a>
+        <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Building effective AI agents — Anthropic Engineering</p>
+            <p class="text-xs text-gray-400 mt-0.5">エージェントの基礎設計思想。ワークフロー vs エージェントの定義を含む。</p>
+          </div>
+        </a>
+        <a href="https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Prompt engineering overview — Anthropic Docs</p>
+            <p class="text-xs text-gray-400 mt-0.5">プロンプトエンジニアリングの公式リファレンス。コンテキストエンジニアリングの前提知識として。</p>
+          </div>
+        </a>
+        <a href="https://docs.anthropic.com/en/docs/build-with-claude/memory" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Memory and context management — Anthropic Docs</p>
+            <p class="text-xs text-gray-400 mt-0.5">Claudeのメモリツール・コンテキスト管理クックブックへのリンク集。</p>
+          </div>
+        </a>
+        <a href="https://arxiv.org/abs/2307.03172" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Lost in the Middle: How Language Models Use Long Contexts (Liu et al., 2023)</p>
+            <p class="text-xs text-gray-400 mt-0.5">長いコンテキストにおける情報想起精度の低下（コンテキスト汚染）を実証した学術論文。</p>
+          </div>
+        </a>
+        <a href="https://modelcontextprotocol.io" target="_blank" class="flex items-start gap-3 bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-blue-300 transition-colors group">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <p class="font-semibold text-blue-700 group-hover:underline text-sm">Model Context Protocol — 公式サイト</p>
+            <p class="text-xs text-gray-400 mt-0.5">MCPの仕様・実装ガイド。エージェントとツール接続の標準化プロトコル。</p>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 pt-6 text-center text-xs text-gray-400">
+      <p>Techmap — コンテキストエンジニアリング for AIエージェント</p>
+      <p class="mt-1">Source: Anthropic Engineering Blog (2025-09-29) | Generated 2026-04-19</p>
+    </footer>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

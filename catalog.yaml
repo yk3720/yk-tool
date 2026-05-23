@@ -1,0 +1,43 @@
+# yk-tool ツール台帳（論理レジストリ · 雛形）
+# 方針: c:/yk-memo/handoffs/workspace-layout/HANDOFF.md §5-2
+# バージョン詳細は各ツールの package.json / CHANGELOG.md を正とする
+
+version: 1
+updated: "2026-05-23"
+
+tools:
+  - id: workspace-ui-kit
+    name: Workspace UI Kit
+    path: workspace-ui-kit/
+    kind: next-app
+    status: forked
+    version_ref: package.json
+    notes: 図解管理 UI 含む。講座 ADS リポとは切り離し済み
+
+  - id: flowchart-web
+    name: Flowchart Web
+    path: flowchart-web/
+    kind: next-app
+    status: experimental
+    version_ref: package.json
+
+  - id: playwright-test
+    name: Playwright E2E
+    path: playwright-test/
+    kind: test-harness
+    status: experimental
+    version_ref: package.json
+    notes: ui-kit / flowchart-web 向け E2E
+
+  - id: commit-report-tool
+    name: Commit Report Tool
+    path: apps/commit-report-tool/
+    kind: automation
+    status: experimental
+    version_ref: package.json
+    notes: GitHub コミット分析 → 図解 → Slack 投稿
+
+publish:
+  path: publish/
+  ledger: c:/yk-skill/metadata/surge-published-list.md
+  notes: 図解 HTML 正本。スキル output/ は作業用

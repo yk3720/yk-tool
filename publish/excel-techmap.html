@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Excel テックマップ | 実務エンジニアのための技術図解</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @media print {
+      #pdf-btn, #toc-floating { display: none !important; }
+      section { break-inside: avoid; }
+      .card { break-inside: avoid; }
+    }
+    html { scroll-behavior: smooth; }
+    #toc-floating {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      width: 220px;
+      z-index: 50;
+    }
+    @media (max-width: 1280px) {
+      #toc-floating { display: none; }
+    }
+    .term-box {
+      border-left: 3px solid #3b82f6;
+      background: #eff6ff;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      margin: 8px 0;
+    }
+    .analogy-card {
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+      border: 1px solid #86efac;
+    }
+    .warn-card {
+      background: linear-gradient(135deg, #fffbeb, #fef9c3);
+      border: 1px solid #fde047;
+    }
+    .code-explain {
+      background: #1e293b;
+      border-radius: 8px 8px 0 0;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 0 0 8px 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans leading-relaxed">
+
+  <!-- ヘッダー -->
+  <header class="bg-gradient-to-r from-green-700 to-emerald-500 text-white py-10 px-6 shadow-lg">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center gap-3 mb-2">
+        <i data-lucide="table-2" class="w-8 h-8 opacity-80"></i>
+        <span class="text-sm font-medium opacity-80 tracking-widest uppercase">Techmap</span>
+      </div>
+      <h1 class="text-3xl font-bold mb-2">Microsoft Excel</h1>
+      <p class="text-green-100 text-lg">ビジネスの標準表計算ツール — 強み・弱点・自動化・今後の動向まで</p>
+    </div>
+  </header>
+
+  <!-- 浮遊目次（デスクトップ） -->
+  <nav id="toc-floating" class="bg-white border border-slate-200 rounded-xl shadow-lg p-4 text-sm">
+    <p class="font-bold text-slate-700 mb-2 flex items-center gap-1">
+      <i data-lucide="list" class="w-4 h-4"></i> 目次
+    </p>
+    <ol class="space-y-1 text-slate-600">
+      <li><a href="#summary" class="hover:text-green-600">1. ひとことで言えば</a></li>
+      <li><a href="#history" class="hover:text-green-600">2. なぜ生まれたのか</a></li>
+      <li><a href="#core3" class="hover:text-green-600">3. まず理解する3つ</a></li>
+      <li><a href="#concepts" class="hover:text-green-600">4. 主要概念・アーキテクチャ</a></li>
+      <li><a href="#pitfalls" class="hover:text-green-600">5. 落とし穴</a></li>
+      <li><a href="#pricing" class="hover:text-green-600">6. 料金プラン</a></li>
+      <li><a href="#glossary" class="hover:text-green-600">7. 専門用語集</a></li>
+      <li><a href="#next" class="hover:text-green-600">8. 次に学ぶと良いもの</a></li>
+      <li><a href="#refs" class="hover:text-green-600">9. 参考文献</a></li>
+    </ol>
+  </nav>
+
+  <!-- PDFボタン -->
+  <button id="pdf-btn"
+    onclick="window.print()"
+    class="fixed bottom-6 right-6 z-50 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-full shadow-xl flex items-center gap-2 text-sm font-medium transition-colors">
+    <i data-lucide="file-text" class="w-4 h-4"></i> PDFで保存
+  </button>
+
+  <main class="max-w-4xl mx-auto px-4 py-10 space-y-16">
+
+    <!-- 1. ひとことで言えば -->
+    <section id="summary">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="zap" class="w-6 h-6 text-green-500"></i>
+        ひとことで言えば
+      </h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <p class="text-xl font-semibold text-slate-700 mb-4">
+          「セルの格子に数値・数式・テキストを配置し、計算・可視化・レポートを一体で行うビジネスの汎用ハブ」
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+            <p class="font-bold text-green-700 mb-1 flex items-center gap-1"><i data-lucide="users" class="w-4 h-4"></i> 対象読者</p>
+            <p class="text-sm text-slate-600">数値データを扱う全ての業務担当者・エンジニア。特に自動化・最適化を検討する人</p>
+          </div>
+          <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+            <p class="font-bold text-green-700 mb-1 flex items-center gap-1"><i data-lucide="target" class="w-4 h-4"></i> カバー範囲</p>
+            <p class="text-sm text-slate-600">集計・グラフ化・ピボット分析・自動化（マクロ/Power Query/Python）・レポーティング</p>
+          </div>
+          <div class="bg-green-50 rounded-xl p-4 border border-green-100">
+            <p class="font-bold text-green-700 mb-1 flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i> カバー外</p>
+            <p class="text-sm text-slate-600">本番トランザクション処理・正規化されたデータモデリング・大規模同時書き込み</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. なぜ生まれたのか -->
+    <section id="history">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="clock" class="w-6 h-6 text-green-500"></i>
+        なぜ生まれたのか
+      </h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+        <p class="text-slate-700">
+          表計算ソフトの原点は <strong>1979年の VisiCalc</strong>（Apple II 向け）にある。「画面上で数値を変えると結果が即座に再計算される」という体験は、それまで紙と電卓で行っていたシナリオ分析を劇的に加速した。
+        </p>
+        <p class="text-slate-700">
+          その後 <strong>Lotus 1-2-3</strong>（1983年）が MS-DOS 上で支配的となる中、Microsoft は 1982年の <strong>MultiPlan</strong> でシェア獲得に失敗。GUI（グラフィカルユーザーインタフェース）を備えた Macintosh の登場を機に、<strong>1985年に Excel の初版を Macintosh 向けにリリース</strong>した。
+        </p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-green-50">
+                <th class="border border-slate-200 px-4 py-2 text-left">年</th>
+                <th class="border border-slate-200 px-4 py-2 text-left">出来事</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="border border-slate-200 px-4 py-2">1979</td><td class="border border-slate-200 px-4 py-2">VisiCalc 登場（表計算ソフトの原点）</td></tr>
+              <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2">1983</td><td class="border border-slate-200 px-4 py-2">Lotus 1-2-3 が MS-DOS 市場を制覇</td></tr>
+              <tr><td class="border border-slate-200 px-4 py-2">1985</td><td class="border border-slate-200 px-4 py-2">Excel 初版（Macintosh 向け）リリース</td></tr>
+              <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2">1987</td><td class="border border-slate-200 px-4 py-2">Windows 版 Excel 登場</td></tr>
+              <tr><td class="border border-slate-200 px-4 py-2">2007</td><td class="border border-slate-200 px-4 py-2">.xlsx（OOXML：Office Open XML（オフィス オープン XML）形式）採用、行数が 65,536 → 1,048,576 に拡張</td></tr>
+              <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2">2016〜</td><td class="border border-slate-200 px-4 py-2">Power Query / Power Pivot が標準搭載、動的配列（スピル）追加</td></tr>
+              <tr><td class="border border-slate-200 px-4 py-2">2023〜</td><td class="border border-slate-200 px-4 py-2">Python in Excel・Copilot in Excel が展開開始</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-slate-600 text-sm">
+          Windows の普及と Office スイートのバンドル販売により、現在はビジネスの「共通言語」として事実上の標準となっている。
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. まず理解する3つ -->
+    <section id="core3">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="book-open" class="w-6 h-6 text-green-500"></i>
+        まず理解する3つ
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border-t-4 border-green-400 p-5">
+          <div class="text-3xl font-black text-green-400 mb-2">01</div>
+          <h3 class="font-bold text-lg mb-2">セル参照の仕組み</h3>
+          <p class="text-sm text-slate-600">相対・絶対・混合参照の区別が理解できれば、数式のコピーで意図しない結果が出ることを防げる。ここがExcelの「型システム」にあたる。</p>
+          <div class="term-box mt-3">
+            <strong>絶対参照</strong>：<code>$A$1</code> のように <code>$</code> で固定。コピーしても参照先が変わらない。
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border-t-4 border-emerald-400 p-5">
+          <div class="text-3xl font-black text-emerald-400 mb-2">02</div>
+          <h3 class="font-bold text-lg mb-2">値・数式・表示形式の分離</h3>
+          <p class="text-sm text-slate-600">セルには「実際の値（シリアル値や浮動小数）」と「見た目（書式）」が別々に存在する。日付の罠や金額の端数誤差はここから生まれる。</p>
+          <div class="term-box mt-3">
+            <strong>シリアル値</strong>：日付は内部的に整数（1900年1月1日=1）で管理。<code>=TODAY()-1</code> が動くのはこのため。
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border-t-4 border-teal-400 p-5">
+          <div class="text-3xl font-black text-teal-400 mb-2">03</div>
+          <h3 class="font-bold text-lg mb-2">テーブル化によるデータ管理</h3>
+          <p class="text-sm text-slate-600">単なるセル範囲ではなく「テーブル（Ctrl+T）」として定義することで、フィルタ・集計・Power Query 連携・構造化参照が安定して使えるようになる。</p>
+          <div class="term-box mt-3">
+            <strong>構造化参照</strong>：<code>=Table1[売上]</code> のように列名で参照する記法。行番号より保守しやすい。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 主要概念・アーキテクチャ -->
+    <section id="concepts">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="layers" class="w-6 h-6 text-green-500"></i>
+        主要概念・アーキテクチャ
+      </h2>
+
+      <!-- 強みと弱点 -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-6 flex items-center gap-2">
+        <i data-lucide="scale" class="w-5 h-5 text-emerald-500"></i>
+        強みと弱点
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
+          <h4 class="font-bold text-green-700 mb-3 flex items-center gap-1"><i data-lucide="thumbs-up" class="w-4 h-4"></i> 強み</h4>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i><span><strong>機能の網羅性</strong>：400以上の関数、ピボット、条件付き書式、Solver、Power Query/Pivot まで1ツールに統合</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i><span><strong>エコシステムの厚さ</strong>：教材・テンプレ・業務ノウハウが豊富。非エンジニアでも操作できる</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i><span><strong>オフライン・大容量に強い</strong>：デスクトップ版はネット不要で大規模ブックを扱える</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="check-circle" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i><span><strong>VBAレガシー資産</strong>：長年蓄積された業務マクロを再利用できる</span></li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-xl border border-red-200 p-5 shadow-sm">
+          <h4 class="font-bold text-red-600 mb-3 flex items-center gap-1"><i data-lucide="thumbs-down" class="w-4 h-4"></i> 弱点</h4>
+          <ul class="space-y-2 text-sm text-slate-700">
+            <li class="flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i><span><strong>同時編集はGoogleに劣る</strong>：リアルタイム共同編集はOneDrive連携で改善されたが、設計思想としてオフラインファースト</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i><span><strong>バージョン差異</strong>：Microsoft 365・2021・Web版で使える関数・機能が異なる</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i><span><strong>「セルに全部載せ」問題</strong>：複雑なロジックをセルに書き続けると保守不能になる</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-400 mt-0.5 shrink-0"></i><span><strong>真のDB代替にはなれない</strong>：正規化・同時トランザクション・監査ログはリレーショナルDBに劣る</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- たとえ話 1: セル参照 -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-500"></i>
+        たとえ話で理解する Excel の仕組み
+      </h3>
+      <div class="space-y-4">
+        <div class="analogy-card rounded-xl p-5 shadow-sm">
+          <p class="font-bold text-green-800 mb-2 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> たとえ1：相対参照 = 「自分の位置から数えた方向指示」</p>
+          <p class="text-sm text-slate-700">
+            相対参照は「今いる場所から3つ左の棚」という指示に近い。数式をコピーするとコピー先から数えた方向で参照先が決まる。
+            一方、絶対参照（<code>$A$1</code>）は「倉庫の原点（A1）に固定された在庫棚」のようなもの。常に同じ場所を指す。
+            混合参照（<code>$A1</code> や <code>A$1</code>）は「列は固定、行は動く」ような半固定の棚番号だ。
+          </p>
+        </div>
+        <div class="analogy-card rounded-xl p-5 shadow-sm">
+          <p class="font-bold text-green-800 mb-2 flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i> たとえ2：Power Query = 「ETL パイプラインの GUI 版」</p>
+          <p class="text-sm text-slate-700">
+            Power Query（パワークエリ）は、データウェアハウス文脈でいう ETL（Extract・Transform・Load：抽出・変換・ロード）パイプラインを、コードなしで設定できるツールだ。
+            変換ステップはクエリとして保存され、元データが更新されれば「更新ボタン1回」で全ステップが再実行される。手作業でのコピペ整形を、冪等な変換定義に昇格させるイメージ。
+          </p>
+          <div class="term-box mt-2">
+            <strong>ETL（Extract, Transform, Load）</strong>：データを取得し、加工して、目的の場所に格納する処理の総称。Power Query の変換ステップがこれに相当する。
+          </div>
+        </div>
+        <div class="analogy-card rounded-xl p-5 shadow-sm">
+          <p class="font-bold text-green-800 mb-2 flex items-center gap-2"><i data-lucide="git-branch" class="w-4 h-4"></i> たとえ3：VBA vs Power Query vs Python in Excel = 「レンチ・ドライバー・CNC 工作機械」</p>
+          <p class="text-sm text-slate-700">
+            <strong>VBA（Visual Basic for Applications：ビジュアルベーシック フォー アプリケーションズ）</strong>はレンチのような直接操作ツール。セルの色変え・ダイアログ表示・ボタンクリック自動化など、UI 操作の細粒度制御に向く。
+            <strong>Power Query</strong>は「段取り治具」のようなもの。材料（データ）を一定の寸法・形状に揃えてから次工程に渡す専用装置だ。VBA の「命令型・手続き的」な動きとは対照的に、Power Query は「宣言型・冪等（べきとう）」で動く。変換ステップを定義しておけば、ボタン一つで同じ変換が何度でも再現される。
+            <strong>Python in Excel</strong>は CNC 工作機械のようなもの。pandas・NumPy・scikit-learn などの豊富なライブラリで高精度な分析が可能だが、クラウド実行（Microsoft のサーバーで計算）という制約も持つ。
+          </p>
+        </div>
+        <div class="analogy-card rounded-xl p-5 shadow-sm">
+          <p class="font-bold text-green-800 mb-2 flex items-center gap-2"><i data-lucide="pivot-table" class="w-4 h-4"></i> たとえ4：ピボットテーブル = 「GROUP BY + 集計関数の GUI 版」</p>
+          <p class="text-sm text-slate-700">
+            SQL に慣れているなら、ピボットテーブル（PivotTable）は <code>GROUP BY ＋ SUM/COUNT</code> を視覚的に設定するインタフェースだと捉えるとすぐ理解できる。
+            行・列・値・フィルターの4ペインに項目をドロップするだけで、集計軸の変更も瞬時に行える。スライサー（Slicer）はフィルタ条件を GUI ボタンで切り替える拡張機能。
+          </p>
+          <div class="term-box mt-2">
+            <strong>スライサー（Slicer）</strong>：ピボットテーブルやテーブルのフィルタを視覚的なボタンで切り替えるUI要素。複数のピボットに同一フィルタを適用できる。
+          </div>
+        </div>
+      </div>
+
+      <!-- オンライン vs オフライン -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="wifi" class="w-5 h-5 text-emerald-500"></i>
+        オンライン版 vs オフライン版（デスクトップ版）
+      </h3>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-green-50">
+              <th class="border border-slate-200 px-4 py-3 text-left">比較軸</th>
+              <th class="border border-slate-200 px-4 py-3 text-left">Excel for the Web（オンライン）</th>
+              <th class="border border-slate-200 px-4 py-3 text-left">デスクトップ版</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">同時編集</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ リアルタイム共同編集</td><td class="border border-slate-200 px-4 py-2 text-slate-600">△ OneDrive/SharePoint 経由で可能</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">VBA/マクロ</td><td class="border border-slate-200 px-4 py-2 text-red-600">× 実行不可</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ フル対応</td></tr>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">Power Query</td><td class="border border-slate-200 px-4 py-2 text-yellow-700">△ 機能制限あり</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ フル対応</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">Python in Excel</td><td class="border border-slate-200 px-4 py-2 text-slate-600">展開中（時期・プランにより差あり）</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ Windows 版で利用可能</td></tr>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">オフライン利用</td><td class="border border-slate-200 px-4 py-2 text-red-600">× 不可</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ 可能</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">大規模ブック</td><td class="border border-slate-200 px-4 py-2 text-red-600">△ ファイルサイズ上限あり</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ メモリ上限まで対応</td></tr>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">コスト</td><td class="border border-slate-200 px-4 py-2 text-green-700">基本無料（Microsoft アカウントで利用可）</td><td class="border border-slate-200 px-4 py-2 text-slate-600">有料（Microsoft 365 / 買い切り）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-slate-500 mt-2">目安：軽い閲覧・共同編集 → Web版、マクロ・Power Query・大規模データ → デスクトップ版</p>
+
+      <!-- Google スプレッドシートとの比較 -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="columns" class="w-5 h-5 text-emerald-500"></i>
+        Google スプレッドシートとの比較
+      </h3>
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-green-50">
+              <th class="border border-slate-200 px-4 py-3 text-left">比較軸</th>
+              <th class="border border-slate-200 px-4 py-3 text-left">Excel</th>
+              <th class="border border-slate-200 px-4 py-3 text-left">Google スプレッドシート</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">同時編集</td><td class="border border-slate-200 px-4 py-2">OneDrive連携で可能</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ クラウドネイティブで得意</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">関数の豊富さ</td><td class="border border-slate-200 px-4 py-2 text-green-700">◎ 400以上。XLOOKUP・LAMBDA等の高度な関数も充実</td><td class="border border-slate-200 px-4 py-2">IMPORTRANGE・GASとの連携が強み</td></tr>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">自動化スクリプト</td><td class="border border-slate-200 px-4 py-2">VBA / Office Script</td><td class="border border-slate-200 px-4 py-2">Google Apps Script（GAS）</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">ファイル互換性</td><td class="border border-slate-200 px-4 py-2">.xlsx の親元</td><td class="border border-slate-200 px-4 py-2">.xlsx インポート可能だが複雑な数式・マクロは崩れやすい</td></tr>
+            <tr><td class="border border-slate-200 px-4 py-2 font-medium">コスト</td><td class="border border-slate-200 px-4 py-2">Microsoft 365 必要（企業向け契約が多い）</td><td class="border border-slate-200 px-4 py-2 text-green-700">Google アカウントで基本無料</td></tr>
+            <tr class="bg-slate-50"><td class="border border-slate-200 px-4 py-2 font-medium">企業管理</td><td class="border border-slate-200 px-4 py-2 text-green-700">グループポリシー・Active Directory との親和性が高い</td><td class="border border-slate-200 px-4 py-2">Google Workspace 管理で対応</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 自動化の使い分け -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="cpu" class="w-5 h-5 text-emerald-500"></i>
+        自動化ツールの使い分け（Power Query / VBA / Python in Excel）
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="filter" class="w-5 h-5 text-blue-500"></i>
+            <h4 class="font-bold text-blue-700">Power Query</h4>
+          </div>
+          <p class="text-xs text-slate-500 mb-2">パワークエリ</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-blue-400"></i>繰り返しのデータ整形・クレンジング</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-blue-400"></i>複数ソースの結合（CSV・DB・Web）</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-blue-400"></i>GUI で手順が保存され再現可能</li>
+          </ul>
+          <p class="text-xs text-slate-500 mt-3 border-t pt-2">コードレスで ETL を構築したい場合に最適</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="terminal" class="w-5 h-5 text-purple-500"></i>
+            <h4 class="font-bold text-purple-700">VBA</h4>
+          </div>
+          <p class="text-xs text-slate-500 mb-2">Visual Basic for Applications</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-purple-400"></i>UI 操作・ダイアログ・ボタン制御</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-purple-400"></i>レガシー資産・既存マクロの保守</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-purple-400"></i>Excel API へのきめ細かいアクセス</li>
+          </ul>
+          <p class="text-xs text-slate-500 mt-3 border-t pt-2">.xlsm 形式が必要。セキュリティポリシーに注意</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="code-2" class="w-5 h-5 text-orange-500"></i>
+            <h4 class="font-bold text-orange-700">Python in Excel</h4>
+          </div>
+          <p class="text-xs text-slate-500 mb-2">PY関数でセルからPythonを実行</p>
+          <ul class="text-sm text-slate-700 space-y-1">
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-orange-400"></i>pandas・NumPy・統計分析</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-orange-400"></i>機械学習の前処理・可視化</li>
+            <li class="flex items-start gap-1"><i data-lucide="chevron-right" class="w-3 h-3 mt-1 shrink-0 text-orange-400"></i>Excelの表計算に分析結果を統合</li>
+          </ul>
+          <p class="text-xs text-slate-500 mt-3 border-t pt-2">計算はMicrosoftクラウドで実行。ライセンス・ポリシー確認が必要</p>
+        </div>
+      </div>
+
+      <!-- M式の性質 -->
+      <div class="term-box mt-4" style="border-left-color: #3b82f6;">
+        <strong>M 式（Power Query 数式言語）の性質</strong>：M は関数型言語（Functional Language）として設計されている。<code>let … in</code> 構文で変換ステップを式として連鎖させる構造は、Haskell や F# のパイプライン処理に近い発想だ。「変数への破壊的代入」ではなく「各ステップが前ステップを参照する式のチェーン」として表現される。
+      </div>
+
+      <!-- コード例：Power Query M 式 -->
+      <div class="mt-4">
+        <div class="code-explain">このコードがやること：CSVファイルを読み込み、不要な列を除去して「売上合計」列を追加する Power Query の M 式の例</div>
+        <pre>let
+    // 1. CSVファイルを読み込む
+    Source = Csv.Document(File.Contents("C:\data\sales.csv"),
+                          [Delimiter=",", Encoding=65001]),
+
+    // 2. 1行目をヘッダーに昇格
+    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+
+    // 3. 不要な列を削除
+    RemovedColumns = Table.RemoveColumns(PromotedHeaders, {"備考", "内部ID"}),
+
+    // 4. 型を明示的に設定（数値・日付の混在を防ぐ）
+    TypedTable = Table.TransformColumnTypes(RemovedColumns, {
+        {"日付", type date},
+        {"売上", type number},
+        {"数量", Int64.Type}
+    }),
+
+    // 5. 売上合計列を追加
+    AddedTotal = Table.AddColumn(TypedTable, "売上合計",
+                                 each [売上] * [数量], type number)
+in
+    AddedTotal</pre>
+      </div>
+
+      <!-- 仕様上の制限 -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="info" class="w-5 h-5 text-emerald-500"></i>
+        エンジニアが知っておくべき仕様・制限
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <h4 class="font-bold text-slate-700 mb-3">ワークシートの上限値</h4>
+          <ul class="text-sm text-slate-700 space-y-2">
+            <li class="flex justify-between border-b pb-1"><span>最大行数</span><span class="font-mono font-bold text-green-700">1,048,576 行</span></li>
+            <li class="flex justify-between border-b pb-1"><span>最大列数</span><span class="font-mono font-bold text-green-700">16,384 列（XFD）</span></li>
+            <li class="flex justify-between border-b pb-1"><span>セルあたり最大文字数</span><span class="font-mono font-bold text-green-700">32,767 文字</span></li>
+            <li class="flex justify-between border-b pb-1"><span>数式の最大長</span><span class="font-mono font-bold text-green-700">8,192 文字</span></li>
+            <li class="flex justify-between"><span>関数の入れ子レベル</span><span class="font-mono font-bold text-green-700">64 レベル</span></li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <h4 class="font-bold text-slate-700 mb-3">数値・日付の内部仕様</h4>
+          <ul class="text-sm text-slate-700 space-y-2">
+            <li class="flex items-start gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500 mt-0.5 shrink-0"></i><span><strong>有効桁：15桁</strong>。IEEE 754（アイトリプルイー 754）倍精度浮動小数点数に起因。16桁目以降は丸められる</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500 mt-0.5 shrink-0"></i><span><strong>日付シリアル値</strong>：1900年1月1日=1（Windowsモード）。Mac と Windows でシリアル値体系が異なる（1904年モード）</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="alert-triangle" class="w-4 h-4 text-yellow-500 mt-0.5 shrink-0"></i><span><strong>大量データのパフォーマンス</strong>：「入る」≠「快適に使える」。100万行の全列 SUM はメモリとCPUを多用する</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 今後の動向 -->
+      <h3 class="text-lg font-bold text-slate-700 mb-3 mt-8 flex items-center gap-2">
+        <i data-lucide="trending-up" class="w-5 h-5 text-emerald-500"></i>
+        今後の動向
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="code" class="w-5 h-5 text-orange-500"></i>
+            <h4 class="font-bold text-slate-700">Python in Excel</h4>
+          </div>
+          <p class="text-sm text-slate-600">pandas・NumPy・Matplotlib をセルから直接利用。計算はMicrosoftクラウド上で実行される設計。2023年に Windows デスクトップ向けに展開開始。Web/Mac への拡張も進行中。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="bot" class="w-5 h-5 text-blue-500"></i>
+            <h4 class="font-bold text-slate-700">Copilot in Excel</h4>
+          </div>
+          <p class="text-sm text-slate-600">自然言語で「売上を月別に集計して」と入力するとピボットや数式を自動提案。OneDrive/SharePoint 保存とテーブル化が利用の前提になりやすい。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="cloud" class="w-5 h-5 text-green-500"></i>
+            <h4 class="font-bold text-slate-700">クラウド化とガバナンス</h4>
+          </div>
+          <p class="text-sm text-slate-600">共同編集・AI機能・外部データ接続に対する企業ITによるポリシー制御がより重要に。マクロ・Python 実行のホワイトリスト管理が課題になりつつある。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 落とし穴 -->
+    <section id="pitfalls">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-500"></i>
+        初心者がはまりやすい落とし穴
+      </h2>
+      <div class="space-y-4">
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="calendar-x" class="w-4 h-4"></i> 落とし穴1：日付の「見た目」と「値」が別物</h3>
+          <p class="text-sm text-slate-700 mb-2">CSV を開くと「2024/01/05」に見えていたセルが実は文字列で保存されており、DATEDIF や並び替えが壊れる。原因：Excel が自動判定に失敗するか、元データの形式が不統一なケース。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：Power Query でインポートし、型変換ステップを明示的に設定する。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="calculator" class="w-4 h-4"></i> 落とし穴2：金額計算の浮動小数点誤差</h3>
+          <p class="text-sm text-slate-700 mb-2">IEEE 754 倍精度の制約により <code>=0.1+0.2</code> が <code>0.30000000000000004</code> になる。金額をSUMで合計すると端数1円の誤差が生じることがある。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：<code>ROUND(SUM(...), 0)</code> で明示的に丸める。金融システムへの連携はExcel外で Decimal 型を使う。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="search" class="w-4 h-4"></i> 落とし穴3：VLOOKUP の近似一致デフォルト</h3>
+          <p class="text-sm text-slate-700 mb-2">VLOOKUP（ブイルックアップ）の第4引数（TRUE/FALSE）を省略すると近似一致（TRUE）になる。検索列がソートされていないと意図しない値が返る。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：必ず <code>=VLOOKUP(A1, 範囲, 列番号, FALSE)</code> と明記。または XLOOKUP（エックスルックアップ）を使う（完全一致がデフォルト）。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="merge" class="w-4 h-4"></i> 落とし穴4：セルの結合との相性問題</h3>
+          <p class="text-sm text-slate-700 mb-2">見た目のために結合したセルは、フィルタ・テーブル・コピー&ペーストで予期しない挙動を引き起こす。ピボットテーブルの集計対象にもなりにくい。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：「セルを結合して中央揃え」の代わりに「選択範囲内で中央」（書式設定）を使う。データ列には絶対に結合セルを使わない。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="file-minus" class="w-4 h-4"></i> 落とし穴5：CSV の先頭ゼロ消失とエンコーディング問題</h3>
+          <p class="text-sm text-slate-700 mb-2">郵便番号「001-0000」や社員コード「00123」をCSVで開くと、Excelが数値と判定して先頭ゼロを削除する。UTF-8のCSVをダブルクリックで開くと文字化けが起きることも。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：Power Query でインポートし列の型を「テキスト」に指定する。または「データ → テキスト/CSV から」でインポートウィザードを使う。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="type" class="w-4 h-4"></i> 落とし穴6：「数値に見えて文字列」問題</h3>
+          <p class="text-sm text-slate-700 mb-2">DBやシステムからエクスポートした数字がExcel上で文字列（左揃え・緑の警告三角）として認識され、SUM や AVERAGE が 0 を返す。視覚的には数値と区別しにくいため原因究明に時間がかかる。VLOOKUP のキー列でも起き、「完全一致のはずなのにマッチしない」問題を引き起こす。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：<code>=ISNUMBER(A1)</code> で型確認。変換は <code>VALUE()</code> 関数か、Power Query でインポート時に型を数値に明示指定する。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="refresh-cw" class="w-4 h-4"></i> 落とし穴7：揮発関数（Volatile Function）によるパフォーマンス劣化</h3>
+          <p class="text-sm text-slate-700 mb-2">NOW・RAND・TODAY・INDIRECT・OFFSET は揮発関数（Volatile Function）と呼ばれ、どのセルが変更されても再計算が走る。特に INDIRECT を多用した大規模シートは「なぜか計算が遅い」の主要原因になる。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：INDIRECT の代わりに構造化参照や名前付き範囲を使う。OFFSET は INDEX で置き換え可能な場合が多い。</p>
+        </div>
+        <div class="warn-card rounded-xl p-5 shadow-sm">
+          <h3 class="font-bold text-yellow-800 mb-1 flex items-center gap-2"><i data-lucide="shield-alert" class="w-4 h-4"></i> 落とし穴8：Python in Excel のデータプライバシー</h3>
+          <p class="text-sm text-slate-700 mb-2">Python in Excel はセルの内容（＝業務データ）を Microsoft のクラウドサーバーに送信して計算を実行する設計になっている。機密情報・個人情報・社外秘データを含むシートで使うと、情報がテナント外に出る可能性がある。社内展開前にデータ分類ポリシーと Microsoft のデータ処理規約を必ず確認すること。</p>
+          <p class="text-sm font-medium text-yellow-800">回避策：機密データを含むシートでは Python in Excel を使わない。代替として Python スクリプト（openpyxl / pandas）をローカルで実行する。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 料金プラン -->
+    <section id="pricing">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="credit-card" class="w-6 h-6 text-green-500"></i>
+        料金プラン
+      </h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="font-bold text-slate-700 mb-1 flex items-center gap-1"><i data-lucide="globe" class="w-4 h-4 text-green-500"></i> Excel for the Web</div>
+            <div class="text-2xl font-black text-green-600 mb-1">無料</div>
+            <p class="text-xs text-slate-500">Microsoft アカウントで利用可。機能制限あり（VBA不可・Power Query制限・ファイルサイズ上限）。</p>
+          </div>
+          <div class="rounded-xl border border-green-300 bg-green-50 p-4">
+            <div class="font-bold text-green-700 mb-1 flex items-center gap-1"><i data-lucide="refresh-cw" class="w-4 h-4 text-green-600"></i> Microsoft 365（サブスク）</div>
+            <div class="text-2xl font-black text-green-700 mb-1">月額課金</div>
+            <p class="text-xs text-slate-600">常に最新版・OneDrive 付き。参考価格（2026年3月時点）：</p>
+            <ul class="text-xs text-slate-700 mt-1 space-y-0.5 ml-2">
+              <li>・Personal（個人1台）：約 ¥13,000/年</li>
+              <li>・Family（最大6人）：約 ¥19,000/年</li>
+              <li>・Business Basic（法人）：約 ¥900/月/ユーザー</li>
+              <li>・Business Standard（法人、Excelフル機能）：約 ¥1,874/月/ユーザー</li>
+            </ul>
+            <p class="text-xs text-slate-500 mt-1">Python in Excel・Copilot はプランにより有無が変わる。最新価格は公式で確認。</p>
+          </div>
+          <div class="rounded-xl border border-slate-200 p-4">
+            <div class="font-bold text-slate-700 mb-1 flex items-center gap-1"><i data-lucide="package" class="w-4 h-4 text-slate-500"></i> 買い切り（永続ライセンス）</div>
+            <div class="text-2xl font-black text-slate-600 mb-1">一括払い</div>
+            <p class="text-xs text-slate-500">Office 2024 Home &amp; Business：約 ¥38,000 前後（参考価格）。機能更新は限定的。Python in Excel・Copilot 等の新機能は使えないか限定的。</p>
+          </div>
+        </div>
+        <p class="text-xs text-slate-500 mt-4">
+          ※ 価格・プラン名は更新されることがあります。最新情報は
+          <a href="https://www.microsoft.com/ja-jp/microsoft-365" target="_blank" class="text-blue-600 underline">Microsoft 公式サイト</a>
+          でご確認ください。教育機関・政府・大量契約（EA）では別途交渉プランが適用される場合があります。
+        </p>
+      </div>
+    </section>
+
+    <!-- 7. 専門用語集 -->
+    <section id="glossary">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="book-marked" class="w-6 h-6 text-green-500"></i>
+        専門用語集
+      </h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="space-y-4">
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">Power Query（パワークエリ）</p>
+            <p class="text-sm text-slate-600">データの取得・結合・変換（ETL）を GUI で設定し、クエリとして保存する機能。Excel 2016 以降標準搭載。→ 関連：ETL、M式</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">VBA（Visual Basic for Applications）</p>
+            <p class="text-sm text-slate-600">Excel を含む Microsoft Office アプリを操作するためのプログラミング言語。UI制御・マクロ記録・ファイル操作が得意。→ 関連：マクロ、.xlsm</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">ピボットテーブル（PivotTable）</p>
+            <p class="text-sm text-slate-600">行・列・値・フィルターを指定してデータを動的に集計・クロス集計するインタフェース。SQL の GROUP BY に相当。→ 関連：スライサー、Power Pivot</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">スピル（Spill）/ 動的配列</p>
+            <p class="text-sm text-slate-600">1 つの数式が複数セルに結果を自動的に展開する機能（Excel 2019 / Microsoft 365 向け）。FILTER・SORT・UNIQUE 関数などで活用される。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">XLOOKUP（エックスルックアップ）</p>
+            <p class="text-sm text-slate-600">VLOOKUP の後継関数。検索列と戻り列を独立して指定でき、左方向検索・完全一致デフォルト・見つからない時の返値設定が可能。→ 関連：VLOOKUP、INDEX/MATCH</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">Power Pivot（パワーピボット）</p>
+            <p class="text-sm text-slate-600">複数テーブルのリレーション定義と DAX（Data Analysis Expressions：データ分析式）による高度な集計ができるデータモデリング機能。Power BI と共通の基盤を持つ。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">DAX（Data Analysis Expressions：データ分析式）</p>
+            <p class="text-sm text-slate-600">Power Pivot・Power BI で使われる計算式言語。SQL のような集計・フィルタ・タイムインテリジェンス（時系列計算）が可能。→ 関連：Power Pivot、Power BI</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">シリアル値</p>
+            <p class="text-sm text-slate-600">Excel 内部での日付の表現形式。1900年1月1日 = 1 として加算する整数。表示形式（書式）を変えると日付として見える。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">構造化参照（Structured Reference）</p>
+            <p class="text-sm text-slate-600">テーブル化されたデータに対して <code>=Table1[売上]</code> のように列名で参照する記法。行の追加・削除に自動追従する。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">Office Script（オフィス スクリプト）</p>
+            <p class="text-sm text-slate-600">Excel for the Web 向けの自動化スクリプト。TypeScript ベースで記述し、Power Automate と連携できる。VBA の Web 版代替として位置づけられる。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">LAMBDA（ラムダ）関数</p>
+            <p class="text-sm text-slate-600">Excel 数式内でユーザー定義関数を作成できる関数（Microsoft 365向け）。<code>=LAMBDA(x, x*2)</code> のように引数と計算式を定義し、名前付き範囲に登録して再利用できる。再帰も可能で、これまで VBA に頼っていた繰り返し処理の一部を数式層に持ち込める。</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">揮発関数（Volatile Function）</p>
+            <p class="text-sm text-slate-600">NOW・RAND・TODAY・INDIRECT・OFFSET など、参照先が変わらなくても再計算が常に走る関数の総称。多用するとブック全体のパフォーマンスが低下する。→ 関連：INDIRECT、OFFSET</p>
+          </div>
+          <div class="border-b pb-3">
+            <p class="font-bold text-slate-800">OOXML（Office Open XML：オフィス オープン XML）</p>
+            <p class="text-sm text-slate-600">Microsoft が Office 2007 で採用した XML ベースのオープンドキュメント形式。.xlsx・.docx・.pptx の拡張子がこれに当たる。旧 .xls（バイナリ）に比べて行数上限が大幅拡大され、他ツールとの相互運用性も高まった。</p>
+          </div>
+          <div>
+            <p class="font-bold text-slate-800">IEEE 754（アイトリプルイー 754）</p>
+            <p class="text-sm text-slate-600">浮動小数点演算の国際標準規格。Excel の数値演算はこれに準拠した倍精度（64bit）で実行されるため、有効桁は15桁、0.1+0.2 が厳密に0.3にならないなどの挙動が生じる。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 次に学ぶと良いもの -->
+    <section id="next">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="arrow-right-circle" class="w-6 h-6 text-green-500"></i>
+        次に学ぶと良いもの
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="bar-chart-2" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">Power BI</p>
+            <p class="text-sm text-slate-500">Excel の Power Query / Power Pivot の延長線上にあるビジネスインテリジェンスツール。インタラクティブなダッシュボードと組織共有が得意。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="database" class="w-5 h-5 text-green-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">SQL / リレーショナルDB</p>
+            <p class="text-sm text-slate-500">Excel で限界を感じる大量データ・正規化・同時更新のニーズに対応。SELECT・GROUP BY・JOIN を覚えると Power Query の M 式も理解しやすくなる。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="code-2" class="w-5 h-5 text-orange-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">Python（pandas / openpyxl）</p>
+            <p class="text-sm text-slate-500">Excel ファイルの自動生成・大量シートの一括処理・分析ワークフローの自動化。openpyxl でExcelファイルの読み書き、pandas で表形式データの集計・変換ができる。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="workflow" class="w-5 h-5 text-purple-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">Power Automate</p>
+            <p class="text-sm text-slate-500">Excel Online の更新をトリガーにしたフロー（承認・通知・他サービス連携）を構築できる。Office Script と組み合わせることで、より高度な自動化が可能。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="git-branch" class="w-5 h-5 text-red-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">DAX（Data Analysis Expressions）</p>
+            <p class="text-sm text-slate-500">Power Pivot・Power BI で使える高度な集計式言語。タイムインテリジェンス（前年同月比・累計など）など、Excelの通常関数では難しい計算を可能にする。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="layers" class="w-5 h-5 text-teal-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">Apache Arrow / Parquet / データレイク</p>
+            <p class="text-sm text-slate-500">Excelの上限を超える大規模データを扱うためのフォーマット・基盤。Excelはサマリ表示・可視化ハブとして活用し、大量データはこれらで管理するアーキテクチャが増えている。</p>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex items-start gap-3">
+          <i data-lucide="function-square" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0"></i>
+          <div>
+            <p class="font-bold text-slate-700">LAMBDA 関数 / LET 関数 / 動的配列</p>
+            <p class="text-sm text-slate-500">Microsoft 365 で追加された現代的な関数群。LAMBDA でユーザー定義関数を数式だけで実装、LET で中間変数を数式内に定義、FILTER・SORT・UNIQUE でスピル（動的配列展開）を活用する。VBA 依存度を減らして保守性を高める方向性の象徴。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. 参考文献 -->
+    <section id="refs">
+      <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+        <i data-lucide="external-link" class="w-6 h-6 text-green-500"></i>
+        参考文献・URL
+      </h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <ul class="space-y-3 text-sm">
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/excel" target="_blank" class="text-blue-600 underline hover:text-blue-800">Excel サポート総合（Microsoft）</a>
+            <span class="text-slate-500">— 関数リファレンス・使い方ガイドの起点</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/en-us/office/excel-specifications-and-limits-1672b34d-7043-467e-8e27-269d656771c3" target="_blank" class="text-blue-600 underline hover:text-blue-800">Excel の仕様と制限（Microsoft）</a>
+            <span class="text-slate-500">— 行数・列数・数式長など公式の上限値一覧</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/en-us/office/differences-between-using-a-workbook-in-the-browser-and-in-excel-f0dc28ed-b85d-4e1d-be6d-5878005db3b6" target="_blank" class="text-blue-600 underline hover:text-blue-800">ブラウザ版とデスクトップ版の機能差（Microsoft）</a>
+            <span class="text-slate-500">— Excel for the Web の制限事項を確認できる</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://learn.microsoft.com/en-us/office365/servicedescriptions/office-online-service-description/excel-online" target="_blank" class="text-blue-600 underline hover:text-blue-800">Excel for the Web サービス説明（Microsoft Learn）</a>
+            <span class="text-slate-500">— オンライン版のファイルサイズ制限・機能範囲</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/en-us/office/python-in-excel-add-on-licensing-faq-6d90fc0e-f080-4799-9d28-9754c77fb308" target="_blank" class="text-blue-600 underline hover:text-blue-800">Python in Excel ライセンス FAQ（Microsoft）</a>
+            <span class="text-slate-500">— プラン別の利用可否・課金の整理</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/en-gb/office/get-started-with-copilot-in-excel-d7110502-0334-4b4f-a175-a73abdfc118a" target="_blank" class="text-blue-600 underline hover:text-blue-800">Copilot in Excel 入門（Microsoft）</a>
+            <span class="text-slate-500">— 自然言語による数式提案・データ分析機能の概要</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://techcommunity.microsoft.com/category/ExcelBlog" target="_blank" class="text-blue-600 underline hover:text-blue-800">Excel Blog（Microsoft Tech Community）</a>
+            <span class="text-slate-500">— 新機能・アップデート情報の一次ソース</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://www.microsoft.com/ja-jp/microsoft-365" target="_blank" class="text-blue-600 underline hover:text-blue-800">Microsoft 365 プラン・価格（日本語）</a>
+            <span class="text-slate-500">— 最新の料金・プラン比較</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://learn.microsoft.com/ja-jp/office/troubleshoot/excel/floating-point-arithmetic-inaccurate-result" target="_blank" class="text-blue-600 underline hover:text-blue-800">Excel の浮動小数点演算の精度について（Microsoft Learn）</a>
+            <span class="text-slate-500">— 金額計算の端数誤差の原因を技術的に解説</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/ja-jp/office/lambda-%E9%96%A2%E6%95%B0-bd212d27-1cd1-4321-a34a-ccbf254b8b67" target="_blank" class="text-blue-600 underline hover:text-blue-800">LAMBDA 関数リファレンス（Microsoft）</a>
+            <span class="text-slate-500">— ユーザー定義関数を数式層で実装する方法</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="link" class="w-4 h-4 text-green-500 mt-0.5 shrink-0"></i>
+            <a href="https://support.microsoft.com/ja-jp/office/python-in-excel-%E3%81%AE%E3%83%87%E3%83%BC%E3%82%BF-%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3%E3%81%A8%E3%83%97%E3%83%A9%E3%82%A4%E3%83%90%E3%82%B7%E3%83%BC-67a06e9d-dec4-4b6c-9d8a-5c0afad2ef41" target="_blank" class="text-blue-600 underline hover:text-blue-800">Python in Excel のデータセキュリティとプライバシー（Microsoft）</a>
+            <span class="text-slate-500">— どのデータがクラウドに送信されるかの公式説明</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-800 text-slate-400 text-center text-sm py-6 mt-16">
+    <p>Microsoft Excel テックマップ — 実務エンジニアのための技術図解</p>
+    <p class="mt-1 text-xs">生成日：2026年3月28日 | 価格・機能は変動するため公式サイトで最新情報を確認してください</p>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

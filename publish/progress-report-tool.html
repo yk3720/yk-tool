@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="装置進捗報告 自動化ツール">
+  <meta property="og:description" content="スマホで入力するだけで、毎晩レポートが関係者に届く仕組みを図解します。">
+  <meta property="og:type" content="article">
+  <title>装置進捗報告 自動化ツール</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- ============================================================ -->
+<!--  HERO                                                        -->
+<!-- ============================================================ -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="zap" class="w-4 h-4"></i>
+    業務自動化
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    装置進捗報告<br>
+    <span class="bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">自動化ツール</span>
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    毎晩の連絡作業を仕組みで解決する。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+
+<!-- ============================================================ -->
+<!--  ONE-PAGE SUMMARY                                            -->
+<!-- ============================================================ -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-6">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      スマホで入力するだけで、<br class="md:hidden">毎晩<span class="text-ads-accent-light">自動でレポートが届く</span>
+    </p>
+    <p class="text-sm text-ads-muted">
+      個別に連絡しなくても、関係者全員がリアルタイムで状況を把握できる
+    </p>
+  </div>
+
+  <!-- Core flow -->
+  <div class="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-0 mb-8">
+    <!-- スマホ入力 -->
+    <div class="flex flex-col items-center w-32 p-3">
+      <div class="w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="smartphone" class="w-7 h-7 text-blue-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm text-center">スマホ入力</div>
+      <div class="text-[11px] text-blue-600/70 mt-0.5 text-center">帰宅中の電車</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+      <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim md:hidden"></i>
+    </div>
+
+    <!-- スプレッドシート -->
+    <div class="flex flex-col items-center w-32 p-3">
+      <div class="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="table-2" class="w-7 h-7 text-emerald-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm text-center">スプレッドシート</div>
+      <div class="text-[11px] text-emerald-600/70 mt-0.5 text-center">データ蓄積</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+      <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim md:hidden"></i>
+    </div>
+
+    <!-- GAS -->
+    <div class="flex flex-col items-center w-36 p-4 bg-ads-accent/5 border-2 border-ads-accent/20 rounded-2xl">
+      <div class="w-16 h-16 rounded-2xl bg-ads-accent/15 border-2 border-ads-accent/30 flex items-center justify-center mb-2.5">
+        <i data-lucide="code-2" class="w-8 h-8 text-ads-accent-light"></i>
+      </div>
+      <div class="font-bold text-ads-accent-light text-sm text-center">GAS</div>
+      <div class="text-[11px] text-ads-muted mt-0.5 text-center mb-1">毎晩22:30に自動実行</div>
+      <div class="text-[10px] text-ads-muted bg-white rounded-lg px-2 py-0.5 border border-ads-border/50">HTMLレポートを生成</div>
+    </div>
+
+    <div class="flex items-center justify-center md:w-10 py-1 md:py-0">
+      <i data-lucide="arrow-right" class="w-4 h-4 text-ads-dim hidden md:block"></i>
+      <i data-lucide="arrow-down" class="w-4 h-4 text-ads-dim md:hidden"></i>
+    </div>
+
+    <!-- LINE -->
+    <div class="flex flex-col items-center w-32 p-3">
+      <div class="w-14 h-14 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mb-2.5">
+        <i data-lucide="message-circle" class="w-7 h-7 text-green-600"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm text-center">LINE通知</div>
+      <div class="text-[11px] text-green-600/70 mt-0.5 text-center">全員に届く</div>
+    </div>
+  </div>
+
+  <!-- 3 key features -->
+  <div class="flex items-center gap-4 mb-5">
+    <div class="flex-1 border-t border-ads-border/50"></div>
+    <div class="text-[11px] text-ads-dim font-medium">このツールの3つのポイント</div>
+    <div class="flex-1 border-t border-ads-border/50"></div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-2">
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="bell-off" class="w-3.5 h-3.5 text-blue-500"></i>
+      個別連絡が不要になる
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-500"></i>
+      毎晩自動で送信される
+    </div>
+    <div class="flex items-center gap-1.5 bg-white border border-ads-border rounded-full px-3.5 py-1.5 text-xs text-slate-700">
+      <i data-lucide="circle-dollar-sign" class="w-3.5 h-3.5 text-amber-500"></i>
+      費用は完全ゼロ
+    </div>
+  </div>
+</div>
+
+<p class="text-center text-ads-muted mb-16 md:mb-20">
+  ここから、このツールの「なぜ」と「どうやって」を一つひとつ解説していきます。
+</p>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 1: 解決したい課題                                    -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500/10 flex-shrink-0">
+      <i data-lucide="alert-circle" class="w-5 h-5 text-red-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">解決したい課題</h2>
+  </div>
+
+  <p class="mb-6 leading-relaxed">
+    装置の立ち上げ作業では、毎日のようにトラブルが発生します。担当のメカ設計者は別の工場にいるため直接話せず、現状はスプレッドシートに問題点を書いてメールや口頭で連絡しています。
+  </p>
+
+  <p class="mb-8 leading-relaxed">
+    この「<strong class="text-slate-900">誰かに連絡する</strong>」という作業が、積み重なると大きな負担になります。
+  </p>
+
+  <!-- Before / After 比較 -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+    <!-- Before -->
+    <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-red-500/10 text-red-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+        現状 — 手動で連絡
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">別工場のメカ設計者に<strong class="text-red-700">毎回スプレッドシートを共有して説明</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">上長からの「今どんな状況？」に<strong class="text-red-700">都度口頭で答える</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">電気設計者・生産担当者にも<strong class="text-red-700">個別にステータスを共有</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="x" class="w-4 h-4 text-red-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">急ぎ対応が重なると<strong class="text-red-700">連絡が漏れる・遅れる</strong>リスク</span>
+        </li>
+      </ul>
+      <div class="mt-5 pt-4 border-t border-red-500/10 text-sm text-red-700/70 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+        本来の開発作業に集中できない。
+      </div>
+    </div>
+
+    <!-- After -->
+    <div class="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-6">
+      <div class="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-bold tracking-wide mb-5">
+        <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+        目指す状態 — 自動配信
+      </div>
+      <ul class="space-y-3">
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">帰宅中の電車でスマホから入力するだけ。<strong class="text-emerald-700">あとは全自動</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">毎晩22:30に<strong class="text-emerald-700">HTMLレポートが自動生成・配信</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">関係者全員がLINEで<strong class="text-emerald-700">同じレポートを同時に確認できる</strong></span>
+        </li>
+        <li class="flex items-start gap-2.5">
+          <i data-lucide="check" class="w-4 h-4 text-emerald-600 mt-1 flex-shrink-0"></i>
+          <span class="text-sm">上長の「今の状態は？」にも<strong class="text-emerald-700">レポートURLを送るだけ</strong></span>
+        </li>
+      </ul>
+      <div class="mt-5 pt-4 border-t border-emerald-500/10 text-sm text-emerald-700/70 flex items-center gap-2">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        「伝える手間」をゼロにする。
+      </div>
+    </div>
+  </div>
+
+  <!-- 登場人物 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6">
+    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="users" class="w-4 h-4 text-ads-accent"></i>
+      このツールに関わる人たち
+    </h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3 text-center">
+        <i data-lucide="user" class="w-6 h-6 text-blue-600 mx-auto mb-1.5"></i>
+        <div class="text-xs font-bold text-blue-700">制御設計者</div>
+        <div class="text-[10px] text-ads-muted mt-0.5">作成・送信する側</div>
+        <div class="text-[10px] text-blue-600/70 mt-1 bg-blue-500/5 rounded px-1.5 py-0.5">自分</div>
+      </div>
+      <div class="bg-orange-500/5 border border-orange-500/20 rounded-lg p-3 text-center">
+        <i data-lucide="wrench" class="w-6 h-6 text-orange-600 mx-auto mb-1.5"></i>
+        <div class="text-xs font-bold text-orange-700">メカ設計者</div>
+        <div class="text-[10px] text-ads-muted mt-0.5">別工場に在籍</div>
+        <div class="text-[10px] text-orange-600/70 mt-1 bg-orange-500/5 rounded px-1.5 py-0.5">主な連絡先</div>
+      </div>
+      <div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 text-center">
+        <i data-lucide="cpu" class="w-6 h-6 text-purple-600 mx-auto mb-1.5"></i>
+        <div class="text-xs font-bold text-purple-700">電気設計者</div>
+        <div class="text-[10px] text-ads-muted mt-0.5">進捗を共有</div>
+        <div class="text-[10px] text-purple-600/70 mt-1 bg-purple-500/5 rounded px-1.5 py-0.5">関係者</div>
+      </div>
+      <div class="bg-slate-500/5 border border-slate-500/20 rounded-lg p-3 text-center">
+        <i data-lucide="clipboard-check" class="w-6 h-6 text-slate-500 mx-auto mb-1.5"></i>
+        <div class="text-xs font-bold text-slate-600">生産担当者</div>
+        <div class="text-[10px] text-ads-muted mt-0.5">進捗確認</div>
+        <div class="text-[10px] text-slate-600/70 mt-1 bg-slate-500/5 rounded px-1.5 py-0.5">関係者</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 2: 全体の流れ                                        -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10 flex-shrink-0">
+      <i data-lucide="git-branch" class="w-5 h-5 text-blue-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">全体の流れ</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    「スマホで入力」から「LINEに届く」まで、全部で5つのステップで動きます。途中の処理はすべて自動です。
+  </p>
+
+  <!-- ステップフロー -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-6 md:p-8 mb-8">
+    <div class="flex flex-col gap-4">
+
+      <!-- Step 1 -->
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-blue-500 text-white text-sm font-bold flex items-center justify-center">1</div>
+          <div class="w-0.5 h-8 bg-ads-border/60 mt-1"></div>
+        </div>
+        <div class="flex-1 pb-2">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="smartphone" class="w-4 h-4 text-blue-600"></i>
+            <span class="font-bold text-slate-900 text-sm">スマホで進捗を入力</span>
+            <span class="text-[10px] text-blue-600/70 bg-blue-500/5 border border-blue-500/20 rounded-full px-2 py-0.5">帰宅中・通勤中</span>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">作業の完了数・トラブル内容・状態をGoogleスプレッドシートに入力する。スマホで操作できるのでどこでも入力可能。</p>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-emerald-500 text-white text-sm font-bold flex items-center justify-center">2</div>
+          <div class="w-0.5 h-8 bg-ads-border/60 mt-1"></div>
+        </div>
+        <div class="flex-1 pb-2">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="table-2" class="w-4 h-4 text-emerald-600"></i>
+            <span class="font-bold text-slate-900 text-sm">スプレッドシートにデータが蓄積</span>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">入力した内容がGoogleスプレッドシートにリアルタイムで保存される。計画内作業・トラブル・状態・優先度などのカラムに整理されて記録される。</p>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-ads-accent text-white text-sm font-bold flex items-center justify-center">3</div>
+          <div class="w-0.5 h-8 bg-ads-border/60 mt-1"></div>
+        </div>
+        <div class="flex-1 pb-2">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="clock" class="w-4 h-4 text-ads-accent"></i>
+            <span class="font-bold text-slate-900 text-sm">GASが毎晩22:30に自動起動</span>
+            <span class="text-[10px] text-ads-accent/70 bg-ads-accent/5 border border-ads-accent/20 rounded-full px-2 py-0.5">完全自動</span>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">Google Apps Script（GAS）の時間トリガーが毎晩22:30頃に自動でスクリプトを起動する。手動操作は一切不要。</p>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-purple-500 text-white text-sm font-bold flex items-center justify-center">4</div>
+          <div class="w-0.5 h-8 bg-ads-border/60 mt-1"></div>
+        </div>
+        <div class="flex-1 pb-2">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="file-code" class="w-4 h-4 text-purple-600"></i>
+            <span class="font-bold text-slate-900 text-sm">HTMLレポートを生成・公開</span>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">GASがスプレッドシートのデータを読み込み、ガントチャート・計画内作業テーブル・不具合対策テーブルを含むHTMLレポートを生成し、GASウェブアプリとして固定URLで公開する。</p>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col items-center flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-green-500 text-white text-sm font-bold flex items-center justify-center">5</div>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <i data-lucide="message-circle" class="w-4 h-4 text-green-600"></i>
+            <span class="font-bold text-slate-900 text-sm">LINEにサマリー＋URLを送信</span>
+          </div>
+          <p class="text-sm text-ads-muted leading-relaxed">LINE Messaging API経由で、当日のサマリーテキスト（遅延件数・問い合わせ中の不具合数など）とレポートのURLを送信。関係者はLINEからレポートを即確認できる。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LINE通知イメージ -->
+  <div class="rounded-xl overflow-hidden border border-slate-300/50 mb-8 max-w-xs mx-auto">
+    <div class="bg-green-500 px-4 py-2.5 flex items-center gap-2">
+      <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+        <i data-lucide="message-circle" class="w-4 h-4 text-white"></i>
+      </div>
+      <span class="text-white text-sm font-bold">進捗レポートBot</span>
+    </div>
+    <div class="bg-green-50 p-4 space-y-2">
+      <div class="bg-white rounded-xl rounded-tl-sm px-4 py-3 shadow-sm max-w-[90%] text-left">
+        <div class="text-xs text-green-700 font-bold mb-1.5">【進捗報告】塗布装置 2026/04/12</div>
+        <div class="text-xs text-slate-600 space-y-1">
+          <div class="flex items-center gap-1.5"><i data-lucide="check-circle" class="w-3 h-3 text-emerald-500"></i> 計画内作業：3件 / 5件 完了</div>
+          <div class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-3 h-3 text-red-500"></i> 遅延中：1件</div>
+          <div class="flex items-center gap-1.5"><i data-lucide="help-circle" class="w-3 h-3 text-amber-500"></i> 問い合わせ中：1件</div>
+        </div>
+        <div class="mt-2 pt-2 border-t border-slate-100 text-[10px] text-ads-accent underline">
+          レポートを見る →
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 3: 4つのパーツ                                       -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-500/10 flex-shrink-0">
+      <i data-lucide="layers" class="w-5 h-5 text-purple-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">ツールを支える4つのパーツ</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    このツールは、4つの役割に分解できます。それぞれがどのような技術で実現されているか、一つずつ確認します。
+  </p>
+
+  <!-- 4パーツの全体構造 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5 mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="flex flex-col items-center bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 text-center">
+        <i data-lucide="clock" class="w-6 h-6 text-blue-600 mb-2"></i>
+        <div class="text-xs font-bold text-blue-700 mb-0.5">トリガー</div>
+        <div class="text-[10px] text-ads-muted">いつ動かすか</div>
+      </div>
+      <div class="flex flex-col items-center bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 text-center">
+        <i data-lucide="database" class="w-6 h-6 text-emerald-600 mb-2"></i>
+        <div class="text-xs font-bold text-emerald-700 mb-0.5">ソース元</div>
+        <div class="text-[10px] text-ads-muted">どこからデータを取るか</div>
+      </div>
+      <div class="flex flex-col items-center bg-purple-500/5 border border-purple-500/20 rounded-xl p-4 text-center">
+        <i data-lucide="code-2" class="w-6 h-6 text-purple-600 mb-2"></i>
+        <div class="text-xs font-bold text-purple-700 mb-0.5">処理</div>
+        <div class="text-[10px] text-ads-muted">何をするか</div>
+      </div>
+      <div class="flex flex-col items-center bg-green-500/5 border border-green-500/20 rounded-xl p-4 text-center">
+        <i data-lucide="send" class="w-6 h-6 text-green-600 mb-2"></i>
+        <div class="text-xs font-bold text-green-700 mb-0.5">届ける先</div>
+        <div class="text-[10px] text-ads-muted">誰にどう届けるか</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- パーツ1: トリガー -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden mb-4">
+    <div class="flex items-center gap-3 px-6 py-4 bg-blue-500/5 border-b border-ads-border/50">
+      <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="clock" class="w-4 h-4 text-blue-600"></i>
+      </div>
+      <div>
+        <div class="text-[10px] text-blue-600/70 font-medium">パーツ 1</div>
+        <h3 class="font-bold text-slate-900 text-sm">トリガー — GAS 時間トリガー</h3>
+      </div>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-ads-muted leading-relaxed mb-4">
+        Google Apps Script（GAS）の「インストール可能トリガー」を使い、<strong class="text-slate-800">毎晩22:30頃に自動でスクリプトを起動</strong>します。設定はGASのダッシュボードから数クリックで完了します。
+      </p>
+      <div class="bg-slate-800 rounded-lg p-4 text-sm font-mono text-emerald-300 overflow-x-auto mb-3">
+        <div class="text-slate-400 text-xs mb-1">// 毎晩22:30に自動実行する設定</div>
+        <div>ScriptApp.<span class="text-blue-300">newTrigger</span>(<span class="text-amber-300">"sendDailyReport"</span>)</div>
+        <div class="pl-4">.<span class="text-blue-300">timeBased</span>()</div>
+        <div class="pl-4">.<span class="text-blue-300">atHour</span>(<span class="text-purple-300">22</span>).<span class="text-blue-300">nearMinute</span>(<span class="text-purple-300">30</span>)</div>
+        <div class="pl-4">.<span class="text-blue-300">everyDays</span>(<span class="text-purple-300">1</span>).<span class="text-blue-300">create</span>();</div>
+      </div>
+      <div class="flex items-start gap-2 bg-amber-500/5 border border-amber-500/20 rounded-lg px-3 py-2">
+        <i data-lucide="info" class="w-3.5 h-3.5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+        <p class="text-xs text-ads-muted">22:30指定でも、実際は22:30〜23:30の間でランダムに実行されます（GASの仕様）。エラーが出ると登録したGmailに自動通知が届きます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- パーツ2: ソース元 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden mb-4">
+    <div class="flex items-center gap-3 px-6 py-4 bg-emerald-500/5 border-b border-ads-border/50">
+      <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="table-2" class="w-4 h-4 text-emerald-600"></i>
+      </div>
+      <div>
+        <div class="text-[10px] text-emerald-600/70 font-medium">パーツ 2</div>
+        <h3 class="font-bold text-slate-900 text-sm">ソース元 — Googleスプレッドシート</h3>
+      </div>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-ads-muted leading-relaxed mb-4">
+        スマホからGoogleスプレッドシートに進捗を入力します。GASは <code class="text-emerald-700 text-xs bg-slate-100 px-1.5 py-0.5 rounded">SpreadsheetApp</code> でデータを<strong class="text-slate-800">一括取得</strong>します（セルを1つずつ読むと70秒かかる処理が1秒に短縮されます）。
+      </p>
+      <div class="bg-slate-800 rounded-lg p-4 text-sm font-mono text-emerald-300 overflow-x-auto mb-3">
+        <div class="text-slate-400 text-xs mb-1">// スプレッドシートからデータを一括取得</div>
+        <div><span class="text-purple-300">const</span> sheet = SpreadsheetApp</div>
+        <div class="pl-4">.<span class="text-blue-300">openById</span>(<span class="text-amber-300">"スプレッドシートID"</span>)</div>
+        <div class="pl-4">.<span class="text-blue-300">getActiveSheet</span>();</div>
+        <div><span class="text-purple-300">const</span> data = sheet.<span class="text-blue-300">getDataRange</span>().<span class="text-blue-300">getValues</span>();</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- パーツ3: 処理 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden mb-4">
+    <div class="flex items-center gap-3 px-6 py-4 bg-purple-500/5 border-b border-ads-border/50">
+      <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="code-2" class="w-4 h-4 text-purple-600"></i>
+      </div>
+      <div>
+        <div class="text-[10px] text-purple-600/70 font-medium">パーツ 3</div>
+        <h3 class="font-bold text-slate-900 text-sm">処理 — GAS HtmlService</h3>
+      </div>
+    </div>
+    <div class="px-6 py-5">
+      <p class="text-sm text-ads-muted leading-relaxed mb-4">
+        GASの <code class="text-purple-700 text-xs bg-slate-100 px-1.5 py-0.5 rounded">HtmlService</code> でHTMLテンプレートにデータを流し込み、レポートを生成します。GASウェブアプリとして公開すると<strong class="text-slate-800">固定URL</strong>が発行され、LINEからそのURLを開けるようになります。
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+        <div class="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3">
+          <i data-lucide="bar-chart-2" class="w-5 h-5 text-purple-600 mx-auto mb-1.5"></i>
+          <div class="text-xs font-bold text-purple-700">ガントチャート</div>
+          <div class="text-[10px] text-ads-muted mt-0.5">計画 vs 実績</div>
+        </div>
+        <div class="bg-blue-500/5 border border-blue-500/20 rounded-lg p-3">
+          <i data-lucide="list-checks" class="w-5 h-5 text-blue-600 mx-auto mb-1.5"></i>
+          <div class="text-xs font-bold text-blue-700">計画内作業テーブル</div>
+          <div class="text-[10px] text-ads-muted mt-0.5">内容・状態・期限</div>
+        </div>
+        <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-3">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 mx-auto mb-1.5"></i>
+          <div class="text-xs font-bold text-red-700">不具合対策テーブル</div>
+          <div class="text-[10px] text-ads-muted mt-0.5">トラブル・対応状況</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- パーツ4: 届ける先 -->
+  <div class="bg-ads-surface border border-ads-border rounded-xl overflow-hidden">
+    <div class="flex items-center gap-3 px-6 py-4 bg-green-500/5 border-b border-ads-border/50">
+      <div class="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="message-circle" class="w-4 h-4 text-green-600"></i>
+      </div>
+      <div>
+        <div class="text-[10px] text-green-600/70 font-medium">パーツ 4</div>
+        <h3 class="font-bold text-slate-900 text-sm">届ける先 — LINE Messaging API</h3>
+      </div>
+    </div>
+    <div class="px-6 py-5">
+      <div class="flex items-start gap-2 bg-red-500/5 border border-red-500/20 rounded-lg px-3 py-2 mb-4">
+        <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-red-600 flex-shrink-0 mt-0.5"></i>
+        <p class="text-xs text-ads-muted"><strong class="text-red-700">LINE Notify は2025年3月31日に廃止済み。</strong>現在は LINE Messaging API への移行が必須です。</p>
+      </div>
+      <p class="text-sm text-ads-muted leading-relaxed mb-4">
+        LINE Messaging APIのPush Messageで、<strong class="text-slate-800">サマリーテキスト + レポートURL</strong>の2段構えで送信します。1日1通 = 月約31通なので、<strong class="text-slate-800">無料プラン（月200通）で完全に賄えます。</strong>
+      </p>
+      <!-- 料金プラン -->
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-emerald-500/5 border-2 border-emerald-500/30 rounded-lg p-3">
+          <div class="text-lg font-black text-emerald-600 mb-0.5">0円</div>
+          <div class="text-[10px] font-bold text-emerald-700 mb-0.5">無料プラン</div>
+          <div class="text-[10px] text-ads-muted">月200通まで</div>
+          <div class="text-[9px] text-emerald-600 mt-1.5 bg-emerald-500/10 rounded px-1 py-0.5">今回はこれで十分</div>
+        </div>
+        <div class="bg-ads-surface border border-ads-border rounded-lg p-3">
+          <div class="text-lg font-black text-slate-700 mb-0.5">5,000円</div>
+          <div class="text-[10px] font-bold text-slate-600 mb-0.5">Lightプラン</div>
+          <div class="text-[10px] text-ads-muted">月5,000通まで</div>
+        </div>
+        <div class="bg-ads-surface border border-ads-border rounded-lg p-3">
+          <div class="text-lg font-black text-slate-700 mb-0.5">15,000円</div>
+          <div class="text-[10px] font-bold text-slate-600 mb-0.5">Standardプラン</div>
+          <div class="text-[10px] text-ads-muted">月30,000通まで</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 4: レポートのイメージ                                 -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-500/10 flex-shrink-0">
+      <i data-lucide="file-bar-chart" class="w-5 h-5 text-amber-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">レポートの見た目</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    生成されるHTMLレポートは、3つのセクションで構成されます。関係者がLINEのリンクをタップするだけで、このページが開きます。
+  </p>
+
+  <!-- ブラウザUIモックアップ -->
+  <div class="rounded-xl overflow-hidden border border-slate-300/50 mb-8">
+    <div class="flex items-center gap-3 bg-slate-800 px-4 py-2.5">
+      <div class="flex gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+      </div>
+      <div class="flex-1 bg-slate-700/50 rounded-lg px-3 py-1 text-xs text-slate-400 flex items-center gap-1.5">
+        <i data-lucide="lock" class="w-3 h-3 text-emerald-400"></i>
+        script.google.com/macros/s/.../exec
+      </div>
+    </div>
+    <div class="bg-white p-5">
+      <!-- レポートヘッダー -->
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+        <div>
+          <div class="text-xs text-slate-400 mb-0.5">【進捗報告】塗布装置</div>
+          <div class="font-bold text-slate-800 text-sm">2026/04/12</div>
+        </div>
+        <div class="flex gap-2">
+          <div class="bg-emerald-500/10 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded">計画内 3件</div>
+          <div class="bg-red-500/10 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded">遅延 1件</div>
+          <div class="bg-amber-500/10 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded">問合中 1件</div>
+        </div>
+      </div>
+
+      <!-- ガントチャート（簡略） -->
+      <div class="mb-4">
+        <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-ads-accent"></i>
+          計画内作業 ガントチャート（計画 vs 実績）
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-[10px]">
+            <div class="w-16 text-slate-500 text-right flex-shrink-0">手動: 供給部</div>
+            <div class="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-slate-300 rounded-full" style="width: 80%"></div>
+              <div class="absolute inset-y-0 left-0 bg-red-400 rounded-full" style="width: 22%"></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-[10px]">
+            <div class="w-16 text-slate-500 text-right flex-shrink-0">手動: 塗布1</div>
+            <div class="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-slate-300 rounded-full" style="width: 80%"></div>
+              <div class="absolute inset-y-0 left-0 bg-red-400 rounded-full" style="width: 19%"></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-[10px]">
+            <div class="w-16 text-slate-500 text-right flex-shrink-0">手動: 塗布2</div>
+            <div class="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-slate-300 rounded-full" style="width: 100%"></div>
+              <div class="absolute inset-y-0 left-0 bg-red-400 rounded-full" style="width: 28%"></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-[10px]">
+            <div class="w-16 text-slate-500 text-right flex-shrink-0">手動: 収納</div>
+            <div class="flex-1 bg-slate-100 rounded-full h-4 relative overflow-hidden">
+              <div class="absolute inset-y-0 left-0 bg-slate-300 rounded-full" style="width: 80%"></div>
+              <div class="absolute inset-y-0 left-0 bg-red-400 rounded-full" style="width: 26%"></div>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 mt-2 text-[9px] text-slate-400">
+          <div class="flex items-center gap-1"><div class="w-6 h-2 bg-slate-300 rounded-full"></div> 計画</div>
+          <div class="flex items-center gap-1"><div class="w-6 h-2 bg-red-400 rounded-full"></div> 実績</div>
+        </div>
+      </div>
+
+      <!-- 計画内作業テーブル -->
+      <div class="mb-4">
+        <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+          <i data-lucide="list-checks" class="w-3.5 h-3.5 text-blue-600"></i>
+          計画内作業
+        </div>
+        <div class="rounded-lg overflow-hidden border border-slate-200 text-[10px]">
+          <div class="grid grid-cols-5 bg-slate-700 text-white">
+            <div class="px-2 py-1.5 font-bold">No</div>
+            <div class="px-2 py-1.5 font-bold">期限</div>
+            <div class="px-2 py-1.5 font-bold col-span-2">内容</div>
+            <div class="px-2 py-1.5 font-bold">状態</div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-100">
+            <div class="px-2 py-1.5">1</div>
+            <div class="px-2 py-1.5">04/07</div>
+            <div class="px-2 py-1.5 col-span-2">手動: 供給部</div>
+            <div class="px-2 py-1.5"><span class="bg-red-500 text-white rounded px-1 py-0.5">遅延中</span></div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-100 bg-slate-50/50">
+            <div class="px-2 py-1.5">2</div>
+            <div class="px-2 py-1.5">04/11</div>
+            <div class="px-2 py-1.5 col-span-2">手動: 塗布1</div>
+            <div class="px-2 py-1.5"><span class="bg-slate-200 text-slate-700 rounded px-1 py-0.5">計画内</span></div>
+          </div>
+          <div class="grid grid-cols-5">
+            <div class="px-2 py-1.5">3</div>
+            <div class="px-2 py-1.5">04/12</div>
+            <div class="px-2 py-1.5 col-span-2">手動: 塗布2</div>
+            <div class="px-2 py-1.5"><span class="bg-amber-400 text-white rounded px-1 py-0.5">問合中</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 不具合テーブル -->
+      <div>
+        <div class="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-red-600"></i>
+          不具合対策
+        </div>
+        <div class="rounded-lg overflow-hidden border border-slate-200 text-[10px]">
+          <div class="grid grid-cols-5 bg-red-700 text-white">
+            <div class="px-2 py-1.5 font-bold">No</div>
+            <div class="px-2 py-1.5 font-bold">期限</div>
+            <div class="px-2 py-1.5 font-bold col-span-2">内容</div>
+            <div class="px-2 py-1.5 font-bold">状態</div>
+          </div>
+          <div class="grid grid-cols-5 border-b border-slate-100">
+            <div class="px-2 py-1.5">1</div>
+            <div class="px-2 py-1.5">04/13</div>
+            <div class="px-2 py-1.5 col-span-2">チャックがブロックに干渉する</div>
+            <div class="px-2 py-1.5"><span class="bg-red-500 text-white rounded px-1 py-0.5">対応中</span></div>
+          </div>
+          <div class="grid grid-cols-5">
+            <div class="px-2 py-1.5">2</div>
+            <div class="px-2 py-1.5">04/11</div>
+            <div class="px-2 py-1.5 col-span-2">エアブローONしない</div>
+            <div class="px-2 py-1.5"><span class="bg-amber-400 text-white rounded px-1 py-0.5">問合中</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 5: スプレッドシート入力イメージ                        -->
+<!-- ============================================================ -->
+<section class="mb-16 md:mb-20">
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 flex-shrink-0">
+      <i data-lucide="table-2" class="w-5 h-5 text-emerald-600"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">スプレッドシートへの入力</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    帰宅中の電車でスマホから入力するシートです。各行が1件の作業またはトラブルに対応します。
+  </p>
+
+  <!-- スプレッドシートモックアップ -->
+  <div class="rounded-xl overflow-hidden border border-slate-300/50 mb-6">
+    <div class="flex items-center gap-2 bg-emerald-700 px-4 py-2.5">
+      <div class="flex gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+      </div>
+      <i data-lucide="table-2" class="w-4 h-4 text-white/80"></i>
+      <span class="text-white text-xs font-medium">装置進捗管理シート</span>
+    </div>
+    <div class="overflow-x-auto bg-white">
+      <table class="text-[10px] w-full border-collapse">
+        <thead>
+          <tr class="bg-slate-100 border-b border-slate-200">
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">No</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">日付(登録)</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">日付(期限)</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">区分</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">装置名</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">内容</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">現在</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">総数</th>
+            <th class="px-2 py-1.5 border-r border-slate-200 text-slate-600 font-bold text-left whitespace-nowrap">状態</th>
+            <th class="px-2 py-1.5 text-slate-600 font-bold text-left whitespace-nowrap">優先度</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-slate-100">
+            <td class="px-2 py-1.5 border-r border-slate-100">1</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/03/10</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/04/11</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-blue-100 text-blue-700 rounded px-1 py-0.5 whitespace-nowrap">計画内作業</span></td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">塗布装置</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">手動: 供給部</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">3</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">16</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-emerald-100 text-emerald-700 rounded px-1 py-0.5 whitespace-nowrap">対応完了</span></td>
+            <td class="px-2 py-1.5">中</td>
+          </tr>
+          <tr class="border-b border-slate-100 bg-slate-50/50">
+            <td class="px-2 py-1.5 border-r border-slate-100">2</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/03/10</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/04/12</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-blue-100 text-blue-700 rounded px-1 py-0.5 whitespace-nowrap">計画内作業</span></td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">塗布装置</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">手動: 塗布2</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">6</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">20</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-amber-100 text-amber-700 rounded px-1 py-0.5 whitespace-nowrap">問合中</span></td>
+            <td class="px-2 py-1.5">中</td>
+          </tr>
+          <tr class="border-b border-slate-100">
+            <td class="px-2 py-1.5 border-r border-slate-100">3</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/04/01</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">2026/04/13</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-red-100 text-red-700 rounded px-1 py-0.5">トラブル</span></td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">塗布装置</td>
+            <td class="px-2 py-1.5 border-r border-slate-100 whitespace-nowrap">チャックがブロックに干渉</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">—</td>
+            <td class="px-2 py-1.5 border-r border-slate-100">—</td>
+            <td class="px-2 py-1.5 border-r border-slate-100"><span class="bg-red-100 text-red-700 rounded px-1 py-0.5 whitespace-nowrap">対応中</span></td>
+            <td class="px-2 py-1.5">中</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bg-ads-accent/5 border border-ads-accent/20 rounded-xl p-5">
+    <div class="flex items-start gap-3">
+      <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-ads-accent/10 flex-shrink-0 mt-0.5">
+        <i data-lucide="lightbulb" class="w-4 h-4 text-ads-accent-light"></i>
+      </div>
+      <div>
+        <p class="font-bold text-ads-accent-light mb-1">入力はスマホから！</p>
+        <p class="text-ads-muted leading-relaxed text-sm">
+          GoogleスプレッドシートはスマホアプリでもPCブラウザでも編集できます。帰宅中の電車で今日の進捗を入力しておけば、22:30に自動でレポートが生成・送信されます。<strong class="text-slate-800">入力後は何もしなくていい</strong>のがポイントです。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================ -->
+<!--  SECTION 6: 開発ステップ                                      -->
+<!-- ============================================================ -->
+<section>
+  <div class="flex items-center gap-3 mb-8">
+    <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-ads-accent/10 flex-shrink-0">
+      <i data-lucide="check-circle" class="w-5 h-5 text-ads-accent-light"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-bold text-slate-900">開発ステップ</h2>
+  </div>
+
+  <p class="mb-8 leading-relaxed">
+    ツールを完成させるまでの開発の順序です。上から順番に進めることで、各ステップで動作確認しながら積み上げていけます。
+  </p>
+
+  <div class="space-y-3 mb-10">
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">1</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">スプレッドシートのカラム構成を確定・作成</h3>
+        <p class="text-xs text-ads-muted leading-relaxed">No・日付(登録)・日付(期限)・区分・装置名・内容・現在・総数・状態・優先度・進捗(実績)のカラムを持つシートを作成する。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">2</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">LINE公式アカウントを作成・Messaging APIを有効化</h3>
+        <p class="text-xs text-ads-muted leading-relaxed">LINE Developers ConsoleでアカウントとMessaging APIチャネルを作成し、チャネルアクセストークンと自分のユーザーIDを取得する。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">3</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">GASでスプレッドシートのデータ読み込みを作成</h3>
+        <p class="text-xs text-ads-muted leading-relaxed"><code class="text-emerald-700 text-xs bg-slate-100 px-1 py-0.5 rounded">SpreadsheetApp.openById().getActiveSheet().getDataRange().getValues()</code> でデータを一括取得するスクリプトを作成・テストする。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">4</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">HTMLレポート（ガントチャート・2テーブル）を生成</h3>
+        <p class="text-xs text-ads-muted leading-relaxed">HtmlServiceでテンプレートHTMLを作成し、ガントチャート・計画内作業テーブル・不具合対策テーブルの3セクションを実装する。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">5</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">LINE Messaging APIでメッセージ送信を実装</h3>
+        <p class="text-xs text-ads-muted leading-relaxed"><code class="text-emerald-700 text-xs bg-slate-100 px-1 py-0.5 rounded">UrlFetchApp.fetch()</code> でPush Messageを送信するスクリプトを作成。APIキーは <code class="text-emerald-700 text-xs bg-slate-100 px-1 py-0.5 rounded">PropertiesService</code> に保存してコードに直書きしない。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">6</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">GASの時間トリガーを毎晩22:30に設定</h3>
+        <p class="text-xs text-ads-muted leading-relaxed">GASダッシュボードからインストール可能トリガーを設定する。実行タイミングは22:30〜23:30のランダムになる（GASの仕様）。</p>
+      </div>
+    </div>
+
+    <div class="flex items-start gap-4 bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="w-7 h-7 rounded-lg border-2 border-ads-border flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-xs font-bold text-ads-dim">7</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-sm mb-1">テスト送信・内容確認・調整</h3>
+        <p class="text-xs text-ads-muted leading-relaxed">手動でスクリプトを実行し、LINEにメッセージが届くか・レポートが正しく表示されるかを確認する。問題があれば修正して完成。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center bg-gradient-to-b from-ads-accent/5 to-transparent border border-ads-accent/10 rounded-xl p-8 md:p-10">
+    <i data-lucide="rocket" class="w-8 h-8 text-ads-accent mx-auto mb-4"></i>
+    <p class="text-lg font-bold text-slate-900 mb-3">費用ゼロで、毎晩の連絡作業が消える。</p>
+    <p class="text-ads-muted max-w-lg mx-auto leading-relaxed text-sm">
+      Google Apps Script・Googleスプレッドシート・LINE Messaging API（無料プラン）はすべて無料で使えます。スマホで入力した内容が、その日の夜に自動でLINEに届く仕組みが、ゼロ円で実現できます。
+    </p>
+  </div>
+</section>
+
+<!-- CONTENT_END -->
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">AI-Driven School の図解ツールで作成</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

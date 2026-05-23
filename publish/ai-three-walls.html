@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIの3つの壁 — アテンション・コンテキスト・オートリグレッション</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --sp-0: 4px; --sp-1: 8px; --sp-2: 16px; --sp-3: 24px; --sp-4: 32px; --sp-6: 48px;
+    --c-page: #f1f5f9; --c-card: #ffffff; --c-stripe: #f8fafc; --c-bd: #e2e8f0; --c-bds: #94a3b8;
+    --c-t1: #1e293b; --c-t2: #475569; --c-t3: #64748b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, 'YuGothic', 'Yu Gothic', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--c-page); color: var(--c-t1); margin: 0; line-height: 1.7;
+  }
+  /* ===== TOC ===== */
+  #toc {
+    position: fixed; top: var(--sp-4); left: var(--sp-2); width: 200px; background: var(--c-card);
+    border: 1px solid var(--c-bd); border-radius: 8px; padding: var(--sp-2); z-index: 100;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: none;
+  }
+  @media (min-width: 1280px) { #toc { display: block; } }
+  #toc h3 { font-size: 12px; font-weight: 600; color: var(--c-t3); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em; }
+  #toc a { display: block; font-size: 12px; color: var(--c-t2); text-decoration: none; padding: 3px 0; border-radius: 4px; transition: color 0.15s; }
+  #toc a:hover { color: #2563eb; }
+  /* ===== LAYOUT ===== */
+  .container { max-width: 900px; margin: 0 auto; padding: var(--sp-4) var(--sp-3); }
+  @media (min-width: 1280px) { .container { margin-left: 230px; } }
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f2849 100%);
+    color: white; border-radius: 12px; padding: var(--sp-6) var(--sp-4); margin-bottom: var(--sp-4);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.15); border-radius: 9999px;
+    padding: 4px 12px; font-size: 12px; font-weight: 500; margin-bottom: var(--sp-2);
+  }
+  .hero h1 { font-size: 28px; font-weight: 700; margin: 0 0 var(--sp-2) 0; line-height: 1.3; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.85); margin: 0; }
+  /* ===== SECTION ===== */
+  .section { background: var(--c-card); border-radius: 12px; padding: var(--sp-4); margin-bottom: var(--sp-3); border: 1px solid var(--c-bd); box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; color: var(--c-t1); margin: 0 0 var(--sp-3) 0; padding-bottom: var(--sp-2); border-bottom: 2px solid var(--c-bd); }
+  .section-title .icon { color: #2563eb; }
+  /* ===== TERM BOX ===== */
+  .term-box { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px; padding: var(--sp-2) var(--sp-3); margin: var(--sp-2) 0; }
+  .term-box .term-label { font-size: 11px; font-weight: 600; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .term-box p { margin: 0; font-size: 14px; color: var(--c-t2); }
+  /* ===== WALL CARDS ===== */
+  .wall-card { border-radius: 10px; padding: var(--sp-3); margin-bottom: var(--sp-3); border: 1px solid; }
+  .wall-card.attn { background: #fef2f2; border-color: #fecaca; }
+  .wall-card.ctx  { background: #fff7ed; border-color: #fed7aa; }
+  .wall-card.auto { background: #f0fdf4; border-color: #bbf7d0; }
+  .wall-title { font-size: 18px; font-weight: 700; margin: 0 0 var(--sp-1) 0; }
+  .wall-title.attn { color: #991b1b; }
+  .wall-title.ctx  { color: #9a3412; }
+  .wall-title.auto { color: #166534; }
+  /* ===== PROBLEM LIST ===== */
+  .problem-list { list-style: none; padding: 0; margin: var(--sp-2) 0 0 0; }
+  .problem-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: var(--c-t2); margin-bottom: 6px; }
+  .problem-list li .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+  .problem-list li .dot.red    { background: #ef4444; }
+  .problem-list li .dot.orange { background: #f97316; }
+  .problem-list li .dot.green  { background: #22c55e; }
+  /* ===== TABLE ===== */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: #1e3a5f; color: white; padding: 10px 16px; text-align: left; font-weight: 600; font-size: 13px; }
+  td { padding: 9px 16px; border-bottom: 1px solid var(--c-bd); color: var(--c-t2); }
+  tr:nth-child(odd) td { background: var(--c-stripe); }
+  tr:last-child td { border-bottom: none; }
+  .check { color: #16a34a; font-weight: 700; }
+  .cross { color: #dc2626; font-weight: 700; }
+  .half  { color: #d97706; font-weight: 700; }
+  /* ===== TRIANGLE VIZ ===== */
+  .triangle-container {
+    display: flex; flex-direction: column; align-items: center; padding: var(--sp-3) 0;
+  }
+  .triangle-wrap { position: relative; width: 320px; height: 280px; margin: 0 auto; }
+  .tri-svg { width: 100%; height: 100%; }
+  .tri-label {
+    position: absolute; background: white; border: 2px solid; border-radius: 8px;
+    padding: 6px 12px; font-size: 13px; font-weight: 700; text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); line-height: 1.3;
+  }
+  .tri-label.top    { top: 0; left: 50%; transform: translateX(-50%); border-color: #2563eb; color: #1d4ed8; }
+  .tri-label.bottom-left  { bottom: 0; left: 0; border-color: #dc2626; color: #991b1b; }
+  .tri-label.bottom-right { bottom: 0; right: 0; border-color: #16a34a; color: #166534; }
+  .tri-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -40%); text-align: center; font-size: 12px; color: var(--c-t3); }
+  /* ===== COMPLEXITY CHART ===== */
+  .complexity-bar-wrap { margin: var(--sp-2) 0; }
+  .complexity-row { display: flex; align-items: center; gap: var(--sp-2); margin-bottom: 10px; }
+  .complexity-label { font-size: 13px; font-weight: 600; color: var(--c-t1); width: 120px; flex-shrink: 0; }
+  .complexity-bar-outer { flex: 1; background: #f1f5f9; border-radius: 9999px; height: 24px; position: relative; overflow: hidden; }
+  .complexity-bar-inner { height: 100%; border-radius: 9999px; display: flex; align-items: center; padding-left: 8px; font-size: 11px; font-weight: 700; color: white; transition: width 0.6s ease; }
+  /* ===== U-CURVE ===== */
+  .u-curve-wrap { background: #f8fafc; border-radius: 8px; padding: var(--sp-3); margin: var(--sp-2) 0; }
+  .u-curve-title { font-size: 13px; font-weight: 600; color: var(--c-t2); margin-bottom: var(--sp-2); }
+  .position-bars { display: flex; gap: var(--sp-1); align-items: flex-end; height: 120px; }
+  .pos-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+  .pos-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.5s; }
+  .pos-label { font-size: 10px; color: var(--c-t3); text-align: center; }
+  .pos-val { font-size: 11px; font-weight: 700; color: var(--c-t2); }
+  /* ===== ANALOGY ===== */
+  .analogy-box { border-left: 4px solid #8b5cf6; background: #faf5ff; border-radius: 8px; padding: var(--sp-2) var(--sp-3); margin: var(--sp-2) 0; }
+  .analogy-title { font-size: 12px; font-weight: 600; color: #7c3aed; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .analogy-box p { margin: 0; font-size: 14px; color: var(--c-t2); }
+  /* ===== TIMELINE ===== */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+  .timeline-item { position: relative; margin-bottom: var(--sp-3); }
+  .timeline-dot { position: absolute; left: -24px; width: 14px; height: 14px; border-radius: 50%; top: 4px; border: 2px solid white; box-shadow: 0 0 0 2px currentColor; }
+  .timeline-item .year { font-size: 12px; font-weight: 700; color: var(--c-t3); margin-bottom: 2px; }
+  .timeline-item .event { font-size: 14px; font-weight: 600; color: var(--c-t1); margin-bottom: 2px; }
+  .timeline-item .desc { font-size: 13px; color: var(--c-t2); }
+  /* ===== PITFALL ===== */
+  .pitfall { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 8px; padding: var(--sp-2) var(--sp-3); margin-bottom: var(--sp-2); }
+  .pitfall-title { font-size: 14px; font-weight: 700; color: #be123c; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .pitfall p { margin: 0; font-size: 14px; color: var(--c-t2); }
+  .pitfall-fix { margin-top: 6px; font-size: 13px; color: #166534; background: #f0fdf4; border-radius: 4px; padding: 4px 8px; display: inline-block; }
+  /* ===== GLOSSARY ===== */
+  .glossary-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+  @media (min-width: 640px) { .glossary-grid { grid-template-columns: 1fr 1fr; } }
+  .glossary-item { background: var(--c-stripe); border-radius: 8px; padding: var(--sp-2); border: 1px solid var(--c-bd); }
+  .glossary-term { font-size: 14px; font-weight: 700; color: var(--c-t1); margin-bottom: 4px; }
+  .glossary-def { font-size: 13px; color: var(--c-t2); }
+  /* ===== NEXT TOPICS ===== */
+  .next-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+  @media (min-width: 640px) { .next-grid { grid-template-columns: 1fr 1fr; } }
+  .next-item { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: var(--sp-2) var(--sp-3); display: flex; align-items: flex-start; gap: 8px; }
+  .next-item .ni-icon { color: #2563eb; margin-top: 2px; flex-shrink: 0; }
+  .next-item .ni-title { font-size: 14px; font-weight: 600; color: #1d4ed8; margin-bottom: 2px; }
+  .next-item .ni-desc { font-size: 13px; color: var(--c-t2); }
+  /* ===== REF ===== */
+  .ref-list { list-style: none; padding: 0; margin: 0; }
+  .ref-list li { padding: 6px 0; border-bottom: 1px solid var(--c-bd); font-size: 13px; }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list a { color: #2563eb; text-decoration: none; }
+  .ref-list a:hover { text-decoration: underline; }
+  /* ===== PDF BUTTON ===== */
+  #pdf-btn {
+    position: fixed; bottom: var(--sp-3); right: var(--sp-3); z-index: 200;
+    background: #1e3a5f; color: white; border: none; border-radius: 9999px;
+    padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: background 0.15s;
+  }
+  #pdf-btn:hover { background: #2d5080; }
+  @media print {
+    #pdf-btn, #toc { display: none !important; }
+    .section { break-inside: avoid; }
+  }
+  /* ===== FLOW ===== */
+  .flow-wrap { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin: var(--sp-2) 0; }
+  .flow-node { background: white; border: 2px solid; border-radius: 10px; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; min-width: 110px; }
+  .flow-arrow { font-size: 20px; color: var(--c-t3); margin: 0 4px; }
+  /* ===== SO WHAT ===== */
+  .so-what { background: #1e3a5f; color: white; border-radius: 8px; padding: var(--sp-2) var(--sp-3); margin-top: var(--sp-2); }
+  .so-what-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .so-what p { margin: 0; font-size: 14px; color: rgba(255,255,255,0.9); }
+  /* ===== BADGE ===== */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+  .badge.blue   { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+  .badge.red    { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .badge.green  { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .badge.orange { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+  .badge.purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+</style>
+</head>
+<body>
+
+<!-- TOC -->
+<nav id="toc">
+  <h3>目次</h3>
+  <a href="#summary">ひとことで言えば</a>
+  <a href="#history">なぜ生まれたのか</a>
+  <a href="#three-core">まず理解する3つ</a>
+  <a href="#wall1">壁1：アテンション</a>
+  <a href="#wall2">壁2：コンテキスト</a>
+  <a href="#wall3">壁3：オートリグレッション</a>
+  <a href="#interaction">3つの壁の相互作用</a>
+  <a href="#pitfalls">落とし穴</a>
+  <a href="#glossary">専門用語集</a>
+  <a href="#next">次に学ぶと良いもの</a>
+  <a href="#refs">参考文献</a>
+</nav>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <i data-lucide="cpu" style="width:14px;height:14px;"></i>
+    Techmap — AIアーキテクチャの限界
+  </div>
+  <h1>AIの3つの壁</h1>
+  <p>アテンションの壁・コンテキストウィンドウの壁・オートリグレッションの壁<br>現代LLMが直面する構造的・原理的な限界を理系エンジニア向けに解説する</p>
+</div>
+
+<!-- SECTION: ひとことで言えば -->
+<div class="section" id="summary">
+  <h2 class="section-title"><i data-lucide="zap" class="icon"></i>ひとことで言えば</h2>
+  <p style="font-size:17px; font-weight:600; color:var(--c-t1); line-height:1.6;">
+    現代のAI（LLM）は「アテンション計算のO(n²)爆発」「コンテキスト中間部の情報損失」「逐次生成による誤差連鎖」という3つの構造的限界を持ち、これらはアーキテクチャの本質に起因するため、工夫で緩和はできても情報理論的に完全解決は不可能である。
+  </p>
+  <div style="display:flex; gap:var(--sp-2); flex-wrap:wrap; margin-top:var(--sp-2);">
+    <span class="badge red"><i data-lucide="triangle-alert" style="width:12px;height:12px;"></i>アテンションの壁</span>
+    <span class="badge orange"><i data-lucide="triangle-alert" style="width:12px;height:12px;"></i>コンテキストウィンドウの壁</span>
+    <span class="badge green"><i data-lucide="triangle-alert" style="width:12px;height:12px;"></i>オートリグレッションの壁</span>
+  </div>
+
+  <div class="term-box" style="margin-top:var(--sp-2);">
+    <div class="term-label">対象読者</div>
+    <p>実務経験のある理系エンジニア（プログラミング・数学の素養前提）。LLMの内部構造は初めて学ぶ方。</p>
+  </div>
+</div>
+
+<!-- SECTION: なぜ生まれたのか -->
+<div class="section" id="history">
+  <h2 class="section-title"><i data-lucide="history" class="icon"></i>なぜ生まれたのか — 歴史的背景</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot" style="color:#2563eb; background:#2563eb;"></div>
+      <div class="year">2017</div>
+      <div class="event">Transformerの登場（"Attention Is All You Need"）</div>
+      <div class="desc">Google BrainがRNNを廃しセルフアテンション機構だけで構成するTransformerを発表。並列学習が可能になり、精度・速度が飛躍的に向上。ここで「アテンションの壁」の種が蒔かれた。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="color:#dc2626; background:#dc2626;"></div>
+      <div class="year">2020</div>
+      <div class="event">GPT-3の登場と次トークン予測の限界が可視化</div>
+      <div class="desc">1750億パラメータのGPT-3が驚異的な流暢さを見せる一方、ハルシネーション（事実と異なる自信満々な出力）が広く認識される。オートリグレッション方式の構造的問題が注目され始める。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="color:#f97316; background:#f97316;"></div>
+      <div class="year">2023</div>
+      <div class="event">「Lost in the Middle」論文でコンテキスト問題が実証</div>
+      <div class="desc">Liu et al. がコンテキストの中間部情報が見落とされるU字型の性能劣化を実証。「大きなコンテキストウィンドウ＝性能向上」という単純な期待が崩れる。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="color:#8b5cf6; background:#8b5cf6;"></div>
+      <div class="year">2026</div>
+      <div class="event">「不可能性三角形」が情報理論的に証明（arxiv: 2605.05066）</div>
+      <div class="desc">52のアーキテクチャを解析し、「効率性・コンパクト性・想起能力」の3条件を同時に満たすことが情報理論的に不可能であることが証明。3つの壁には根本的な天井があることが示された。</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: まず理解する3つ -->
+<div class="section" id="three-core">
+  <h2 class="section-title"><i data-lucide="layers" class="icon"></i>まず理解する3つ</h2>
+  <p style="color:var(--c-t2); font-size:14px; margin-bottom:var(--sp-3);">この3つを押さえると、3つの壁の本質が見えてくる。</p>
+
+  <!-- 1: 不可能性三角形 -->
+  <div style="margin-bottom:var(--sp-4);">
+    <h3 style="font-size:16px; font-weight:700; color:var(--c-t1); margin-bottom:var(--sp-2);">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#2563eb;color:white;border-radius:50%;font-size:13px;margin-right:8px;">1</span>
+      不可能性三角形 — なぜ完全解決できないのか
+    </h3>
+    <p style="font-size:14px; color:var(--c-t2); margin-bottom:var(--sp-2);">
+      どんなアーキテクチャも、以下の3条件を<strong>同時に満たすことは情報理論的に不可能</strong>であると証明されている（データ処理不等式・ファノの不等式を用いた証明）。これが3つの壁が「解決できない理由」の本質だ。
+    </p>
+    <div class="triangle-container">
+      <div class="triangle-wrap">
+        <svg class="tri-svg" viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- 三角形の辺 -->
+          <line x1="160" y1="30" x2="20" y2="260" stroke="#e2e8f0" stroke-width="3"/>
+          <line x1="160" y1="30" x2="300" y2="260" stroke="#e2e8f0" stroke-width="3"/>
+          <line x1="20" y1="260" x2="300" y2="260" stroke="#e2e8f0" stroke-width="3"/>
+          <!-- アーキテクチャのプロット点 -->
+          <!-- Transformer (想起能力頂点寄り) -->
+          <circle cx="160" cy="60" r="10" fill="#2563eb" opacity="0.8"/>
+          <text x="175" y="65" fill="#1d4ed8" font-size="11" font-weight="600">Transformer</text>
+          <!-- SSM/Mamba (効率性+コンパクト性辺寄り) -->
+          <circle cx="80" cy="230" r="10" fill="#dc2626" opacity="0.8"/>
+          <text x="20" y="250" fill="#991b1b" font-size="11" font-weight="600">SSM/Mamba</text>
+          <!-- Hybrid -->
+          <circle cx="160" cy="160" r="8" fill="#f97316" opacity="0.8"/>
+          <text x="170" y="165" fill="#9a3412" font-size="11" font-weight="600">Hybrid</text>
+          <!-- 中心（不可能） -->
+          <circle cx="160" cy="195" r="6" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4"/>
+          <text x="168" y="200" fill="#94a3b8" font-size="10">到達不可能</text>
+        </svg>
+        <div class="tri-label top">想起能力<br><span style="font-size:11px;font-weight:400;">Recall</span></div>
+        <div class="tri-label bottom-left">効率性<br><span style="font-size:11px;font-weight:400;">Efficiency</span></div>
+        <div class="tri-label bottom-right">コンパクト性<br><span style="font-size:11px;font-weight:400;">Compactness</span></div>
+      </div>
+    </div>
+    <div class="analogy-box">
+      <div class="analogy-title">たとえ話 — CAP定理との対応</div>
+      <p>分散システムのCAP定理（一貫性・可用性・分断耐性の3つを同時に満たせない）と同じ構造だ。「どれかを犠牲にしてどれかを得る」という選択が常に必要になる。</p>
+    </div>
+  </div>
+
+  <!-- 2: O(n²) -->
+  <div style="margin-bottom:var(--sp-4);">
+    <h3 style="font-size:16px; font-weight:700; color:var(--c-t1); margin-bottom:var(--sp-2);">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#2563eb;color:white;border-radius:50%;font-size:13px;margin-right:8px;">2</span>
+      O(n²)の計算爆発 — アテンションの核心問題
+    </h3>
+    <p style="font-size:14px; color:var(--c-t2); margin-bottom:var(--sp-2);">セルフアテンションは全トークン間の関係を計算するため、入力長が10倍になれば計算量は100倍になる。</p>
+    <div class="complexity-bar-wrap">
+      <div style="font-size:12px; color:var(--c-t3); margin-bottom:var(--sp-1);">入力1000トークン時を1とした場合（相対コスト）</div>
+      <div class="complexity-row">
+        <div class="complexity-label">n=1,000<br><span style="font-size:11px;color:var(--c-t3);">短い文章</span></div>
+        <div class="complexity-bar-outer">
+          <div class="complexity-bar-inner" style="width:10%; background:#22c55e;">1x</div>
+        </div>
+      </div>
+      <div class="complexity-row">
+        <div class="complexity-label">n=10,000<br><span style="font-size:11px;color:var(--c-t3);">中規模文書</span></div>
+        <div class="complexity-bar-outer">
+          <div class="complexity-bar-inner" style="width:40%; background:#f97316;">100x</div>
+        </div>
+      </div>
+      <div class="complexity-row">
+        <div class="complexity-label">n=100,000<br><span style="font-size:11px;color:var(--c-t3);">長文脈</span></div>
+        <div class="complexity-bar-outer">
+          <div class="complexity-bar-inner" style="width:100%; background:#dc2626;">10,000x</div>
+        </div>
+      </div>
+    </div>
+    <div class="analogy-box">
+      <div class="analogy-title">たとえ話 — 会議室の人数爆発</div>
+      <p>10人の会議では全員が全員と会話できる（10×10=100通りの組み合わせ）。100人になると10,000通りになり、現実的に全員と話すのは不可能になる。アテンションはこれをトークンの数だけ毎回やっている。</p>
+    </div>
+  </div>
+
+  <!-- 3: Lost in the Middle -->
+  <div>
+    <h3 style="font-size:16px; font-weight:700; color:var(--c-t1); margin-bottom:var(--sp-2);">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#2563eb;color:white;border-radius:50%;font-size:13px;margin-right:8px;">3</span>
+      Lost in the Middle — コンテキストのU字型性能劣化
+    </h3>
+    <p style="font-size:14px; color:var(--c-t2); margin-bottom:var(--sp-2);">コンテキストウィンドウの冒頭と末尾の情報は正確に参照されるが、中間部は大幅に見落とされる。</p>
+    <div class="u-curve-wrap">
+      <div class="u-curve-title">コンテキスト位置別の正答率（模式図）</div>
+      <div style="display:flex; gap:4px; align-items:flex-end; height:140px; padding-bottom:0;">
+        <div class="pos-bar-wrap">
+          <div class="pos-val">90%</div>
+          <div class="pos-bar" style="height:108px; background:#22c55e;"></div>
+          <div class="pos-label">冒頭</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">80%</div>
+          <div class="pos-bar" style="height:96px; background:#84cc16;"></div>
+          <div class="pos-label">前寄り</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">58%</div>
+          <div class="pos-bar" style="height:70px; background:#f97316;"></div>
+          <div class="pos-label">中間前</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">55%</div>
+          <div class="pos-bar" style="height:66px; background:#dc2626;"></div>
+          <div class="pos-label">中間</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">59%</div>
+          <div class="pos-bar" style="height:71px; background:#f97316;"></div>
+          <div class="pos-label">中間後</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">82%</div>
+          <div class="pos-bar" style="height:98px; background:#84cc16;"></div>
+          <div class="pos-label">後寄り</div>
+        </div>
+        <div class="pos-bar-wrap">
+          <div class="pos-val">92%</div>
+          <div class="pos-bar" style="height:110px; background:#22c55e;"></div>
+          <div class="pos-label">末尾</div>
+        </div>
+      </div>
+    </div>
+    <div class="analogy-box">
+      <div class="analogy-title">たとえ話 — 速読家の落とし穴</div>
+      <p>序章と結論は覚えているが、第3章〜第5章の重要な実験結果を見落とす速読家のようなもの。「全部読んだ」と言っているが、中身の精度はU字型に分布している。</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: 壁1 アテンション -->
+<div class="section" id="wall1">
+  <h2 class="section-title"><i data-lucide="cpu" class="icon" style="color:#dc2626;"></i>壁1：アテンションの壁（Attention Wall）</h2>
+  <div class="wall-card attn">
+    <div class="wall-title attn">計算量O(n²)による処理限界</div>
+    <p style="font-size:14px; color:var(--c-t2); margin:var(--sp-1) 0 0 0;">
+      Transformer（トランスフォーマー）の中核機構であるセルフアテンション（Self-Attention）は、すべてのトークン間の関係を計算する。入力長をnとすると計算量はO(n²)となり、長い入力の処理が現実的に不可能になる。
+    </p>
+  </div>
+
+  <div class="term-box">
+    <div class="term-label">用語：セルフアテンション（Self-Attention）</div>
+    <p>文中のすべての単語が互いの「関連度」を計算し合う機構。「私はリンゴを食べた」という文では、「食べた」と「リンゴ」の関連度が高いと学習される。n語の文ではn×nの行列計算が必要になる。</p>
+  </div>
+
+  <div class="term-box">
+    <div class="term-label">用語：KVキャッシュ（Key-Value Cache）</div>
+    <p>アテンション計算で使うKey・Valueベクトルを再計算せずメモリに保持する最適化手法。推論速度を大幅に改善するが、保持するメモリ量が入力長に比例して増大するため、長文脈では数十GBのメモリを消費する。</p>
+  </div>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">引き起こす問題</h3>
+  <ul class="problem-list">
+    <li><span class="dot red"></span><strong>超長文書の一括処理が困難：</strong>長い文書や長い会話履歴を一度に処理すると計算コストが爆発する</li>
+    <li><span class="dot red"></span><strong>推論レイテンシの増大：</strong>入力が長いほど応答時間が増加し、リアルタイム応用でボトルネックになる</li>
+    <li><span class="dot red"></span><strong>GPU メモリ枯渇（OOM）：</strong>長文脈の処理でKVキャッシュがGPUメモリを圧迫する</li>
+    <li><span class="dot red"></span><strong>推論コストの高騰：</strong>コンテキストを2倍にすると計算コストは4倍になり、API利用料が急増する</li>
+  </ul>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">対策技術とトレードオフ</h3>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>技術</th><th>計算量</th><th>メモリ</th><th>想起能力</th><th>備考</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>標準Attention</strong></td><td>O(n²)</td><td>O(n²)</td><td class="check">✓ 高い</td><td>基準</td></tr>
+        <tr><td><strong>FlashAttention</strong></td><td>O(n²)</td><td class="check">O(n) ✓</td><td class="check">✓ 高い</td><td>IO効率化。計算量は変わらず</td></tr>
+        <tr><td><strong>Linformer</strong></td><td class="check">O(n)</td><td class="check">O(n)</td><td class="cross">✗ 低下</td><td>低ランク近似。精度トレードオフ</td></tr>
+        <tr><td><strong>SSM / Mamba</strong></td><td class="check">O(n)</td><td class="check">O(1)</td><td class="cross">✗ 低下</td><td>固定サイズ状態。想起能力に弱点</td></tr>
+        <tr><td><strong>ハイブリッド</strong></td><td class="half">△</td><td class="half">△</td><td class="half">△</td><td>注意層比率でトレードオフ調整</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="so-what">
+    <div class="so-what-label">エンジニアとして何を設計判断に組み込むか</div>
+    <p>「長いコンテキストを使えばいい」は誤り。長いコンテキストは計算コストの二乗増加を意味する。RAGなどで必要な情報だけを絞り込み、不必要な情報をコンテキストに入れないアーキテクチャ設計が必要。</p>
+  </div>
+</div>
+
+<!-- SECTION: 壁2 コンテキスト -->
+<div class="section" id="wall2">
+  <h2 class="section-title"><i data-lucide="layers" class="icon" style="color:#f97316;"></i>壁2：コンテキストウィンドウの壁（Context Window Wall）</h2>
+  <div class="wall-card ctx">
+    <div class="wall-title ctx">広告値と実効値の大きなギャップ</div>
+    <p style="font-size:14px; color:var(--c-t2); margin:var(--sp-1) 0 0 0;">
+      LLMが一度に処理できる情報量（コンテキストウィンドウ）の<strong>有効性の限界</strong>。仕様上の最大値（128K〜2Mトークン）が大きくても、実際の性能はそれより大幅に低く、中間部の情報は著しく見落とされる。
+    </p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2); margin:var(--sp-2) 0;" class="stats-grid">
+    <div style="background:#fee2e2; border-radius:8px; padding:var(--sp-2); text-align:center;">
+      <div style="font-size:28px; font-weight:700; color:#dc2626; font-variant-numeric:tabular-nums;">99%</div>
+      <div style="font-size:13px; color:var(--c-t2);">広告値と実効値の最大乖離</div>
+    </div>
+    <div style="background:#fff7ed; border-radius:8px; padding:var(--sp-2); text-align:center;">
+      <div style="font-size:28px; font-weight:700; color:#f97316; font-variant-numeric:tabular-nums;">-30%</div>
+      <div style="font-size:13px; color:var(--c-t2);">中間部における正答率の低下</div>
+    </div>
+  </div>
+  <style>
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr !important; } }
+  </style>
+
+  <div class="term-box">
+    <div class="term-label">用語：MCW と MECW</div>
+    <p>MCW（Maximum Context Window：最大コンテキスト長）はカタログスペック上の値。MECW（Maximum Effective Context Window：実効コンテキスト長）は実際に正確に機能する長さ。この乖離がコンテキスト壁の実態。</p>
+  </div>
+
+  <div class="term-box">
+    <div class="term-label">用語：Context Rot（コンテキスト劣化）</div>
+    <p>入力長が増えるほど、関連情報の有無にかかわらず性能が無条件に劣化する現象。長いコンテキストは「使える分が増える」のではなく「全体の精度が下がる」リスクを伴う。</p>
+  </div>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">技術的な原因</h3>
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>原因</th><th>メカニズム</th><th>影響</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>RoPE（回転位置埋め込み）</strong><br><span style="font-size:12px;color:var(--c-t3);">Rotary Position Embedding</span></td>
+          <td>距離が離れたトークン間の注意スコアが長距離減衰する設計</td>
+          <td>中間部のトークンへの注意が薄くなる</td>
+        </tr>
+        <tr>
+          <td><strong>因果的注意機構</strong></td>
+          <td>情報が一方向（過去→現在）にしか流れない構造</td>
+          <td>前方の情報は後から修正できない</td>
+        </tr>
+        <tr>
+          <td><strong>学習データの分布バイアス</strong></td>
+          <td>訓練データが冒頭・末尾に重要情報を置く構造を持つ</td>
+          <td>モデルがその位置バイアスを学習してしまう</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">引き起こす問題</h3>
+  <ul class="problem-list">
+    <li><span class="dot orange"></span><strong>長文書の要約・分析精度の低下：</strong>文書の中間部にある重要な事実が見落とされる</li>
+    <li><span class="dot orange"></span><strong>RAGシステムの精度問題：</strong>検索で集めた文書群の中間部の情報が無視される</li>
+    <li><span class="dot orange"></span><strong>コスト対効果の悪化：</strong>大きなコンテキストウィンドウに課金しても実際の性能向上が得られない</li>
+    <li><span class="dot orange"></span><strong>プロンプト設計の複雑化：</strong>「どこに情報を置くか」という設計が重要になる</li>
+  </ul>
+
+  <div class="so-what">
+    <div class="so-what-label">エンジニアとして何を設計判断に組み込むか</div>
+    <p>「128Kトークン対応だから全部入れればいい」は誤り。重要な情報は冒頭か末尾に置く。RAGのチャンク数は3〜5に絞る。コンテキスト長を増やすほどコストは増加し精度は低下するという逆説を前提に設計する。</p>
+  </div>
+</div>
+
+<!-- SECTION: 壁3 オートリグレッション -->
+<div class="section" id="wall3">
+  <h2 class="section-title"><i data-lucide="git-branch" class="icon" style="color:#16a34a;"></i>壁3：オートリグレッションの壁（Autoregressive Wall）</h2>
+  <div class="wall-card auto">
+    <div class="wall-title auto">逐次生成による誤差連鎖とハルシネーション</div>
+    <p style="font-size:14px; color:var(--c-t2); margin:var(--sp-1) 0 0 0;">
+      LLMは「次のトークンを予測する」を繰り返して文章を生成する自己回帰（Autoregressive）方式を採用している。この逐次的な生成の仕組みが、誤差の蓄積・ハルシネーション・生成速度の限界を構造的に引き起こす。
+    </p>
+  </div>
+
+  <div class="term-box">
+    <div class="term-label">用語：オートリグレッション（Autoregressive：自己回帰）</div>
+    <p>前の出力を次の入力として使いながら逐次的に生成する方式。「東京の」→「首都は」→「日本で」→「あります」のように1トークンずつ確定させながら生成する。並列生成ができないため、長い出力ほど時間がかかる。</p>
+  </div>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">ハルシネーションが起きる仕組み</h3>
+  <div style="background:#f8fafc; border-radius:8px; padding:var(--sp-3); margin-bottom:var(--sp-2); font-family:monospace; font-size:14px; overflow-x:auto;">
+    <div style="color:var(--c-t3); font-size:12px; margin-bottom:8px;">逐次生成の例：誤りが連鎖する流れ</div>
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <div><span style="color:#2563eb; font-weight:700;">入力:</span> "アインシュタインの経歴は？"</div>
+      <div><span style="color:#dc2626;">Step 1:</span> "物理学者として" ← 正しい</div>
+      <div><span style="color:#dc2626;">Step 2:</span> "オリンピックでも" ← <span style="background:#fee2e2; padding:1px 4px; border-radius:3px;">誤りが入り込む</span></div>
+      <div><span style="color:#dc2626;">Step 3:</span> "活躍し、金メダルを" ← 誤りを確信的に継続</div>
+      <div><span style="color:#dc2626;">Step 4:</span> "獲得しました" ← 完全な誤情報として確定</div>
+    </div>
+  </div>
+
+  <div class="term-box">
+    <div class="term-label">用語：ハルシネーション（Hallucination：幻覚）</div>
+    <p>LLMが事実と異なる内容を確信的に（まるで事実であるかのように）出力する現象。「正しい答えを生成する」ように訓練されているのではなく、「もっともらしい続きを生成する」ように訓練されているため発生する。</p>
+  </div>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">引き起こす問題</h3>
+  <ul class="problem-list">
+    <li><span class="dot green"></span><strong>誤情報の自信満々な出力（ハルシネーション）：</strong>知識のないことでも「もっともらしい」答えを生成する</li>
+    <li><span class="dot green"></span><strong>誤差の連鎖（Error Compounding）：</strong>初期の小さな誤りが後続トークンで増幅・固定化される</li>
+    <li><span class="dot green"></span><strong>逐次生成によるレイテンシ：</strong>並列生成が不可能で長い回答ほど生成時間が線形増大する</li>
+    <li><span class="dot green"></span><strong>「わからない」と言えない設計的問題：</strong>評価指標が推測を報酬するため、不確実な場合でも推測を出力する</li>
+  </ul>
+
+  <h3 style="font-size:15px; font-weight:700; margin:var(--sp-3) 0 var(--sp-2) 0; color:var(--c-t1);">ハルシネーション率の推移と限界</h3>
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-2); margin-bottom:var(--sp-2);" class="halluc-grid">
+    <div style="background:#f8fafc; border-radius:8px; padding:var(--sp-2); text-align:center; border:1px solid var(--c-bd);">
+      <div style="font-size:20px; font-weight:700; color:#dc2626;">39.6%</div>
+      <div style="font-size:13px; color:var(--c-t2);">GPT-3.5</div>
+    </div>
+    <div style="font-size:24px; display:flex; align-items:center; justify-content:center; color:var(--c-t3);">→</div>
+    <div style="background:#f8fafc; border-radius:8px; padding:var(--sp-2); text-align:center; border:1px solid var(--c-bd);">
+      <div style="font-size:20px; font-weight:700; color:#f97316;">28.6%</div>
+      <div style="font-size:13px; color:var(--c-t2);">GPT-4</div>
+    </div>
+  </div>
+  <style>
+    @media (max-width: 480px) { .halluc-grid { grid-template-columns: 1fr !important; } }
+  </style>
+  <p style="font-size:13px; color:var(--c-t2);">ハルシネーション率はモデルの進化で低減可能だが、次トークン予測という訓練目標を変えない限りゼロにはできない。</p>
+
+  <div class="analogy-box">
+    <div class="analogy-title">たとえ話 — 電話伝言ゲーム</div>
+    <p>最初の一言が少し間違っていると、それを受け取った次の人がさらに「もっともらしく補正」するため、最終的に元のメッセージと全く別の内容になる。各トークンの予測が「前のトークンの確信」に依存するため、誤りが連鎖・増幅する。</p>
+  </div>
+
+  <div class="so-what">
+    <div class="so-what-label">エンジニアとして何を設計判断に組み込むか</div>
+    <p>LLMの出力を「正しい可能性が高い情報」として扱わない。重要な事実確認にはRAGや外部ツール（検索・データベース照合）を組み合わせる。長い回答を要求するほど誤りが入り込むリスクが高まることを前提にシステムを設計する。</p>
+  </div>
+</div>
+
+<!-- SECTION: 相互作用 -->
+<div class="section" id="interaction">
+  <h2 class="section-title"><i data-lucide="share-2" class="icon"></i>3つの壁の相互作用</h2>
+  <p style="font-size:14px; color:var(--c-t2); margin-bottom:var(--sp-3);">
+    3つの壁はそれぞれ独立した問題でありながら、実務では複合的に絡み合い、より深刻な問題を引き起こす。
+  </p>
+
+  <div class="flow-wrap" style="margin-bottom:var(--sp-3);">
+    <div class="flow-node" style="border-color:#dc2626; color:#991b1b;">アテンション壁<br><span style="font-size:11px; font-weight:400;">計算量O(n²)</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color:#f97316; color:#9a3412;">コンテキスト壁<br><span style="font-size:11px; font-weight:400;">情報損失</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node" style="border-color:#16a34a; color:#166534;">オートリグレッション壁<br><span style="font-size:11px; font-weight:400;">誤差連鎖</span></div>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr><th>アーキテクチャ</th><th>効率性</th><th>コンパクト性</th><th>想起能力</th><th>実用上の弱点</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Transformer（KVキャッシュ型）</strong></td>
+          <td class="cross">✗ O(n²)</td>
+          <td class="cross">✗ 線形増大</td>
+          <td class="check">✓ 高い</td>
+          <td>コスト・メモリが爆発</td>
+        </tr>
+        <tr>
+          <td><strong>SSM / Mamba</strong></td>
+          <td class="check">✓ O(n)</td>
+          <td class="check">✓ 固定サイズ</td>
+          <td class="cross">✗ 低い</td>
+          <td>長文脈での想起が困難</td>
+        </tr>
+        <tr>
+          <td><strong>ハイブリッド</strong></td>
+          <td class="half">△</td>
+          <td class="half">△</td>
+          <td class="half">△</td>
+          <td>全てが中途半端なトレードオフ</td>
+        </tr>
+        <tr style="background:#fff3cd;">
+          <td><strong>理想（不可能性三角形の中心）</strong></td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td class="check">✓</td>
+          <td style="color:#dc2626; font-weight:700;">情報理論的に到達不可能</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:var(--sp-3); margin-top:var(--sp-3);">
+    <h3 style="font-size:15px; font-weight:700; color:#1d4ed8; margin:0 0 var(--sp-2) 0;">2026年の業界の方向性</h3>
+    <ul style="list-style:none; padding:0; margin:0;">
+      <li style="display:flex; gap:8px; margin-bottom:8px; font-size:14px; color:var(--c-t2);"><span style="color:#2563eb;">→</span>コンテキストウィンドウの拡大競争から「<strong>実効的なコンテキスト管理</strong>」へのシフト</li>
+      <li style="display:flex; gap:8px; margin-bottom:8px; font-size:14px; color:var(--c-t2);"><span style="color:#2563eb;">→</span>推論時スケーリング（o1、o3型）で精度は向上するが、根本的な壁は越えられない</li>
+      <li style="display:flex; gap:8px; margin-bottom:0; font-size:14px; color:var(--c-t2);"><span style="color:#2563eb;">→</span>プロンプトキャッシュ・RAG・外部メモリの組み合わせで実用的なシステムを構築する方向</li>
+    </ul>
+  </div>
+</div>
+
+<!-- SECTION: 落とし穴 -->
+<div class="section" id="pitfalls">
+  <h2 class="section-title"><i data-lucide="alert-triangle" class="icon" style="color:#dc2626;"></i>初心者がはまりやすい落とし穴</h2>
+
+  <div class="pitfall">
+    <div class="pitfall-title"><i data-lucide="x-circle" style="width:16px;height:16px;"></i>「128Kトークン対応なら全部入れればいい」</div>
+    <p>コンテキストウィンドウの広告値（MCW）と実効値（MECW）には最大99%の乖離がある。全部入れることでコスト増加・精度低下の両方が発生する。</p>
+    <div class="pitfall-fix">✓ 対策：重要情報だけを絞って入れる。RAGのチャンク数は3〜5に抑える。</div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-title"><i data-lucide="x-circle" style="width:16px;height:16px;"></i>「RAGのチャンクを増やせば精度が上がる」</div>
+    <p>文書数が増えると「Lost in the Middle」が深刻になり、中間にある関連チャンクが見落とされる。むしろ増やすほど精度が低下するケースが多い。</p>
+    <div class="pitfall-fix">✓ 対策：関連度の高いチャンクを上位3〜5件に絞る。質問の表現をチャンクのラベルに近づける。</div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-title"><i data-lucide="x-circle" style="width:16px;height:16px;"></i>「長い回答を求めるほど詳しい答えが得られる」</div>
+    <p>オートリグレッション方式では生成トークン数が増えるほど誤りが蓄積・増幅する。長い回答は誤情報が混入するリスクが高い。</p>
+    <div class="pitfall-fix">✓ 対策：重要な事実を要求する場合は短い回答を求め、外部検索・DBで検証する設計にする。</div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-title"><i data-lucide="x-circle" style="width:16px;height:16px;"></i>「新しいアーキテクチャ（Mamba等）なら壁を解決できる」</div>
+    <p>SSM/Mambaは計算コストを削減できるが、不可能性三角形により「想起能力」を犠牲にしている。長文脈の特定情報を正確に参照するタスクでは性能が低下する。</p>
+    <div class="pitfall-fix">✓ 対策：タスクに合わせてアーキテクチャを選ぶ。想起精度が重要なら従来のTransformerを選ぶ。</div>
+  </div>
+
+  <div class="pitfall">
+    <div class="pitfall-title"><i data-lucide="x-circle" style="width:16px;height:16px;"></i>「Chain of Thoughtを使えばハルシネーションは解決する」</div>
+    <p>CoT（Chain of Thought）は推論精度を改善するが、自己回帰方式の根本的なアーキテクチャが同じである限り、誤差連鎖の問題は完全には解消しない。</p>
+    <div class="pitfall-fix">✓ 対策：CoTを使いつつも、重要な事実はRAGや検索ツールで外部から補強する。</div>
+  </div>
+</div>
+
+<!-- SECTION: 専門用語集 -->
+<div class="section" id="glossary">
+  <h2 class="section-title"><i data-lucide="book-open" class="icon"></i>専門用語集</h2>
+  <div class="glossary-grid">
+    <div class="glossary-item">
+      <div class="glossary-term">セルフアテンション（Self-Attention）</div>
+      <div class="glossary-def">Transformerの中核。全トークン間の関連度をn×nの行列で計算する機構。O(n²)の計算量が「アテンション壁」の原因。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">O(n²)（二乗オーダー）</div>
+      <div class="glossary-def">入力長nの2乗に比例して計算量が増える複雑性。n=10倍なら100倍のコストがかかる。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">KVキャッシュ（Key-Value Cache）</div>
+      <div class="glossary-def">アテンション計算のKey/Valueをメモリに保持する最適化。推論を高速化するが、入力長に比例してメモリを消費する。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Lost in the Middle</div>
+      <div class="glossary-def">コンテキスト中間部の情報が見落とされる現象。正答率がU字型に分布し、中間部で最大30%低下する。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">MCW / MECW</div>
+      <div class="glossary-def">MCW（最大コンテキスト長、仕様値）とMECW（実効コンテキスト長、実測値）。この乖離が最大99%に達するケースがある。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">RoPE（回転位置埋め込み）</div>
+      <div class="glossary-def">Rotary Position Embeddingの略。トークンの位置情報をエンコードする手法。長距離で注意スコアが減衰する特性を持つ。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">オートリグレッション（Autoregressive）</div>
+      <div class="glossary-def">前の出力を次の入力として1トークンずつ逐次生成する方式。並列化不可で、初期の誤りが連鎖する構造的問題がある。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">ハルシネーション（Hallucination）</div>
+      <div class="glossary-def">事実と異なる内容を確信的に出力する現象。「正しい答え」ではなく「もっともらしい続き」を生成する訓練目標が原因。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">不可能性三角形（Impossibility Triangle）</div>
+      <div class="glossary-def">効率性・コンパクト性・想起能力の3条件を同時に満たすことが情報理論的に不可能であることを示す定理（arxiv: 2605.05066）。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">SSM / Mamba（状態空間モデル）</div>
+      <div class="glossary-def">State Space Model（状態空間モデル）。固定サイズの状態でO(n)の線形計算を実現。効率性は高いが、長文脈の正確な想起に弱点がある。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">FlashAttention</div>
+      <div class="glossary-def">GPU高速メモリ（SRAM）を最大活用するIO最適化されたAttention実装。メモリ消費をO(n)に改善するが、計算量はO(n²)のまま。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">誤差連鎖（Error Compounding）</div>
+      <div class="glossary-def">自己回帰生成において初期の誤りが後続トークンで増幅される現象。生成が長くなるほどリスクが増大する。</div>
+    </div>
+    <div class="glossary-item">
+      <div class="glossary-term">Context Rot（コンテキスト劣化）</div>
+      <div class="glossary-def">入力長が増えるほど関連情報の有無にかかわらず性能が劣化する現象。長いコンテキストは精度低下のリスクを伴う。</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: 次に学ぶと良いもの -->
+<div class="section" id="next">
+  <h2 class="section-title"><i data-lucide="arrow-right-circle" class="icon"></i>次に学ぶと良いもの</h2>
+  <div class="next-grid">
+    <div class="next-item">
+      <i data-lucide="brain" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">RAG（Retrieval-Augmented Generation）</div>
+        <div class="ni-desc">コンテキスト壁・ハルシネーションへの実践的対処法。外部知識を検索して付加することで精度を高める手法。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="zap" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">FlashAttention / FlashAttention-2</div>
+        <div class="ni-desc">アテンション壁への実装レベルの対処。IO-aware アルゴリズムの仕組みと限界を理解する。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="git-merge" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">SSM / Mamba / ハイブリッドアーキテクチャ</div>
+        <div class="ni-desc">不可能性三角形の各頂点に配置された次世代アーキテクチャの設計思想と実装を学ぶ。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="bar-chart-2" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">LLMの評価手法（RAGAS、HELM等）</div>
+        <div class="ni-desc">ハルシネーションや精度をどのように定量測定するか。「Lost in the Middle」のような性能劣化を定量化する手法。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="cpu" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">推論時スケーリング（Inference-Time Scaling）</div>
+        <div class="ni-desc">o1・o3型の推論モデルが採用するアプローチ。壁の中で最大限の性能を引き出すための戦略。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="shield" class="ni-icon" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-title">LLMのファクトチェック・グラウンディング</div>
+        <div class="ni-desc">オートリグレッション壁への実践的対処。外部データソースとLLM出力を照合して事実確認する手法。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: 参考文献 -->
+<div class="section" id="refs">
+  <h2 class="section-title"><i data-lucide="external-link" class="icon"></i>参考文献・URL</h2>
+  <ul class="ref-list">
+    <li><a href="https://arxiv.org/abs/2605.05066" target="_blank">arxiv: 2605.05066 — The Impossibility Triangle of Long-Context Modeling</a> — 不可能性三角形を証明した論文（2026年5月）</li>
+    <li><a href="https://ai-papers.net/impossibility-triangle-long-context-llm-efficiency-compactness-recall" target="_blank">長文脈LLMの不可能性三角形とは？</a> — AI-Papers、論文の詳細解説（日本語）</li>
+    <li><a href="https://arxiv.org/abs/2403.06963v3" target="_blank">arxiv: 2403.06963 — The pitfalls of next-token prediction</a> — 次トークン予測の構造的問題（論文）</li>
+    <li><a href="https://arxiv.org/abs/2507.19703v2" target="_blank">arxiv: 2507.19703 — The wall confronting large language models</a> — LLMが直面する壁（論文）</li>
+    <li><a href="https://zenn.dev/lluminai_tech/articles/c2558295190551" target="_blank">長文コンテキストをLLMが読んでくれない — Lost in the Middle実践対策</a> — Zenn（日本語）</li>
+    <li><a href="https://zenn.dev/kimkiyong/articles/c0250864d53595" target="_blank">言語モデルの長文コンテキスト処理：Lost in the Middle現象の実態と最新研究</a> — Zenn（日本語）</li>
+    <li><a href="https://dev.to/gabrielanhaia/lost-in-the-middle-is-still-real-in-2026-even-on-1m-token-models-2ehj" target="_blank">Lost-in-the-Middle Is Still Real in 2026</a> — Dev.to、2026年時点の現状報告</li>
+    <li><a href="https://openai.com/ja-JP/index/why-language-models-hallucinate/" target="_blank">言語モデルでハルシネーションが起きる理由</a> — OpenAI公式（日本語）</li>
+    <li><a href="https://a-x.inc/blog/llm-attention/" target="_blank">LLMのアテンションとは？仕組みや種類、最新動向</a> — 株式会社AX（日本語、2026年版）</li>
+    <li><a href="https://mbrenndoerfer.com/writing/attention-complexity-quadratic-scaling-memory-efficient-transformers" target="_blank">Attention Complexity: Quadratic Scaling, Memory Limits & Efficient Alternatives</a> — Michael Brenndoerfer</li>
+    <li><a href="https://towardsai.net/p/machine-learning/the-context-window-paradox-engineering-trade-offs-in-modern-llm-architecture" target="_blank">The Context Window Paradox: Engineering Trade-offs in Modern LLM Architecture</a> — Towards AI</li>
+    <li><a href="https://zylos.ai/research/2026-01-19-llm-context-management" target="_blank">LLM Context Window Management and Long-Context Strategies 2026</a> — Zylos Research</li>
+  </ul>
+</div>
+
+<div style="height:var(--sp-6);"></div>
+</div><!-- /container -->
+
+<!-- PDF BUTTON -->
+<button id="pdf-btn" onclick="window.print()">
+  <i data-lucide="download" style="width:16px;height:16px;"></i>
+  PDFで保存
+</button>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

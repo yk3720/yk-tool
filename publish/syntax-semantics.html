@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>シンタックスとセマンティクス — 形式と意味を分けて考える</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    @media print {
+      #pdf-btn, #toc-sidebar { display: none !important; }
+      section { break-inside: avoid; }
+    }
+    html { scroll-behavior: smooth; }
+    .term-box {
+      background: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 0.6rem 1rem;
+      border-radius: 0 0.5rem 0.5rem 0;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+    .term-box strong { color: #0369a1; }
+    .analogy-card {
+      border-left: 4px solid #8b5cf6;
+      background: #faf5ff;
+    }
+    code.inline {
+      background: #f1f5f9;
+      padding: 0.1rem 0.4rem;
+      border-radius: 0.25rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.88em;
+      color: #dc2626;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.875rem;
+      line-height: 1.7;
+    }
+    pre .comment { color: #94a3b8; }
+    pre .keyword { color: #93c5fd; }
+    pre .string  { color: #86efac; }
+    pre .error   { color: #f87171; }
+    .pipeline-step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .pipeline-step + .pipeline-step::before {
+      content: '';
+    }
+    #toc-sidebar {
+      position: fixed;
+      top: 50%;
+      right: 1rem;
+      transform: translateY(-50%);
+      width: 200px;
+      z-index: 50;
+    }
+    @media (max-width: 1280px) {
+      #toc-sidebar { display: none; }
+    }
+    .toc-link {
+      display: block;
+      font-size: 0.75rem;
+      color: #64748b;
+      padding: 0.2rem 0.5rem;
+      border-left: 2px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+    .toc-link:hover {
+      color: #1e40af;
+      border-left-color: #3b82f6;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+  <!-- PDF button -->
+  <button id="pdf-btn"
+    onclick="window.print()"
+    class="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg transition">
+    <i data-lucide="file-text" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <!-- TOC sidebar -->
+  <nav id="toc-sidebar" class="bg-white border border-gray-200 rounded-xl p-3 shadow-sm">
+    <p class="text-xs font-semibold text-gray-500 mb-2 px-1">目次</p>
+    <a class="toc-link" href="#sec-summary">ひとことで言えば</a>
+    <a class="toc-link" href="#sec-history">なぜ生まれたのか</a>
+    <a class="toc-link" href="#sec-three">まず理解する3つ</a>
+    <a class="toc-link" href="#sec-concepts">主要概念</a>
+    <a class="toc-link" href="#sec-pitfalls">落とし穴</a>
+    <a class="toc-link" href="#sec-glossary">専門用語集</a>
+    <a class="toc-link" href="#sec-next">次に学ぶと良いもの</a>
+    <a class="toc-link" href="#sec-refs">参考文献</a>
+  </nav>
+
+  <div class="max-w-3xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex items-center gap-2 text-blue-600 text-sm font-medium mb-3">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        プログラミング言語理論 / 言語学
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
+        シンタックスとセマンティクス
+      </h1>
+      <p class="text-lg text-gray-500">「形式」と「意味」を分けて考える技術</p>
+    </header>
+
+    <!-- Section 1: ひとことで言えば -->
+    <section id="sec-summary" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="zap" class="w-5 h-5 text-yellow-500"></i>
+        ひとことで言えば
+      </h2>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6">
+        <p class="text-base font-medium text-blue-900">
+          <strong>シンタックス</strong>は「正しく書かれているか（形式）」、<strong>セマンティクス</strong>は「書いた内容が意図どおりの意味を持つか（内容）」を扱う。この2つを分けて考えることで、エラーの種類・検出タイミング・検証手法が明確になる。
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="file-code" class="w-5 h-5 text-indigo-500"></i>
+            <h3 class="font-semibold text-gray-900">シンタックス（Syntax）</h3>
+          </div>
+          <p class="text-sm text-gray-600">記号・単語を並べる際の<strong>形式ルール</strong>。<br>「どう書くか」 — How to write</p>
+          <div class="mt-3 text-xs text-indigo-700 bg-indigo-50 rounded-lg px-3 py-2">
+            コンパイル前・実行前に検出可能
+          </div>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="brain" class="w-5 h-5 text-purple-500"></i>
+            <h3 class="font-semibold text-gray-900">セマンティクス（Semantics）</h3>
+          </div>
+          <p class="text-sm text-gray-600">その記述が表す<strong>意味・意図・論理</strong>。<br>「何を意味するか」 — What it means</p>
+          <div class="mt-3 text-xs text-purple-700 bg-purple-50 rounded-lg px-3 py-2">
+            実行して初めて顕在化するバグも多い
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 bg-gray-100 rounded-xl p-4 text-sm text-gray-600">
+        <strong>対象読者：</strong> プログラミング経験がある技術者。言語処理系・型システム・静的解析に踏み込む前の整理として。
+      </div>
+    </section>
+
+    <!-- Section 2: なぜ生まれたのか -->
+    <section id="sec-history" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="clock" class="w-5 h-5 text-orange-500"></i>
+        なぜ生まれたのか
+      </h2>
+
+      <p class="text-sm text-gray-700 mb-4">この分類は1950年代の言語学と計算機科学の接点から生まれた。</p>
+
+      <div class="space-y-4">
+        <div class="bg-white rounded-xl border-l-4 border-orange-400 pl-5 pr-4 py-4">
+          <h3 class="font-semibold text-gray-900 mb-1">チョムスキーの生成文法（1950年代〜）</h3>
+          <p class="text-sm text-gray-600">
+            ノーム・チョムスキー（Noam Chomsky）は、自然言語の文法を「有限の規則から無限に文を生成できる形式体系」として定式化した。この際、<strong>「文法的に正しいこと（シンタックス）」と「意味が通ること（セマンティクス）」を意図的に分離</strong>して記述しようとした。
+            その成果として「チョムスキー階層」が生まれ、文法の表現力をオートマトン（計算機）と対応させた分類が確立した。
+          </p>
+        </div>
+
+        <div class="bg-white rounded-xl border-l-4 border-blue-400 pl-5 pr-4 py-4">
+          <h3 class="font-semibold text-gray-900 mb-1">コンパイラ設計への波及</h3>
+          <p class="text-sm text-gray-600">
+            BNF（Backus-Naur Form：バッカス・ナウア記法）や CFG（Context-Free Grammar：文脈自由文法）により、プログラミング言語の構文を機械可読な形で記述できるようになった。
+            コンパイラは「<strong>字句解析 → 構文解析 → 意味解析 → コード生成</strong>」という段階的なパイプラインを持つことで、<strong>構文エラーと意味的エラーを別フェーズで検出</strong>できる設計になった。
+          </p>
+        </div>
+
+        <div class="bg-white rounded-xl border-l-4 border-green-400 pl-5 pr-4 py-4">
+          <h3 class="font-semibold text-gray-900 mb-1">解決した課題</h3>
+          <p class="text-sm text-gray-600">
+            「どの文字列がその言語に属するか（受理問題）」と「そのプログラムが何をするか（振る舞い・型の一貫性）」を明確に分けることで、<strong>ツール（コンパイラ・リンター・型検査器）の設計と、エラーメッセージの品質</strong>が劇的に向上した。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: まず理解する3つ -->
+    <section id="sec-three" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="list-ordered" class="w-5 h-5 text-green-600"></i>
+        まず理解する3つ
+      </h2>
+
+      <div class="space-y-4">
+        <div class="flex gap-4 bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex-shrink-0 w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">シンタックスエラーは「書き方の誤り」</h3>
+            <p class="text-sm text-gray-600">カッコの閉じ忘れ・<code class="inline">==</code> と書くべき場所に <code class="inline">=</code> を書く・インデントミス。パーサが<strong>実行前</strong>に検出できる。文法規則（BNF/CFG）に照らして機械的に判定可能。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm">2</div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">セマンティクスエラーは「意味の誤り」</h3>
+            <p class="text-sm text-gray-600"><code class="inline">b + c</code> と書くべき場所に <code class="inline">b - c</code> と書く・無限ループ・誤った条件式。文法は正しくても<strong>論理として意図通りでない</strong>。実行して初めて発覚するものも多い。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-white rounded-xl border border-gray-200 p-5">
+          <div class="flex-shrink-0 w-8 h-8 bg-purple-100 text-purple-700 rounded-full flex items-center justify-center font-bold text-sm">3</div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">コンパイラは2段階で検査している</h3>
+            <p class="text-sm text-gray-600">「構文解析（Syntax Analysis）」でシンタックスを、「意味解析（Semantic Analysis）」でセマンティクス（型・スコープ・未定義参照）を検査する。型エラーは多くの場合<strong>意味解析フェーズ</strong>の産物。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: 主要概念 -->
+    <section id="sec-concepts" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="git-branch" class="w-5 h-5 text-blue-600"></i>
+        主要概念・アーキテクチャ
+      </h2>
+
+      <!-- コンパイラパイプライン図 -->
+      <h3 class="font-semibold text-gray-900 mb-3">コンパイラのパイプライン</h3>
+      <p class="text-sm text-gray-600 mb-4">シンタックスとセマンティクスは、コンパイラ内の「どのフェーズで検査されるか」で明確に分離されている。</p>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5 mb-6 overflow-x-auto">
+        <div class="flex items-center gap-1 flex-wrap text-xs font-medium min-w-max">
+          <div class="bg-gray-100 rounded-lg px-3 py-2 flex flex-col items-center gap-1">
+            <i data-lucide="file-text" class="w-4 h-4 text-gray-500"></i>
+            <span>ソース</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+          <div class="bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2 flex flex-col items-center gap-1">
+            <i data-lucide="scan-text" class="w-4 h-4 text-indigo-500"></i>
+            <span class="text-indigo-700">字句解析</span>
+            <span class="text-gray-400 font-normal text-[10px]">トークン列</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+          <div class="bg-indigo-100 border border-indigo-300 rounded-lg px-3 py-2 flex flex-col items-center gap-1">
+            <i data-lucide="git-branch" class="w-4 h-4 text-indigo-600"></i>
+            <span class="text-indigo-800">構文解析</span>
+            <span class="text-indigo-500 font-normal text-[10px]">AST生成</span>
+          </div>
+          <div class="ml-1 mr-1 px-2 py-1 bg-indigo-600 text-white rounded text-[10px] font-bold">← Syntax</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+          <div class="bg-purple-100 border border-purple-300 rounded-lg px-3 py-2 flex flex-col items-center gap-1">
+            <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i>
+            <span class="text-purple-800">意味解析</span>
+            <span class="text-purple-500 font-normal text-[10px]">型・スコープ</span>
+          </div>
+          <div class="ml-1 mr-1 px-2 py-1 bg-purple-600 text-white rounded text-[10px] font-bold">← Semantics</div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+          <div class="bg-gray-100 rounded-lg px-3 py-2 flex flex-col items-center gap-1">
+            <i data-lucide="cpu" class="w-4 h-4 text-gray-500"></i>
+            <span>コード生成</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- たとえ話 1 -->
+      <h3 class="font-semibold text-gray-900 mb-3">たとえ話で理解する</h3>
+
+      <div class="space-y-4 mb-6">
+        <div class="analogy-card rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="utensils" class="w-4 h-4 text-purple-600"></i>
+            <span class="text-sm font-semibold text-purple-800">たとえ話 1 ：レシピの書き方 vs 料理の出来栄え</span>
+          </div>
+          <p class="text-sm text-gray-700">
+            <strong>シンタックス</strong>は「レシピの書き方ルール（材料は箇条書き・手順は番号付き・単位は g/ml で統一）」。このルールを守らないと、料理本の編集者に突き返される（コンパイルエラー）。<br>
+            <strong>セマンティクス</strong>は「そのレシピで作ると本当においしいか」。書き方は正しくても「塩 10 kg」と書けばまずい料理ができる（論理バグ）。
+          </p>
+        </div>
+
+        <div class="analogy-card rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="message-square" class="w-4 h-4 text-purple-600"></i>
+            <span class="text-sm font-semibold text-purple-800">たとえ話 2 ：「無色透明な緑色のアイデアが激しく眠る」</span>
+          </div>
+          <p class="text-sm text-gray-700">
+            チョムスキーが示した有名な例文。「無色透明な緑色の〜」は<strong>文法（シンタックス）的には正しい</strong>構造を持つが、<strong>意味（セマンティクス）として矛盾</strong>している（無色透明なものが緑色にはなれない）。プログラムでも同様に、文法を通過しても意味が破綻するコードは書ける。
+          </p>
+        </div>
+
+        <div class="analogy-card rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="clipboard-check" class="w-4 h-4 text-purple-600"></i>
+            <span class="text-sm font-semibold text-purple-800">たとえ話 3 ：工場の2段階品質検査</span>
+          </div>
+          <p class="text-sm text-gray-700">
+            <strong>第1検査（書類審査 ＝ シンタックス）</strong>：部品の形が規格書通りか。不正な形なら即却下。<br>
+            <strong>第2検査（動作確認 ＝ セマンティクス）</strong>：形が規格通りでも、実際に組み立てると動くか。この段階で初めて「かみ合わない部品」（論理バグ）が発覚する。<br>
+            コンパイラの構文解析と意味解析はちょうどこの2段階に対応している。
+          </p>
+        </div>
+
+      </div>
+
+      <!-- シンタックスエラーの例 -->
+      <h3 class="font-semibold text-gray-900 mb-2">シンタックスエラーの例</h3>
+      <p class="text-sm text-gray-600 mb-2">このコードは「比較演算子の誤り」と「括弧の欠落」という書き方ルール違反を示す。</p>
+      <pre><span class="comment"># シンタックスエラー：実行前に検出される</span>
+<span class="error">if x = 1:          # SyntaxError: 代入演算子 = を比較に使用（正しくは ==）</span>
+    print("one")
+
+<span class="error">result = (a + b    # SyntaxError: 括弧が閉じられていない</span></pre>
+
+      <!-- セマンティクスエラーの例 -->
+      <h3 class="font-semibold text-gray-900 mb-2 mt-5">セマンティクスエラーの例（動的：実行時に発覚）</h3>
+      <p class="text-sm text-gray-600 mb-2">このコードは文法的に正しいが、「割引後の価格」を計算する意図で書かれているのに引き算と足し算が逆になっているという論理バグを示す。</p>
+      <pre><span class="comment"># セマンティクスエラー（動的）：文法は通過するが意味が誤り</span>
+<span class="keyword">def</span> discounted_price(price, discount_rate):
+    <span class="comment"># 意図: 割引後の価格 = price × (1 - discount_rate)</span>
+    <span class="error">return price * (1 + discount_rate)  # 誤: 割増になっている</span>
+
+<span class="comment"># Python は何のエラーも出さず実行する</span>
+print(discounted_price(1000, 0.1))  <span class="comment"># → 1100（本来 900 のはず）</span></pre>
+
+      <!-- 型エラーは静的セマンティクス -->
+      <h3 class="font-semibold text-gray-900 mb-2 mt-5">型エラーは「静的セマンティクス」エラー</h3>
+      <p class="text-sm text-gray-600 mb-2">このコードはシンタックス（文法）的には正しい。しかし型規則（意味）に違反するため、TypeScriptとJavaはコンパイル時に弾く。「型エラー ＝ 実行後に発覚」ではなく、「静的意味解析フェーズで検出」される。</p>
+      <pre><span class="comment">// TypeScript: 型注釈はシンタックス拡張、型検査は静的セマンティクス</span>
+<span class="keyword">const</span> x: number = <span class="string">"hello"</span>;
+<span class="error">// TS2322: Type 'string' is not assignable to type 'number'</span>
+<span class="comment">// → 文法は通過するが、意味解析（型検査）フェーズで拒否される</span>
+
+<span class="comment">// Java: 静的型付きでコンパイル時に型整合を検証</span>
+<span class="keyword">int</span> count = <span class="string">"hello"</span>;
+<span class="error">// error: incompatible types: String cannot be converted to int</span>
+<span class="comment">// → 実行前にコンパイルエラーとして検出（実行時エラーではない）</span></pre>
+
+      <!-- HTMLのシンタックス vs セマンティクス -->
+      <h3 class="font-semibold text-gray-900 mb-2 mt-5">HTMLにおける対応関係</h3>
+      <p class="text-sm text-gray-600 mb-4">HTMLにも同様の区別がある。</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <h4 class="font-medium text-sm text-indigo-700 mb-2">Syntax（書き方のルール）</h4>
+          <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li>タグの開始・終了の対応</li>
+            <li>属性値の引用符</li>
+            <li>文字参照のエスケープ</li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <h4 class="font-medium text-sm text-purple-700 mb-2">Semantics（意味・役割）</h4>
+          <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside">
+            <li><code class="inline">&lt;button&gt;</code> vs <code class="inline">&lt;div onclick&gt;</code></li>
+            <li>見出しレベルの論理的順序</li>
+            <li>アクセシビリティ・スクリーンリーダー上の意味</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-3 text-sm text-gray-700">
+        <strong class="text-amber-800">なぜ <code class="inline">&lt;button&gt;</code> と <code class="inline">&lt;div onclick&gt;</code> は「意味が違う」のか：</strong><br>
+        見た目は同じにできても、<code class="inline">&lt;button&gt;</code> はキーボードフォーカス・Enterキー送信・WAI-ARIA ロール「button」・スクリーンリーダーへの「ボタン」読み上げが自動付与される。<code class="inline">&lt;div onclick&gt;</code> はクリックイベントは走るが、これらの「意味的な役割」が欠落している。シンタックスは通過しても、アクセシビリティ上のセマンティクスが破綻している典型例。
+      </div>
+
+      <div class="term-box mt-4">
+        <strong>AST（Abstract Syntax Tree：抽象構文木）</strong><br>
+        構文解析の出力。「括弧は省いた」「演算子の優先順位を木構造に変換した」状態の中間表現。意味解析はこの木に対して行われる。
+      </div>
+      <div class="term-box">
+        <strong>BNF（Backus-Naur Form：バッカス・ナウア記法）</strong><br>
+        プログラミング言語の文法（シンタックス）を生成規則の形式で記述する表記法。例：<code class="inline">&lt;expr&gt; ::= &lt;term&gt; | &lt;expr&gt; "+" &lt;term&gt;</code>。繰り返しや省略を簡潔に表記した拡張版が EBNF（Extended Backus-Naur Form：拡張バッカス・ナウア記法）。
+      </div>
+      <div class="term-box">
+        <strong>CFG（Context-Free Grammar：文脈自由文法）</strong><br>
+        BNF で表現される文法クラス。多くのプログラミング言語の構文はこのクラスに収まる。<strong>プッシュダウンオートマトン</strong>（スタックを持つ有限状態機械）で解析できる点が重要な数学的性質。チョムスキー階層の第2クラス。
+      </div>
+      <div class="term-box">
+        <strong>受理問題（Acceptance Problem）</strong><br>
+        形式言語理論の文脈で「ある文字列がその文法（言語）に属するか否かを判定する問題」のこと。シンタックスの仕事は、入力コードをこの受理問題として扱い、文法に合致すれば受理（パス）・違反すれば拒否（構文エラー）と判定すること。
+      </div>
+    </section>
+
+    <!-- Section 5: 落とし穴 -->
+    <section id="sec-pitfalls" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-500"></i>
+        初心者がはまりやすい落とし穴
+      </h2>
+
+      <div class="space-y-4">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+          <h3 class="font-semibold text-red-800 mb-2">「コンパイルが通れば動く」という誤解</h3>
+          <p class="text-sm text-gray-700 mb-2">
+            シンタックスエラーがなく、型検査も通過したとしても、<strong>論理バグ・無限ループ・計算ミス</strong>は残る。「コンパイルが通る ≠ 正しく動く」。セマンティクスの正確さはテストや検証で担保する必要がある。
+          </p>
+          <div class="text-xs bg-white border border-red-100 rounded-lg px-3 py-2 text-red-700">
+            回避策：単体テスト・コードレビュー・静的解析ツール（型検査、データフロー解析）の活用
+          </div>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+          <h3 class="font-semibold text-red-800 mb-2">型エラーはシンタックスエラー？という混乱</h3>
+          <p class="text-sm text-gray-700 mb-2">
+            型エラー（<code class="inline">TypeError: cannot add int and str</code>）はシンタックスは正しく通過する。<strong>型チェックは「静的意味（Static Semantics）」フェーズの産物</strong>。「文法は正しいが、意味的に型規則に違反している」という位置づけ。
+          </p>
+          <div class="text-xs bg-white border border-red-100 rounded-lg px-3 py-2 text-red-700">
+            整理：シンタックスエラー ＝ パーサが拒否 / 型エラー ＝ 意味解析器が拒否
+          </div>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+          <h3 class="font-semibold text-red-800 mb-2">「セマンティクスエラーは実行時のみ」という誤解</h3>
+          <p class="text-sm text-gray-700 mb-2">
+            静的型付き言語（Java・TypeScript・Rust）では、<strong>型エラー・未定義変数・スコープ違反はコンパイル前に検出できる</strong>。「セマンティクスエラー ＝ 実行時バグ」ではない。「実行後に顕在化しやすいセマンティクスエラーが存在する」という理解が正確。
+          </p>
+          <div class="text-xs bg-white border border-red-100 rounded-lg px-3 py-2 text-red-700">
+            整理：静的セマンティクス（コンパイル時）＋ 動的セマンティクス（実行時）の2層構造
+          </div>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+          <h3 class="font-semibold text-red-800 mb-2">TypeScriptの型注釈はシンタックス？セマンティクス？</h3>
+          <p class="text-sm text-gray-700 mb-2">
+            <code class="inline">const x: number = "hello"</code> の <code class="inline">: number</code> は、TypeScript が JS の構文に追加した<strong>シンタックス上の拡張</strong>。しかし「string を number 型変数に代入する」のは<strong>意味解析での型エラー</strong>。両方が絡む例。実行時には型情報は消去される（型消去：Type Erasure）。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: 専門用語集 -->
+    <section id="sec-glossary" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="book-open" class="w-5 h-5 text-teal-600"></i>
+        専門用語集
+      </h2>
+
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-left px-4 py-3 font-semibold text-gray-700 w-1/3">用語</th>
+              <th class="text-left px-4 py-3 font-semibold text-gray-700">定義</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <tr>
+              <td class="px-4 py-3 font-medium text-indigo-700">シンタックス<br><span class="text-xs text-gray-400">Syntax</span></td>
+              <td class="px-4 py-3 text-gray-600">記号・単語を並べる際の形式ルール。文法。BNF/CFGで形式的に記述可能。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-purple-700">セマンティクス<br><span class="text-xs text-gray-400">Semantics</span></td>
+              <td class="px-4 py-3 text-gray-600">その記述が表す意味・意図・論理的内容。静的（型・スコープ）と動的（実行時振る舞い）に分かれる。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">トークン<br><span class="text-xs text-gray-400">Token</span></td>
+              <td class="px-4 py-3 text-gray-600">字句解析が生成する最小単位。キーワード・識別子・演算子・リテラルなど。→ 構文解析・意味解析</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">AST<br><span class="text-xs text-gray-400">Abstract Syntax Tree：抽象構文木</span></td>
+              <td class="px-4 py-3 text-gray-600">構文解析の出力。冗長な括弧を省き演算子優先度を木で表現。意味解析・コード生成の入力となる。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">BNF<br><span class="text-xs text-gray-400">Backus-Naur Form：バッカス・ナウア記法</span></td>
+              <td class="px-4 py-3 text-gray-600">言語の構文を生成規則で記述する表記法。多くの言語仕様書で使用。→ CFG, EBNF</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">CFG<br><span class="text-xs text-gray-400">Context-Free Grammar：文脈自由文法</span></td>
+              <td class="px-4 py-3 text-gray-600">チョムスキー階層の第2クラス。多くのプログラミング言語構文を表現できる。プッシュダウンオートマトンで解析可能。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">静的解析<br><span class="text-xs text-gray-400">Static Analysis</span></td>
+              <td class="px-4 py-3 text-gray-600">実行せずにソースコードから性質（型整合・未定義変数・到達不能コード等）を推論する技術。→ セマンティクス</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">型検査<br><span class="text-xs text-gray-400">Type Checking</span></td>
+              <td class="px-4 py-3 text-gray-600">意味解析の中心的役割。静的型付き言語ではコンパイル時に型整合性を検証する。→ 静的セマンティクス</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">シンボルテーブル<br><span class="text-xs text-gray-400">Symbol Table</span></td>
+              <td class="px-4 py-3 text-gray-600">識別子→型・スコープ・アドレス等の対応を管理するデータ構造。意味解析フェーズで構築・参照される。</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-gray-800">型消去<br><span class="text-xs text-gray-400">Type Erasure</span></td>
+              <td class="px-4 py-3 text-gray-600">TypeScript/Javaのジェネリクスなど、コンパイル時に型情報を取り除き実行時には残さない仕組み。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 7: 次に学ぶと良いもの -->
+    <section id="sec-next" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="compass" class="w-5 h-5 text-sky-600"></i>
+        次に学ぶと良いもの
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="git-branch" class="w-4 h-4 text-indigo-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">コンパイラ・インタプリタ設計</h3>
+          </div>
+          <p class="text-xs text-gray-600">字句解析・構文解析・意味解析・コード生成の全フェーズを実装することで、シンタックス/セマンティクスの区別が実装レベルで腑に落ちる。Dragon Book（Aho ら著）が定番教科書。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-purple-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">型理論（Type Theory）</h3>
+          </div>
+          <p class="text-xs text-gray-600">「型エラーは静的セマンティクス」の延長線。型システムを数学的に定式化すると、Rust の借用チェッカーや Haskell の型推論が論理的に見えてくる。Curry–Howard 対応（型＝命題・プログラム＝証明）へ発展。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="function-square" class="w-4 h-4 text-green-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">形式意味論（Formal Semantics）</h3>
+          </div>
+          <p class="text-xs text-gray-600">「セマンティクス ＝ プログラムの振る舞い」を数学的に定義する体系。操作的意味論（抽象機械の状態遷移）・指示的意味論（数学関数への写像）・公理的意味論（Hoare 論理：事前・事後条件）の3流派がある。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="search" class="w-4 h-4 text-orange-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">静的解析ツール・リンター</h3>
+          </div>
+          <p class="text-xs text-gray-600">ESLint・Pylint・Clippy（Rust）は「シンタックスチェック」を超え、未使用変数・型不整合・セキュリティパターンなど意味レベルの問題を指摘する。シンタックス/セマンティクスの区別を理解すると、なぜリンターが「文法は通るのに警告を出す」のかが明快になる。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="message-circle" class="w-4 h-4 text-teal-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">プラグマティクス（語用論）</h3>
+          </div>
+          <p class="text-xs text-gray-600">自然言語学のシンタックス・セマンティクスに続く第3の柱。文脈・話者意図・暗黙の前提を扱う。プログラムでは命名規則・コメント・API 設計の「文化的慣習」に近い概念で、「意味は正しいが慣習に反する」コードへの批判に相当。</p>
+        </div>
+        <div class="bg-white rounded-xl border border-gray-200 p-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="layers" class="w-4 h-4 text-red-500"></i>
+            <h3 class="font-medium text-gray-900 text-sm">BNF / EBNF 記法</h3>
+          </div>
+          <p class="text-xs text-gray-600">言語仕様書で構文を正確に記述するための記法（BNF：Backus-Naur Form / EBNF：Extended Backus-Naur Form）。RFC・ISO 標準・言語仕様書を読む際に必須。「シンタックスとは何か」を形式的に書いたものがBNF/EBNF。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: 参考文献 -->
+    <section id="sec-refs" class="mb-12">
+      <h2 class="flex items-center gap-2 text-xl font-bold text-gray-900 mb-4 border-b pb-2">
+        <i data-lucide="link" class="w-5 h-5 text-gray-500"></i>
+        参考文献・URL
+      </h2>
+
+      <ul class="space-y-3 text-sm">
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://tc39.es/ecma262/" class="text-blue-600 hover:underline font-medium" target="_blank">ECMAScript 言語仕様（tc39.es）</a>
+            <p class="text-gray-500">JavaScript の構文・意味が両方定義されている一次資料</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://www.typescriptlang.org/docs/handbook/intro.html" class="text-blue-600 hover:underline font-medium" target="_blank">TypeScript Handbook（typescriptlang.org）</a>
+            <p class="text-gray-500">型システム（静的意味）と構文拡張の実践的解説</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://html.spec.whatwg.org/dev/syntax.html" class="text-blue-600 hover:underline font-medium" target="_blank">HTML Living Standard — Syntax（html.spec.whatwg.org）</a>
+            <p class="text-gray-500">HTML の構文規則の一次仕様</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://en.wikipedia.org/wiki/Generative_grammar" class="text-blue-600 hover:underline font-medium" target="_blank">Generative Grammar — Wikipedia（英語）</a>
+            <p class="text-gray-500">チョムスキーの生成文法と Syntax/Semantics 分離の背景</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://en.wikipedia.org/wiki/Semantic_analysis_(compilers)" class="text-blue-600 hover:underline font-medium" target="_blank">Semantic Analysis (Compilers) — Wikipedia（英語）</a>
+            <p class="text-gray-500">コンパイラの意味解析フェーズの概要</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://www.cs.cornell.edu/courses/cs4120/2022sp/notes/semantic/" class="text-blue-600 hover:underline font-medium" target="_blank">Cornell CS4120 — Semantic Analysis Notes</a>
+            <p class="text-gray-500">大学院レベルのコンパイラ講義ノート（意味解析・シンボルテーブル）</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://plato.stanford.edu/entries/compositionality/" class="text-blue-600 hover:underline font-medium" target="_blank">Compositionality — Stanford Encyclopedia of Philosophy</a>
+            <p class="text-gray-500">意味の組成性（部分の意味から全体の意味が決まる）の哲学的・言語学的解説</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <a href="https://www.amazon.co.jp/dp/4781905854" class="text-blue-600 hover:underline font-medium" target="_blank">Compilers: Principles, Techniques, and Tools（通称 Dragon Book）</a>
+            <p class="text-gray-500">Aho, Lam, Sethi, Ullman 著。コンパイラ設計の標準教科書。構文解析・意味解析の章が詳しい。</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-medium text-gray-800">プログラミング言語の基礎概念（五十嵐淳 著、サイエンス社）</span>
+            <p class="text-gray-500">日本語で読める形式意味論・型理論の入門書。λ計算・型システムの基礎を丁寧に解説。</p>
+          </div>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-medium text-gray-800">言語処理系（中田育男 著、岩波書店）</span>
+            <p class="text-gray-500">日本語コンパイラ教科書の定番。字句・構文・意味解析の実装が日本語で解説されている。</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="text-center text-xs text-gray-400 mt-8 pb-8">
+      生成日: 2026-03-28 &nbsp;|&nbsp; techmap / syntax-semantics
+    </footer>
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

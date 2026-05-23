@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anthropic Skills 作成ベストプラクティス - Techmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --techmap-primary: #1e3a5f;
+      --techmap-accent: #0ea5e9;
+      --techmap-gradient: linear-gradient(135deg, #1e3a5f 0%, #0ea5e9 100%);
+    }
+    body { font-family: 'Noto Sans JP', 'Inter', sans-serif; }
+    .header-gradient { background: var(--techmap-gradient); }
+    .section-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .term-explain {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border-left: 4px solid #0ea5e9;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .term-word { color: #0369a1; }
+    .badge-essential {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white; padding: 0.25rem 0.75rem; border-radius: 9999px;
+      font-size: 0.875rem; font-weight: 600;
+    }
+    .badge-recommended {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      color: white; padding: 0.25rem 0.75rem; border-radius: 9999px;
+      font-size: 0.875rem; font-weight: 600;
+    }
+    .badge-optional {
+      background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+      color: white; padding: 0.25rem 0.75rem; border-radius: 9999px;
+      font-size: 0.875rem; font-weight: 600;
+    }
+    .code-block {
+      background: #1e293b; color: #e2e8f0; padding: 1.5rem;
+      border-radius: 0.75rem; overflow-x: auto;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.875rem; line-height: 1.7;
+    }
+    .ref-link {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1rem; background: #f8fafc;
+      border: 1px solid #e2e8f0; border-radius: 0.5rem;
+      text-decoration: none; color: #0ea5e9; transition: background 0.15s;
+    }
+    .ref-link:hover { background: #e0f2fe; }
+    .toc {
+      position: fixed; right: 2rem; top: 50%;
+      transform: translateY(-50%); background: white;
+      padding: 1rem; border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      max-height: 80vh; overflow-y: auto; z-index: 50; min-width: 160px;
+    }
+    @media (max-width: 1280px) { .toc { display: none; } }
+    .pdf-btn {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--techmap-gradient); color: white;
+      border: none; padding: 0.75rem 1.25rem; border-radius: 9999px;
+      font-size: 0.875rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(14,165,233,0.4);
+      transition: opacity 0.15s, transform 0.15s; z-index: 100;
+    }
+    .pdf-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    @media print {
+      .toc, .pdf-btn { display: none !important; }
+      body { background: white; }
+      .section-card {
+        box-shadow: none; border: 1px solid #e2e8f0;
+        break-inside: avoid; page-break-inside: avoid;
+      }
+      .header-gradient { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      a[href]::after { content: none; }
+    }
+    .freedom-bar {
+      height: 8px; border-radius: 9999px;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+    }
+    .analogy-box {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+      padding: 1.25rem 1.5rem; border-radius: 0.75rem; margin: 1rem 0;
+    }
+    .pitfall-box {
+      background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+      border-left: 4px solid #ef4444;
+      padding: 1.25rem 1.5rem; border-radius: 0.75rem; margin: 1rem 0;
+    }
+    .good-box {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+      border-left: 4px solid #22c55e;
+      padding: 1.25rem 1.5rem; border-radius: 0.75rem; margin: 1rem 0;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- 目次（デスクトップ専用・フローティング） -->
+  <nav class="toc">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">目次</p>
+    <ul class="space-y-1 text-sm">
+      <li><a href="#summary" class="text-gray-600 hover:text-sky-600">概要</a></li>
+      <li><a href="#why" class="text-gray-600 hover:text-sky-600">なぜ生まれたか</a></li>
+      <li><a href="#basics" class="text-gray-600 hover:text-sky-600">まず理解する3つ</a></li>
+      <li><a href="#structure" class="text-gray-600 hover:text-sky-600">スキルの構造</a></li>
+      <li><a href="#progressive" class="text-gray-600 hover:text-sky-600">プログレッシブ開示</a></li>
+      <li><a href="#freedom" class="text-gray-600 hover:text-sky-600">自由度の設定</a></li>
+      <li><a href="#iteration" class="text-gray-600 hover:text-sky-600">開発イテレーション</a></li>
+      <li><a href="#pitfalls" class="text-gray-600 hover:text-sky-600">落とし穴</a></li>
+      <li><a href="#glossary" class="text-gray-600 hover:text-sky-600">専門用語集</a></li>
+      <li><a href="#related" class="text-gray-600 hover:text-sky-600">次に学ぶもの</a></li>
+      <li><a href="#references" class="text-gray-600 hover:text-sky-600">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <!-- ヘッダー -->
+  <header class="header-gradient text-white py-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium tracking-wide">Techmap</span>
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">AI / LLM</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold">Anthropic Skills 作成ベストプラクティス</h1>
+      <p class="mt-2 text-lg opacity-90">Claude に「再利用可能な能力」を追加するスキルの設計原則</p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+
+    <!-- 1. ひとことで言えば -->
+    <section id="summary" class="section-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="map" class="w-6 h-6 text-sky-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">ひとことで言えば</h2>
+          <p class="text-gray-500">まずここだけ押さえる</p>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-xl p-6">
+        <p class="text-xl font-bold text-sky-900">Skills とは、Claude に「特定ドメインの知識・手順」を再利用可能な形で追加するプラグイン機構である。</p>
+        <p class="mt-3 text-gray-700">SKILL.md という単一ファイル（YAML フロントマター＋本文）で定義し、Claude がタスクに応じて自動で読み込む。<br>
+        設計の核心は <strong>「簡潔さ」</strong> と <strong>「プログレッシブ開示（Progressive Disclosure）」</strong> — コンテキストウィンドウを節約しながら必要な情報だけを届ける。</p>
+      </div>
+
+      <div class="term-explain mt-6">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-sky-500 flex-shrink-0 mt-1"></i>
+          <div>
+            <div class="term-word text-xl font-bold">「コンテキストウィンドウ（Context Window）」とは？</div>
+            <div class="text-base mt-2">
+              LLM（Large Language Model：大規模言語モデル）が一度の推論で参照できるテキストの総量（トークン数で計量）。<br>
+              システムプロンプト・会話履歴・スキルの内容・ユーザーの質問がすべてここに収まる有限リソース。<br>
+              上限を超えると実装依存で <strong>古いメッセージがトランケート（切り捨て）される</strong>か、エラーが返るかのどちらかになる。<br>
+              スキルの本文が長いほど会話履歴に使えるトークンが減る、というトレードオフが生じる。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 動作プラットフォーム -->
+      <div class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="server" class="w-5 h-5 text-slate-600"></i>
+          <span class="font-bold text-slate-800">どこで動くか？</span>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div>
+            <div class="font-bold mb-1">claude.ai のプロジェクト機能</div>
+            <p>「プロジェクト」を作成し、スキルフォルダをアップロードする。プロジェクトを開いた時点（セッション開始時）に全スキルのメタデータが読み込まれ、チャット中に必要なスキル本文が都度読み込まれる。</p>
+          </div>
+          <div>
+            <div class="font-bold mb-1">Claude API（コード実装）</div>
+            <p>API 呼び出し時にスキルファイルを system prompt に含める形で渡す。<strong>ただし API ではネットワーク外部へのアクセスがないため、スクリプトの pip install 等は使えない。</strong></p>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-3">「起動時」とは: claude.ai ではプロジェクトセッションの開始を指す。API では各リクエスト時にスキル内容を渡すため「毎回読み込み」となる。</p>
+      </div>
+
+      <!-- 対象読者・カバー範囲 -->
+      <div class="mt-6 grid sm:grid-cols-2 gap-4">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="user-check" class="w-5 h-5 text-sky-600"></i>
+            <span class="font-bold text-gray-700">対象読者</span>
+          </div>
+          <ul class="text-sm text-gray-600 space-y-1 ml-7 list-disc">
+            <li>Anthropic の Claude API / claude.ai を使っているエンジニア</li>
+            <li>繰り返し使う知識・手順を Claude に覚えさせたい人</li>
+            <li>エージェントや自動化ワークフローを構築したい人</li>
+          </ul>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="layers" class="w-5 h-5 text-sky-600"></i>
+            <span class="font-bold text-gray-700">この図解でわかること</span>
+          </div>
+          <ul class="text-sm text-gray-600 space-y-1 ml-7 list-disc">
+            <li>SKILL.md の構造・書き方のルール</li>
+            <li>プログレッシブ開示パターンの設計方法</li>
+            <li>自由度・フィードバックループの実装</li>
+            <li>評価ファーストの開発プロセス</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. なぜ生まれたのか -->
+    <section id="why" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="history" class="w-6 h-6 text-violet-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">なぜ生まれたのか？</h2>
+          <p class="text-gray-500">LLM の「毎回ゼロから教える問題」を解決するために</p>
+        </div>
+      </div>
+
+      <div class="bg-violet-50 border border-violet-200 rounded-xl p-5 mb-6">
+        <p class="font-bold text-violet-900 text-lg mb-2">解決したかった課題</p>
+        <p class="text-gray-700">LLM は会話をまたいでコンテキストを保持しない。<br>
+        「このプロジェクトの命名規則」「このDBのスキーマ」「このコードレビューの観点」— 毎回同じ背景知識をシステムプロンプトに書いていた。</p>
+      </div>
+
+      <!-- 時系列フロー -->
+      <div class="flex flex-col md:flex-row items-center justify-center gap-3 my-6">
+        <div class="bg-red-100 px-5 py-4 rounded-xl text-center w-full md:w-auto">
+          <i data-lucide="alert-circle" class="w-7 h-7 text-red-500 mx-auto mb-2"></i>
+          <div class="font-bold text-sm">課題</div>
+          <div class="text-xs text-gray-600 mt-1">毎回同じ知識を<br>プロンプトに書く</div>
+        </div>
+        <i data-lucide="arrow-right" class="w-7 h-7 text-gray-400 hidden md:block flex-shrink-0"></i>
+        <i data-lucide="arrow-down" class="w-7 h-7 text-gray-400 md:hidden"></i>
+        <div class="bg-amber-100 px-5 py-4 rounded-xl text-center w-full md:w-auto">
+          <i data-lucide="settings" class="w-7 h-7 text-amber-500 mx-auto mb-2"></i>
+          <div class="font-bold text-sm">アプローチ</div>
+          <div class="text-xs text-gray-600 mt-1">知識を SKILL.md に<br>カプセル化して再利用</div>
+        </div>
+        <i data-lucide="arrow-right" class="w-7 h-7 text-gray-400 hidden md:block flex-shrink-0"></i>
+        <i data-lucide="arrow-down" class="w-7 h-7 text-gray-400 md:hidden"></i>
+        <div class="bg-emerald-100 px-5 py-4 rounded-xl text-center w-full md:w-auto">
+          <i data-lucide="check-circle" class="w-7 h-7 text-emerald-500 mx-auto mb-2"></i>
+          <div class="font-bold text-sm">効果</div>
+          <div class="text-xs text-gray-600 mt-1">Claude が自動で発見し<br>必要時だけ読み込む</div>
+        </div>
+      </div>
+
+      <!-- System Prompt との比較 -->
+      <div class="mt-4 overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="text-left p-3 rounded-tl-lg font-bold text-gray-700">手段</th>
+              <th class="text-left p-3 font-bold text-gray-700">再利用性</th>
+              <th class="text-left p-3 font-bold text-gray-700">コンテキスト消費</th>
+              <th class="text-left p-3 rounded-tr-lg font-bold text-gray-700">向いている用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-gray-200">
+              <td class="p-3 font-bold text-gray-800">システムプロンプト</td>
+              <td class="p-3 text-gray-600">毎回書き直す</td>
+              <td class="p-3 text-gray-600">常に全量消費</td>
+              <td class="p-3 text-gray-600">1つのアプリ・用途に特化した設定</td>
+            </tr>
+            <tr class="border-t border-gray-200 bg-sky-50">
+              <td class="p-3 font-bold text-sky-700">Skills</td>
+              <td class="p-3 text-gray-600">一度書けば複数プロジェクトで再利用</td>
+              <td class="p-3 text-gray-600">必要時のみ本文を読み込む</td>
+              <td class="p-3 text-gray-600">「PDF処理」「BigQuery分析」などドメイン知識の再利用</td>
+            </tr>
+            <tr class="border-t border-gray-200">
+              <td class="p-3 font-bold text-gray-800">Fine-tuning</td>
+              <td class="p-3 text-gray-600">高い（モデル自体に学習させる）</td>
+              <td class="p-3 text-gray-600">なし</td>
+              <td class="p-3 text-gray-600">固定した大量の手順・スタイルの自動適用</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-gray-700 mt-4">
+        スキルはメタデータ（name・description）だけが起動時にロードされ、<strong>本文は必要になった時点で初めて読み込まれる</strong>。
+        100個のスキルがあっても、関係ないスキルの本文はコンテキストを消費しない。
+      </p>
+    </section>
+
+    <!-- 3. まず理解する3つ -->
+    <section id="basics" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="target" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">まず理解する3つ</h2>
+          <p class="text-gray-500">これだけ押さえればスキル作成の骨格がわかる</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <!-- 1 -->
+        <div class="flex items-start gap-4 p-5 bg-sky-50 rounded-xl border border-sky-200">
+          <div class="w-10 h-10 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">1</div>
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="font-bold text-gray-800 text-lg">簡潔さ最優先 — Claude はすでに賢い</span>
+              <span class="badge-essential">必須</span>
+            </div>
+            <p class="text-gray-600 text-sm">スキルのトークンは他の全情報（システムプロンプト・会話履歴など）と競合する。Claude がすでに知っていることは書かない。各記述に「このトークンは本当に必要か？」と自問する。</p>
+          </div>
+        </div>
+        <!-- 2 -->
+        <div class="flex items-start gap-4 p-5 bg-emerald-50 rounded-xl border border-emerald-200">
+          <div class="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">2</div>
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="font-bold text-gray-800 text-lg">SKILL.md は目次 — 詳細は別ファイルへ</span>
+              <span class="badge-essential">必須</span>
+            </div>
+            <p class="text-gray-600 text-sm">SKILL.md 本文は 500 行以内。詳細情報は reference.md などに分離し、必要な時だけ読み込む「プログレッシブ開示」を実装する。参照の深さは1段階まで。</p>
+          </div>
+        </div>
+        <!-- 3 -->
+        <div class="flex items-start gap-4 p-5 bg-violet-50 rounded-xl border border-violet-200">
+          <div class="w-10 h-10 bg-violet-600 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">3</div>
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <span class="font-bold text-gray-800 text-lg">評価ファーストで開発する</span>
+              <span class="badge-recommended">推奨</span>
+            </div>
+            <p class="text-gray-600 text-sm">スキルを書く前に、まず「スキルなしで Claude がどう失敗するか」を記録し、3つ以上の評価シナリオを作る。実際の失敗に基づいて最小限のスキルを書くことで、無駄な記述を防ぐ。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. スキルの構造 -->
+    <section id="structure" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="file-text" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">スキルの構造</h2>
+          <p class="text-gray-500">SKILL.md の必須要件と命名規則</p>
+        </div>
+      </div>
+
+      <div class="term-explain">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-sky-500 flex-shrink-0 mt-1"></i>
+          <div>
+            <div class="term-word text-xl font-bold">「YAML フロントマター（YAML Frontmatter）」とは？</div>
+            <div class="text-base mt-2">
+              ファイル冒頭の <code class="bg-sky-100 px-1 rounded">---</code> で囲まれたメタデータ領域。
+              YAML（YAML Ain't Markup Language：データシリアライズ言語）形式で記述する。<br>
+              ソースコードのヘッダーコメント（<code class="bg-sky-100 px-1 rounded">// @author</code>）に相当するが、機械が自動的に読み取る点が異なる。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- YAML 構造図 -->
+      <div class="mt-6">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="code" class="w-5 h-5 text-purple-500"></i>
+          <span class="font-bold text-gray-700">このコードがやること</span>
+        </div>
+        <p class="text-gray-600 mb-3 ml-7">
+          SKILL.md の最小構成。<code>name</code>（スキル識別子）と <code>description</code>（何をするか・いつ使うか）が必須フィールド。
+          起動時にこの2フィールドだけがすべてのスキルから読み込まれる。
+        </p>
+        <div class="code-block">
+          <pre><code><span style="color:#94a3b8">---</span>
+<span style="color:#7dd3fc">name</span>: <span style="color:#86efac">processing-pdfs</span>
+<span style="color:#7dd3fc">description</span>: <span style="color:#86efac">Extracts text and tables from PDF files, fills forms,
+  and merges documents. Use when working with PDF files or when
+  the user mentions PDFs, forms, or document extraction.</span>
+<span style="color:#94a3b8">---</span>
+
+<span style="color:#e2e8f0"># PDF Processing</span>
+
+<span style="color:#e2e8f0">## Quick start</span>
+<span style="color:#94a3b8">（本文。500行以内に収める）</span></code></pre>
+        </div>
+      </div>
+
+      <!-- フィールド制約テーブル -->
+      <div class="mt-6 overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="text-left p-3 rounded-tl-lg font-bold text-gray-700">フィールド</th>
+              <th class="text-left p-3 font-bold text-gray-700">制約</th>
+              <th class="text-left p-3 rounded-tr-lg font-bold text-gray-700">ポイント</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-gray-200">
+              <td class="p-3 font-mono font-bold text-sky-700">name</td>
+              <td class="p-3 text-gray-600">最大64文字・小文字/数字/ハイフンのみ・予約語（anthropic, claude）禁止</td>
+              <td class="p-3 text-gray-600">動名詞形（processing-pdfs）推奨</td>
+            </tr>
+            <tr class="border-t border-gray-200">
+              <td class="p-3 font-mono font-bold text-sky-700">description</td>
+              <td class="p-3 text-gray-600">最大1024文字・空不可・XML タグ禁止</td>
+              <td class="p-3 text-gray-600">三人称で「何をするか＋いつ使うか」を両方記述</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- description の書き方 -->
+      <div class="mt-6">
+        <h3 class="font-bold text-gray-800 text-lg mb-3">description の書き方：三人称ルール</h3>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="good-box">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+              <span class="font-bold text-emerald-800">良い例（三人称）</span>
+            </div>
+            <code class="text-sm text-gray-800">Processes Excel files and generates reports</code>
+          </div>
+          <div class="pitfall-box">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+              <span class="font-bold text-red-800">悪い例（一人称・二人称）</span>
+            </div>
+            <code class="text-sm text-gray-800">I can help you process Excel files</code><br>
+            <code class="text-sm text-gray-800">You can use this to process files</code>
+          </div>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-3 text-sm text-gray-700">
+          <div class="font-bold mb-2 text-slate-800">なぜ三人称でなければならないのか？— 注入メカニズム</div>
+          <p>claude.ai は起動時に全スキルの description を連結して以下のような形のシステムプロンプトを自動生成する：</p>
+          <div class="code-block mt-2 text-xs">
+            <pre><code>You have access to the following skills:
+- processing-pdfs: Extracts text and tables from PDF files...
+- analyzing-spreadsheets: Analyzes Excel data and generates reports...
+</code></pre>
+          </div>
+          <p class="mt-2">ここに「I can help you process Excel files」と一人称が混入すると、システムプロンプト全体の一貫性が崩れ、Claude がどの主語で応答すべきかを誤判断する可能性がある。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. プログレッシブ開示パターン -->
+    <section id="progressive" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="layers" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">プログレッシブ開示パターン</h2>
+          <p class="text-gray-500">必要な情報を、必要なタイミングだけ読み込む設計</p>
+        </div>
+      </div>
+
+      <div class="term-explain">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-sky-500 flex-shrink-0 mt-1"></i>
+          <div>
+            <div class="term-word text-xl font-bold">「プログレッシブ開示（Progressive Disclosure）」とは？</div>
+            <div class="text-base mt-2">
+              情報を一度に全部渡すのではなく、必要になったタイミングで段階的に開示する設計パターン。<br>
+              <strong class="text-sky-700">百科事典の目次</strong>に相当する：全文を読まなくても、必要な項目のページだけ開ける。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analogy-box mt-4">
+        <div class="flex items-start gap-3">
+          <i data-lucide="book-open" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-amber-900">たとえ話① ― 教科書と目次</div>
+            <div class="text-sm text-gray-700 mt-1">
+              SKILL.md は「教科書の目次」。Claude は目次だけ見て、必要な章だけ開く。全章を最初から読む必要はない。<br>
+              目次にないページを Claude は自力で発見できない → SKILL.md に必ず参照先を書くこと。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ディレクトリ構造図 -->
+      <div class="mt-6">
+        <h3 class="font-bold text-gray-800 text-lg mb-3">推奨ディレクトリ構成</h3>
+        <div class="code-block">
+          <pre><code>pdf-skill/
+├── <span style="color:#7dd3fc">SKILL.md</span>          <span style="color:#94a3b8"># メイン（起動時に読み込み） ← 500行以内</span>
+├── <span style="color:#86efac">FORMS.md</span>          <span style="color:#94a3b8"># フォーム記入ガイド（必要時のみ）</span>
+├── <span style="color:#86efac">reference.md</span>      <span style="color:#94a3b8"># APIリファレンス（必要時のみ）</span>
+└── scripts/
+    ├── <span style="color:#fcd34d">analyze_form.py</span>  <span style="color:#94a3b8"># 実行するスクリプト</span>
+    └── <span style="color:#fcd34d">fill_form.py</span></code></pre>
+        </div>
+      </div>
+
+      <!-- 参照深度の比較 -->
+      <div class="mt-6">
+        <h3 class="font-bold text-gray-800 text-lg mb-3">参照の深さは 1 段階まで</h3>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <div class="pitfall-box">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+              <span class="font-bold text-red-800">悪い例（2段階ネスト）</span>
+            </div>
+            <div class="text-sm text-gray-700 font-mono">
+              SKILL.md → advanced.md<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ details.md<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 実際の情報
+            </div>
+            <p class="text-xs text-gray-600 mt-2">Claude が途中で止まり情報を取りきれない可能性がある</p>
+          </div>
+          <div class="good-box">
+            <div class="flex items-center gap-2 mb-2">
+              <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600"></i>
+              <span class="font-bold text-emerald-800">良い例（1段階のみ）</span>
+            </div>
+            <div class="text-sm text-gray-700 font-mono">
+              SKILL.md → advanced.md（情報がここに）<br>
+              SKILL.md → reference.md（情報がここに）
+            </div>
+            <p class="text-xs text-gray-600 mt-2">すべての参照先が SKILL.md から直接リンクされている</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 自由度の設定 -->
+    <section id="freedom" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="sliders" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">自由度の設定</h2>
+          <p class="text-gray-500">タスクの性質に応じて指示の具体度を調整する</p>
+        </div>
+      </div>
+
+      <div class="analogy-box">
+        <div class="flex items-start gap-3">
+          <i data-lucide="mountain" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-amber-900">たとえ話② ― 崖のある橋 vs 広野</div>
+            <div class="text-sm text-gray-700 mt-1">
+              <strong>崖のある細い橋</strong>：安全な道は1本だけ → 低自由度（ガードレール付きの厳密な指示）<br>
+              <strong>障害物のない広野</strong>：どこを歩いてもゴールに着く → 高自由度（方向だけ示す）
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 space-y-4">
+        <!-- 高 -->
+        <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-gray-800">高自由度（テキストによる方針）</span>
+            <span class="badge-optional">例：コードレビュー</span>
+          </div>
+          <div class="freedom-bar w-full opacity-40 mb-2"></div>
+          <p class="text-sm text-gray-600">複数のアプローチが有効・文脈依存の判断。<br>手順を列挙するだけで Claude が最適な方法を選ぶ。</p>
+        </div>
+        <!-- 中 -->
+        <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-gray-800">中自由度（パラメータ付きテンプレート）</span>
+            <span class="badge-recommended">例：レポート生成</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-3">推奨パターンがある・設定で挙動が変わる場合。テンプレートを示しつつ変更可能な箇所を明示。</p>
+          <div class="code-block text-xs">
+            <pre><code><span style="color:#94a3b8"># スキル内での記述例（中自由度）</span>
+<span style="color:#94a3b8">## レポート生成</span>
+
+<span style="color:#e2e8f0">このテンプレートを使い、必要に応じてカスタマイズすること：</span>
+
+<span style="color:#7dd3fc">def</span> <span style="color:#86efac">generate_report</span>(data, format=<span style="color:#fcd34d">"markdown"</span>, include_charts=<span style="color:#fcd34d">True</span>):
+    <span style="color:#94a3b8"># データを処理する</span>
+    <span style="color:#94a3b8"># 指定フォーマットで出力</span>
+    <span style="color:#94a3b8"># include_charts=True なら可視化も含める</span></code></pre>
+          </div>
+        </div>
+        <!-- 低 -->
+        <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-bold text-gray-800">低自由度（完全なコマンド）</span>
+            <span class="badge-essential">例：DB マイグレーション</span>
+          </div>
+          <p class="text-sm text-gray-600">操作が脆弱・順序固定・一貫性が必須の場合。<br>「このコマンドをそのまま実行し、フラグを追加しないこと」と明記。</p>
+          <div class="code-block mt-3">
+            <pre><code>python scripts/migrate.py --verify --backup
+<span style="color:#94a3b8"># このコマンドを変更・追記しないこと</span></code></pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- フィードバックループ -->
+      <div class="mt-8">
+        <h3 class="font-bold text-gray-800 text-lg mb-4">フィードバックループの実装</h3>
+        <p class="text-gray-600 mb-4">品質が重要なタスクでは「検証 → 修正 → 繰り返し」ループを明示的に組み込む。</p>
+
+        <div class="analogy-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="refresh-cw" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-amber-900">たとえ話③ ― コンパイル→テスト→修正サイクル</div>
+              <div class="text-sm text-gray-700 mt-1">
+                プログラムのビルドパイプラインと同じ構造：<br>
+                コード変更 → <code>make test</code> → 失敗 → 修正 → 再テスト → 全テスト通過後にのみマージ。<br>
+                スキルでも「validate.py を実行 → 失敗したら修正 → 再実行 → 通過後のみ次へ」と書くことで同等の安全性を担保できる。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- チェックリスト例 -->
+        <div class="mt-4">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="code" class="w-5 h-5 text-purple-500"></i>
+            <span class="font-bold text-gray-700">チェックリスト付きワークフローの書き方</span>
+          </div>
+          <p class="text-gray-600 mb-3 ml-7">Claude とユーザーが進捗を共有できるよう、コピー可能なチェックリストとして提示する。</p>
+          <div class="code-block">
+            <pre><code><span style="color:#7dd3fc">## タスク進捗</span>
+- [ ] Step 1: フォームを解析する（analyze_form.py を実行）
+- [ ] Step 2: フィールドマッピングを作成する（fields.json を編集）
+- [ ] Step 3: マッピングを検証する（validate_fields.py を実行）
+- [ ] Step 4: フォームに記入する（fill_form.py を実行）
+- [ ] Step 5: 出力を確認する（verify_output.py を実行）
+
+<span style="color:#94a3b8"># Step 3 が失敗した場合は Step 2 に戻る</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 開発イテレーション -->
+    <section id="iteration" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="repeat" class="w-6 h-6 text-rose-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">開発イテレーション</h2>
+          <p class="text-gray-500">評価ファースト × Claude A/B 方式でスキルを磨く</p>
+        </div>
+      </div>
+
+      <!-- Claude A/B フロー -->
+      <h3 class="font-bold text-gray-800 text-lg mb-4">Claude A / Claude B 方式</h3>
+
+      <div class="analogy-box">
+        <div class="flex items-start gap-3">
+          <i data-lucide="users" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-amber-900">たとえ話④ ― 仕様作成者と実装者の分業</div>
+            <div class="text-sm text-gray-700 mt-1">
+              ソフトウェア開発での「仕様設計者（Claude A）」と「実装者（Claude B）」の役割分担と同じ。<br>
+              設計者がドキュメントを書き、実装者が実際に動かしてみてフィードバックを返すサイクル。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 mb-4 text-sm text-gray-700">
+        <div class="font-bold mb-2 text-slate-800">具体的な操作手順（claude.ai の場合）</div>
+        <ol class="space-y-1 ml-4 list-decimal">
+          <li><strong>Claude A（設計セッション）</strong>：新しいチャットを開き、タスクを会話で実行。繰り返し使う知識・手順を特定して「SKILL.md を作成してください」と依頼する。</li>
+          <li>生成された SKILL.md をファイルに保存し、プロジェクトのスキルフォルダに追加する。</li>
+          <li><strong>Claude B（テストセッション）</strong>：スキルを追加したプロジェクトで別の新チャットを開き、実際のタスクを投げる。</li>
+          <li>Claude B の挙動を観察して問題をメモし、Claude A セッションに持ち帰って SKILL.md を改善する。</li>
+        </ol>
+        <p class="text-xs text-gray-500 mt-2">「2 つのセッション」の正体は 物理的に別タブで開いた別チャット。Claude A = 設計・改善担当のチャット、Claude B = スキルを実際に使うプロジェクトチャット。</p>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-stretch gap-4 mt-6">
+        <div class="flex-1 bg-blue-50 rounded-xl p-5 border border-blue-200">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="pencil" class="w-5 h-5 text-blue-600"></i>
+            <span class="font-bold text-blue-800">Claude A（設計者）</span>
+          </div>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>・タスクを実際にやってみる</li>
+            <li>・繰り返し使う知識・手順を特定する</li>
+            <li>・SKILL.md を作成・改善する</li>
+            <li>・過剰説明を削る</li>
+          </ul>
+        </div>
+        <div class="flex items-center justify-center">
+          <div class="flex flex-col items-center gap-1">
+            <i data-lucide="arrow-right" class="w-8 h-8 text-gray-400 hidden md:block"></i>
+            <i data-lucide="arrow-down" class="w-8 h-8 text-gray-400 md:hidden"></i>
+            <span class="text-xs text-gray-500 hidden md:block">スキルを渡す</span>
+            <i data-lucide="arrow-left" class="w-8 h-8 text-gray-400 hidden md:block mt-4"></i>
+            <i data-lucide="arrow-up" class="w-8 h-8 text-gray-400 md:hidden"></i>
+            <span class="text-xs text-gray-500 hidden md:block">問題を報告</span>
+          </div>
+        </div>
+        <div class="flex-1 bg-emerald-50 rounded-xl p-5 border border-emerald-200">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="play-circle" class="w-5 h-5 text-emerald-600"></i>
+            <span class="font-bold text-emerald-800">Claude B（実行者）</span>
+          </div>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>・スキルをロードした状態で実際のタスクを実行</li>
+            <li>・どこで詰まるかを露わにする</li>
+            <li>・予期しないファイル参照パスを取る</li>
+            <li>・ルール適用漏れを起こす</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 評価ファースト -->
+      <div class="mt-8">
+        <h3 class="font-bold text-gray-800 text-lg mb-4">評価ファースト開発プロセス</h3>
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">1</div>
+            <div class="pt-1"><span class="font-bold">スキルなしで Claude にタスクを実行させる</span> — 失敗点・不足コンテキストを記録</div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">2</div>
+            <div class="pt-1"><span class="font-bold">3つ以上の評価シナリオを作る</span> — 実際に起きた失敗をテストケースに</div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">3</div>
+            <div class="pt-1"><span class="font-bold">ベースラインを計測する</span></div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">4</div>
+            <div class="pt-1"><span class="font-bold">最小限のスキルを書いてギャップだけを埋める</span> — 予想で書かない</div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 bg-sky-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">5</div>
+            <div class="pt-1"><span class="font-bold">評価を実行し、改善を繰り返す</span></div>
+          </div>
+        </div>
+
+        <!-- 評価シナリオの例 -->
+        <div class="mt-5">
+          <div class="flex items-center gap-2 mb-2">
+            <i data-lucide="code" class="w-5 h-5 text-purple-500"></i>
+            <span class="font-bold text-gray-700">評価シナリオの書き方（JSON 形式の例）</span>
+          </div>
+          <p class="text-gray-600 mb-3 ml-7">使用スキル・クエリ・期待動作の3要素で構成する。これをベースに手動またはスクリプトで Claude の応答を採点する。</p>
+          <div class="code-block">
+            <pre><code>{
+  <span style="color:#7dd3fc">"skills"</span>: [<span style="color:#86efac">"pdf-processing"</span>],
+  <span style="color:#7dd3fc">"query"</span>: <span style="color:#86efac">"このPDFからテキストを抽出して output.txt に保存して"</span>,
+  <span style="color:#7dd3fc">"files"</span>: [<span style="color:#86efac">"test-files/document.pdf"</span>],
+  <span style="color:#7dd3fc">"expected_behavior"</span>: [
+    <span style="color:#86efac">"pdfplumber など PDF ライブラリを使ってファイルを読み込む"</span>,
+    <span style="color:#86efac">"全ページのテキストを欠落なく抽出する"</span>,
+    <span style="color:#86efac">"output.txt に読みやすい形式で保存する"</span>
+  ]
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 落とし穴 -->
+    <section id="pitfalls" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="triangle-alert" class="w-6 h-6 text-red-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">初心者がはまりやすい落とし穴</h2>
+          <p class="text-gray-500">よくある失敗パターンと回避策</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="pitfall-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-800">Windows スタイルのパスを書く</div>
+              <div class="text-sm text-gray-700 mt-1">
+                <code>scripts\helper.py</code> と書くと Unix 環境（claude.ai 等）でエラーになる。<br>
+                <strong>回避策：</strong>常にスラッシュ <code>scripts/helper.py</code> を使う。OS に関わらず動作する。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitfall-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-800">参照を 2 段階以上ネストする</div>
+              <div class="text-sm text-gray-700 mt-1">
+                SKILL.md → A.md → B.md のように深くすると、Claude がファイル読み取りツール（bash の <code>head -n 100</code> コマンド相当）でファイルを途中まで読んで止まり、B.md の内容が欠落する。<br>
+                <span class="text-xs text-gray-500">（Claude はファイル内容をシェルコマンドで読み込む。リンクされた先のファイルが大きい場合、全文ではなく冒頭部分だけ読んで判断することがある。）</span><br>
+                <strong>回避策：</strong>全参照先を SKILL.md から直接リンクし、参照チェーンは1段階に留める。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitfall-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-800">時間依存の条件分岐を書く</div>
+              <div class="text-sm text-gray-700 mt-1">
+                「2025年8月以前は旧 API を使用」などと書くとスキルが古くなった時に誤動作する。<br>
+                <strong>回避策：</strong>現在の方法をメインに書き、旧情報は Markdown の <code>&lt;details&gt;&lt;summary&gt;...&lt;/summary&gt;...&lt;/details&gt;</code> タグで折り畳む。<br>
+                <span class="text-xs text-gray-500">（Markdown は HTML タグをそのまま通すため、GitHub や claude.ai で <code>&lt;details&gt;</code> は折りたたみブロックとして機能する。Claude はこのブロックを「非推奨/旧情報」のシグナルとして認識し、通常フローでは参照しない。）</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitfall-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-800">MCP ツール名をサーバー名なしで書く</div>
+              <div class="text-sm text-gray-700 mt-1">
+                MCP（Model Context Protocol：モデル コンテキスト プロトコル）ツールを <code>bigquery_schema</code> とだけ書くと「tool not found」エラーになる。<br>
+                <strong>回避策：</strong><code>BigQuery:bigquery_schema</code> のように「サーバー名:ツール名」形式で書く。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pitfall-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-800">スクリプトでエラーを Claude に丸投げする</div>
+              <div class="text-sm text-gray-700 mt-1">
+                <code>return open(path).read()</code> のようにエラー処理なしで書くと、ファイルが存在しない場合に Claude が「どう対応すべきか」を推測し始める。<br>
+                <strong>回避策：</strong><code>try/except</code> でエラーを処理し、デフォルト値を返すか具体的なエラーメッセージを出す。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. 専門用語集 -->
+    <section id="glossary" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="book-open" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">専門用語集</h2>
+          <p class="text-gray-500">スキル設計を理解するうえで押さえておく語</p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">コンテキストウィンドウ（Context Window）</div>
+          <div class="text-sm text-gray-600 mt-1">LLM が1回の推論で参照できるテキストの総量。スキル・会話履歴・システムプロンプトがすべて競合する有限リソース。</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">プログレッシブ開示（Progressive Disclosure）</div>
+          <div class="text-sm text-gray-600 mt-1">必要になった時点で段階的に情報を渡す設計パターン。SKILL.md を目次として機能させ、詳細は別ファイルに分離する基盤概念。</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">YAML フロントマター（YAML Frontmatter）</div>
+          <div class="text-sm text-gray-600 mt-1">ファイル冒頭の <code>---</code> で囲まれたメタデータ領域。name と description の2フィールドが必須。起動時に全スキルからこの部分だけが読み込まれる。</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">動名詞形（Gerund Form）</div>
+          <div class="text-sm text-gray-600 mt-1">「動詞 + -ing」の形（processing / analyzing / managing）。スキル name の推奨命名規則。何をするスキルかが一目でわかる。関連：命名規則</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">フィードバックループ（Feedback Loop）</div>
+          <div class="text-sm text-gray-600 mt-1">「実行 → 検証 → 修正 → 再実行」を繰り返す反復プロセス。スクリプトの validate.py を使って機械的に検証し、エラー時は自動で修正フェーズに戻る。</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">MCP（Model Context Protocol：モデル コンテキスト プロトコル）</div>
+          <div class="text-sm text-gray-600 mt-1">Claude が外部ツールや API を呼び出すためのプロトコル。スキル内でツールを参照する際は「サーバー名:ツール名」形式（例：BigQuery:bigquery_schema）が必須。</div>
+        </div>
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-sky-700">評価シナリオ（Evaluation Scenario）</div>
+          <div class="text-sm text-gray-600 mt-1">スキルの有効性を測るテストケース。使用スキル・クエリ・期待動作の3要素で構成。スキル作成前に最低3つ用意することを推奨。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. 次に学ぶと良いもの -->
+    <section id="related" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="compass" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">次に学ぶと良いもの</h2>
+          <p class="text-gray-500">このスキル知識の先にあるトピック</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">Anthropic Skills 概要（Skills Overview）</div>
+            <div class="text-sm text-gray-600 mt-1">スキルのアーキテクチャ・ランタイム環境の詳細。ファイルシステムベースの設計思想を理解できる。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">MCP（Model Context Protocol）</div>
+            <div class="text-sm text-gray-600 mt-1">Claude が外部ツールを呼び出すプロトコル。スキルと MCP を組み合わせることで API 連携が可能になる。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">プロンプトエンジニアリング（Prompt Engineering）</div>
+            <div class="text-sm text-gray-600 mt-1">スキルの本文自体がプロンプト。Few-shot・Chain-of-Thought などの技法はスキル設計にそのまま応用できる。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">Claude API エージェント設計</div>
+            <div class="text-sm text-gray-600 mt-1">スキルを複数組み合わせて複雑なエージェントを構築する。Tool Use・Computer Use との連携パターン。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200 sm:col-span-2">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">プロンプト設計パターン（Few-shot / Chain-of-Thought）</div>
+            <div class="text-sm text-gray-600 mt-1">
+              <strong>Few-shot</strong>（数ショット学習）：入出力ペアの例を数件見せることで Claude の出力スタイルを制御する手法。スキルの「入出力例パターン」の理論的根拠になる。<br>
+              <strong>Chain-of-Thought</strong>（思考の連鎖）：「ステップごとに考えて」と指示して推論精度を上げる手法。スキルのワークフロー設計に応用できる。<br>
+              どちらもスキル本文を書く際に直接使えるプロンプト設計の基礎知識。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. 参考文献 -->
+    <section id="references" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="book-open" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">参考文献・公式資料</h2>
+          <p class="text-gray-500">さらに詳しく知りたい場合はこちら</p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-ai-skills" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">Anthropic 公式：Skills Overview（スキルの概要）</div>
+            <div class="text-xs text-gray-500">https://docs.anthropic.com/en/docs/agents-and-tools/claude-ai-skills</div>
+          </div>
+        </a>
+        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/skills-best-practices" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">Anthropic 公式：Skill Authoring Best Practices（本図解の原典）</div>
+            <div class="text-xs text-gray-500">https://docs.anthropic.com/en/docs/agents-and-tools/skills-best-practices</div>
+          </div>
+        </a>
+        <a href="https://docs.anthropic.com/en/docs/agents-and-tools/tool-use" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">Anthropic 公式：Tool Use（ツール連携の仕様）</div>
+            <div class="text-xs text-gray-500">https://docs.anthropic.com/en/docs/agents-and-tools/tool-use</div>
+          </div>
+        </a>
+        <a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">MCP 公式サイト（Model Context Protocol）</div>
+            <div class="text-xs text-gray-500">https://modelcontextprotocol.io/</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PDFボタン -->
+  <button class="pdf-btn" onclick="window.print()">
+    <i data-lucide="download" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

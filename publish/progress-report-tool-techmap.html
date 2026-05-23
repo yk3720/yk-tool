@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Techmap: 進捗報告自動化ツール — GAS × Spreadsheet × LINE API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+    .toc-link { transition: color 0.2s; }
+    .toc-link:hover { color: #2563eb; }
+    .term-box { border-left: 3px solid #3b82f6; }
+    .pitfall-box { border-left: 3px solid #ef4444; }
+    .tip-box { border-left: 3px solid #10b981; }
+    .flow-arrow { color: #94a3b8; }
+    @media print {
+      .no-print { display: none !important; }
+      section { break-inside: avoid; }
+      .toc-sidebar { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<!-- PDF保存ボタン -->
+<button onclick="window.print()" class="no-print fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-sm font-medium transition-colors">
+  <i data-lucide="file-down" class="w-4 h-4"></i>
+  PDFで保存
+</button>
+
+<!-- フローティング目次（デスクトップ） -->
+<nav class="toc-sidebar no-print hidden xl:block fixed top-8 right-6 w-52 bg-white border border-slate-200 rounded-xl shadow-md p-4 z-40">
+  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">目次</p>
+  <ol class="space-y-1.5 text-sm text-slate-600">
+    <li><a href="#summary" class="toc-link">1. ひとことで言えば</a></li>
+    <li><a href="#background" class="toc-link">2. なぜ作るのか</a></li>
+    <li><a href="#three-keys" class="toc-link">3. まず理解する3つ</a></li>
+    <li><a href="#architecture" class="toc-link">4. アーキテクチャ詳解</a></li>
+    <li><a href="#pitfalls" class="toc-link">5. 落とし穴</a></li>
+    <li><a href="#pricing" class="toc-link">6. 料金プラン</a></li>
+    <li><a href="#glossary" class="toc-link">7. 専門用語集</a></li>
+    <li><a href="#next" class="toc-link">8. 次に学ぶと良いもの</a></li>
+    <li><a href="#refs" class="toc-link">9. 参考文献</a></li>
+  </ol>
+</nav>
+
+<!-- メインコンテンツ -->
+<div class="max-w-3xl mx-auto px-4 py-12 xl:pr-64">
+
+  <!-- ヘッダー -->
+  <div class="mb-10">
+    <div class="flex items-center gap-2 text-blue-600 text-sm font-medium mb-3">
+      <i data-lucide="map" class="w-4 h-4"></i>
+      Techmap
+    </div>
+    <h1 class="text-3xl font-bold text-slate-900 leading-tight mb-3">
+      進捗報告自動化ツール
+      <span class="block text-xl text-slate-500 font-normal mt-1">GAS × Spreadsheet × LINE Messaging API</span>
+    </h1>
+    <div class="flex flex-wrap gap-2 text-xs">
+      <span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full">Google Apps Script</span>
+      <span class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full">Spreadsheet</span>
+      <span class="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full">LINE Messaging API</span>
+      <span class="bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-full">HtmlService</span>
+      <span class="bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full">費用：完全無料</span>
+    </div>
+  </div>
+
+  <!-- ─── 1. ひとことで言えば ─── -->
+  <section id="summary" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="zap" class="w-5 h-5 text-blue-500"></i>
+      1. ひとことで言えば
+    </h2>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-5">
+      <p class="text-base font-medium text-blue-900 leading-relaxed">
+        帰宅中にスマホでスプレッドシートへ入力するだけで、毎晩自動でHTMLレポートが生成され、LINEに届くシステム。口頭説明・個別メール連絡を一切なくす。
+      </p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-white border border-slate-200 rounded-lg p-4 text-center">
+        <i data-lucide="users" class="w-6 h-6 text-slate-400 mx-auto mb-2"></i>
+        <p class="text-xs font-semibold text-slate-500 mb-1">対象読者</p>
+        <p class="text-sm text-slate-700">制御設計者（作成側）<br>メカ・電気設計者・生産担当（閲覧側）</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4 text-center">
+        <i data-lucide="circle-check" class="w-6 h-6 text-slate-400 mx-auto mb-2"></i>
+        <p class="text-xs font-semibold text-slate-500 mb-1">カバーする範囲</p>
+        <p class="text-sm text-slate-700">トリガー / データ取得 / HTML生成 / LINE送信 の4パーツ</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg p-4 text-center">
+        <i data-lucide="banknote" class="w-6 h-6 text-slate-400 mx-auto mb-2"></i>
+        <p class="text-xs font-semibold text-slate-500 mb-1">費用</p>
+        <p class="text-sm text-slate-700">Google側：無料<br>LINE側：月200通以内で無料</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 2. なぜ作るのか ─── -->
+  <section id="background" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="history" class="w-5 h-5 text-blue-500"></i>
+      2. なぜ作るのか — 解決したい課題
+    </h2>
+    <div class="space-y-4">
+      <div class="bg-red-50 border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-800 mb-3 flex items-center gap-2">
+          <i data-lucide="triangle-alert" class="w-4 h-4"></i>
+          現状の問題
+        </h3>
+        <ul class="space-y-2 text-sm text-red-900">
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            装置立ち上げ中はトラブルが多発するが、担当メカ設計者は別工場にいて直接話せない
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            スプレッドシートに手動で書いて連絡する作業が毎回発生し、非効率
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="x" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            上長からの進捗確認に都度口頭で答える必要があり、対応時間がとられる
+          </li>
+        </ul>
+      </div>
+      <div class="bg-green-50 border border-green-200 rounded-xl p-5">
+        <h3 class="font-semibold text-green-800 mb-3 flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4"></i>
+          解決策のポイント
+        </h3>
+        <ul class="space-y-2 text-sm text-green-900">
+          <li class="flex items-start gap-2">
+            <i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            入力は「帰宅中の電車」でスマホから。特別な作業時間は不要
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            関係者は毎晩LINEを確認するだけ。個別連絡が不要になる
+          </li>
+          <li class="flex items-start gap-2">
+            <i data-lucide="check" class="w-4 h-4 mt-0.5 shrink-0"></i>
+            Google / LINEの無料機能で完結。新たなコストゼロ
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 3. まず理解する3つ ─── -->
+  <section id="three-keys" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="key" class="w-5 h-5 text-blue-500"></i>
+      3. まず理解する3つ
+    </h2>
+    <p class="text-sm text-slate-500 mb-5">この3つを押さえれば、ツール全体の流れが見える。</p>
+    <div class="space-y-4">
+
+      <!-- key 1 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-blue-100 text-blue-700 font-bold text-sm w-7 h-7 rounded-full flex items-center justify-center shrink-0">1</span>
+          <h3 class="font-semibold text-slate-900">GAS（Google Apps Script）は「Googleのサーバーで動くJavaScript」</h3>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          GAS（Google Apps Script：グーグル アップス スクリプト）はGoogleのクラウド上で実行されるスクリプト実行環境。自分のPCを起動していなくても、Googleのサーバーがコードを動かしてくれる。SpreadsheetApp・HtmlService・UrlFetchApp など、Google製サービスをAPIとして呼び出せるのが最大の利点。
+        </p>
+        <div class="mt-3 term-box bg-blue-50 px-4 py-2 rounded-r-lg text-xs text-blue-800">
+          <strong>API（Application Programming Interface：アプリケーション プログラミング インタフェース）</strong> — ソフトウェア同士が機能を呼び合うための「接続口」。ここではGoogleサービスやLINEの機能をコードから呼び出す窓口を指す。
+        </div>
+      </div>
+
+      <!-- key 2 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-blue-100 text-blue-700 font-bold text-sm w-7 h-7 rounded-full flex items-center justify-center shrink-0">2</span>
+          <h3 class="font-semibold text-slate-900">時間トリガーは「スマートプラグのタイマー機能」と同じ仕組み</h3>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          GASのインストール可能トリガー（Installable Time-driven Trigger）は、毎晩22:30にGAS関数を自動実行する仕組み。スマートプラグの「21:00になったら電源ON」と同じ発想で、条件（時刻）に達したらコードが動く。エラー時はGmailへ自動通知が届く。
+        </p>
+        <div class="mt-3 term-box bg-blue-50 px-4 py-2 rounded-r-lg text-xs text-blue-800">
+          <strong>トリガー（Trigger）</strong> — 特定の条件が満たされたときにプログラムを自動起動する仕組み。ここでは「毎晩22:30」という時刻条件が引き金（トリガー）になる。
+        </div>
+      </div>
+
+      <!-- key 3 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="bg-blue-100 text-blue-700 font-bold text-sm w-7 h-7 rounded-full flex items-center justify-center shrink-0">3</span>
+          <h3 class="font-semibold text-slate-900">LINE送信は「GASからLINEのAPIを叩く」だけ</h3>
+        </div>
+        <p class="text-sm text-slate-700 leading-relaxed">
+          LINE Messaging API（LINE メッセージング API）は、プログラムからLINEのメッセージを送受信するための接続口。GASの<code class="bg-slate-100 px-1 rounded text-xs">UrlFetchApp.fetch()</code>でLINEのサーバーにHTTPリクエストを送るだけで、自分のLINEにメッセージが届く。2025年3月に廃止されたLINE Notifyとは別物で、Messaging APIが現在の正式手段。
+        </p>
+        <div class="mt-3 term-box bg-blue-50 px-4 py-2 rounded-r-lg text-xs text-blue-800">
+          <strong>HTTP（HyperText Transfer Protocol：ハイパーテキスト転送プロトコル）</strong> — Webブラウザとサーバーがデータをやりとりするためのプロトコル（通信規約）。GASからLINEへのメッセージ送信も、このHTTPリクエスト/レスポンスの形式で行う。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. アーキテクチャ詳解 ─── -->
+  <section id="architecture" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="boxes" class="w-5 h-5 text-blue-500"></i>
+      4. 主要概念・アーキテクチャ
+    </h2>
+
+    <!-- フローチャート -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">
+      <h3 class="font-semibold text-slate-700 mb-5 text-sm">全体フロー</h3>
+      <div class="flex flex-col items-center gap-0 text-sm">
+
+        <!-- ユーザー入力 -->
+        <div class="w-full max-w-sm bg-slate-50 border-2 border-slate-300 rounded-xl px-5 py-3 text-center">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <i data-lucide="smartphone" class="w-4 h-4 text-slate-500"></i>
+            <span class="font-semibold text-slate-700">制御設計者（スマホ）</span>
+          </div>
+          <p class="text-xs text-slate-500">帰宅中の電車でスプレッドシートへ入力</p>
+        </div>
+        <div class="flex flex-col items-center my-1 text-slate-400">
+          <i data-lucide="arrow-down" class="w-5 h-5"></i>
+          <span class="text-xs">データ蓄積</span>
+        </div>
+
+        <!-- Spreadsheet -->
+        <div class="w-full max-w-sm bg-green-50 border-2 border-green-300 rounded-xl px-5 py-3 text-center">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <i data-lucide="table" class="w-4 h-4 text-green-600"></i>
+            <span class="font-semibold text-green-800">Googleスプレッドシート</span>
+          </div>
+          <p class="text-xs text-green-700">No / 区分 / 内容 / 期限 / 状態 / 優先度 など11カラム</p>
+        </div>
+        <div class="flex flex-col items-center my-1 text-slate-400">
+          <i data-lucide="arrow-down" class="w-5 h-5"></i>
+          <span class="text-xs">毎晩22:30 自動起動</span>
+        </div>
+
+        <!-- GAS処理 -->
+        <div class="w-full max-w-sm bg-blue-50 border-2 border-blue-300 rounded-xl px-5 py-4 text-center">
+          <div class="flex items-center justify-center gap-2 mb-2">
+            <i data-lucide="code-2" class="w-4 h-4 text-blue-600"></i>
+            <span class="font-semibold text-blue-800">Google Apps Script</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-xs text-blue-700">
+            <div class="bg-blue-100 rounded px-2 py-1.5">
+              <i data-lucide="clock" class="w-3 h-3 mx-auto mb-0.5"></i>
+              時間トリガー<br>22:30
+            </div>
+            <div class="bg-blue-100 rounded px-2 py-1.5">
+              <i data-lucide="database" class="w-3 h-3 mx-auto mb-0.5"></i>
+              SpreadsheetApp<br>データ取得
+            </div>
+            <div class="bg-blue-100 rounded px-2 py-1.5">
+              <i data-lucide="layout" class="w-3 h-3 mx-auto mb-0.5"></i>
+              HtmlService<br>HTML生成
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col items-center my-1 text-slate-400">
+          <i data-lucide="arrow-down" class="w-5 h-5"></i>
+          <span class="text-xs">サマリー + レポートURL</span>
+        </div>
+
+        <!-- LINE API -->
+        <div class="w-full max-w-sm bg-green-50 border-2 border-green-400 rounded-xl px-5 py-3 text-center">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <i data-lucide="send" class="w-4 h-4 text-green-600"></i>
+            <span class="font-semibold text-green-800">LINE Messaging API</span>
+          </div>
+          <p class="text-xs text-green-700">Push Message で自分のLINEへ送信</p>
+        </div>
+        <div class="flex flex-col items-center my-1 text-slate-400">
+          <i data-lucide="arrow-down" class="w-5 h-5"></i>
+        </div>
+
+        <!-- 受信者 -->
+        <div class="w-full max-w-sm bg-yellow-50 border-2 border-yellow-300 rounded-xl px-5 py-3 text-center">
+          <div class="flex items-center justify-center gap-2 mb-1">
+            <i data-lucide="bell" class="w-4 h-4 text-yellow-600"></i>
+            <span class="font-semibold text-yellow-800">関係者（LINE）</span>
+          </div>
+          <p class="text-xs text-yellow-700">制御設計者・メカ・電気・生産担当 が受信</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4パーツ詳解 -->
+    <h3 class="font-semibold text-slate-700 mb-4">4つのパーツ詳解</h3>
+    <div class="space-y-5">
+
+      <!-- パーツ1: トリガー -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-slate-700 text-white px-5 py-3 flex items-center gap-3">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          <span class="font-semibold text-sm">パーツ1：トリガー — 時間駆動で自動起動</span>
+        </div>
+        <div class="p-5">
+          <p class="text-sm text-slate-700 mb-4">GASのインストール可能トリガー（Installable Trigger）を使い、毎晩22:30頃に関数を自動実行する。一度設定すれば以降は完全自動。</p>
+          <p class="text-xs text-slate-500 mb-2 font-medium">このコードがやること：毎日22:30頃に<code class="bg-slate-100 px-1 rounded">sendDailyReport</code>関数を自動実行するトリガーを登録する</p>
+          <pre class="bg-slate-900 text-green-300 rounded-lg p-4 text-xs overflow-x-auto"><code>ScriptApp.newTrigger("sendDailyReport")
+  .timeBased()
+  .atHour(22)
+  .nearMinute(30)
+  .inTimezone("Asia/Tokyo")
+  .everyDays(1)
+  .create();</code></pre>
+          <div class="mt-3 pitfall-box bg-red-50 px-4 py-2 rounded-r-lg text-xs text-red-800">
+            <strong>重要：</strong> 22:30指定でも実際は22:30〜23:30の間のランダムなタイミングで実行される（GAS仕様）。厳密な時刻指定は不可能。
+          </div>
+        </div>
+      </div>
+
+      <!-- パーツ2: ソース元 -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-slate-700 text-white px-5 py-3 flex items-center gap-3">
+          <i data-lucide="table" class="w-4 h-4"></i>
+          <span class="font-semibold text-sm">パーツ2：ソース元 — スプレッドシートから一括取得</span>
+        </div>
+        <div class="p-5">
+          <p class="text-sm text-slate-700 mb-3">SpreadsheetApp でスプレッドシートのデータを読み込む。カラム構成は以下の11項目（インデックス0〜10）。</p>
+          <div class="overflow-x-auto mb-4">
+            <table class="w-full text-xs border border-slate-200 rounded">
+              <thead class="bg-slate-100">
+                <tr>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[0] No</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[1] 登録日</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[2] 期限</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[3] 区分</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[4] 装置名</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[5] 内容</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[6] 現在</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[7] 総数</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[8] 状態</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[9] 優先度</th>
+                  <th class="px-2 py-1.5 text-left font-medium text-slate-600">[10] 進捗%</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-slate-100">
+                  <td class="px-2 py-1.5 text-slate-500">1</td>
+                  <td class="px-2 py-1.5 text-slate-500">04/01</td>
+                  <td class="px-2 py-1.5 text-slate-500">04/07</td>
+                  <td class="px-2 py-1.5"><span class="bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded text-xs">計画内</span></td>
+                  <td class="px-2 py-1.5 text-slate-500">塗布装置</td>
+                  <td class="px-2 py-1.5 text-slate-500">手動：供給部</td>
+                  <td class="px-2 py-1.5 text-slate-500">3</td>
+                  <td class="px-2 py-1.5 text-slate-500">16</td>
+                  <td class="px-2 py-1.5"><span class="bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-xs">対応完了</span></td>
+                  <td class="px-2 py-1.5"><span class="bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded text-xs">中</span></td>
+                  <td class="px-2 py-1.5 text-slate-500">18.75%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-xs text-slate-500 mb-2 font-medium">このコードがやること：シート全体のデータを2次元配列として一括取得する（ベストプラクティス）</p>
+          <pre class="bg-slate-900 text-green-300 rounded-lg p-4 text-xs overflow-x-auto"><code>const sheet = SpreadsheetApp
+  .openById("スプレッドシートのID")
+  .getActiveSheet();
+// 全データを一括取得（セル単位でのループは厳禁）
+const data = sheet.getDataRange().getValues();</code></pre>
+          <div class="mt-3 tip-box bg-green-50 px-4 py-2 rounded-r-lg text-xs text-green-800">
+            <strong>ベストプラクティス：</strong> セルを1つずつ読む実装は実行時間が爆発する（1万セルで70秒→1秒の差）。必ず<code>getDataRange().getValues()</code>で一括取得する。
+          </div>
+        </div>
+      </div>
+
+      <!-- パーツ3: 処理 -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-slate-700 text-white px-5 py-3 flex items-center gap-3">
+          <i data-lucide="code-2" class="w-4 h-4"></i>
+          <span class="font-semibold text-sm">パーツ3：処理 — HtmlServiceでHTMLレポートを生成</span>
+        </div>
+        <div class="p-5">
+          <p class="text-sm text-slate-700 mb-4">GASのHtmlService（HTML サービス）でテンプレートHTMLにデータを流し込み、GASウェブアプリとして公開することで固定URLを得る。このURLをLINEで送る。</p>
+
+          <!-- レポート構成 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+              <i data-lucide="bar-chart-horizontal" class="w-5 h-5 text-slate-400 mx-auto mb-1.5"></i>
+              <p class="text-xs font-semibold text-slate-600">サマリーカード</p>
+              <p class="text-xs text-slate-500 mt-1">完了件数・対応中件数など一目で把握</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+              <i data-lucide="gantt-chart" class="w-5 h-5 text-slate-400 mx-auto mb-1.5"></i>
+              <p class="text-xs font-semibold text-slate-600">ガントチャート</p>
+              <p class="text-xs text-slate-500 mt-1">計画（グレー）vs 実績（赤）の横棒グラフ</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-center">
+              <i data-lucide="table-2" class="w-5 h-5 text-slate-400 mx-auto mb-1.5"></i>
+              <p class="text-xs font-semibold text-slate-600">2つのテーブル</p>
+              <p class="text-xs text-slate-500 mt-1">計画内作業 / 不具合対策 それぞれ一覧</p>
+            </div>
+          </div>
+
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3 text-xs text-amber-800">
+            <strong>重要：</strong> GASでは <code>doGet()</code> は<strong>予約済みの関数名</strong>。ウェブアプリへのHTTP GETリクエストが来たとき、GASが自動的にこの名前の関数を探して実行する。別の関数名にすると動かない。同様に、<code>createTemplateFromFile('Report')</code>の <code>'Report'</code> はGASプロジェクト内に別途作成する <code>Report.html</code> ファイルを指す。
+          </div>
+          <p class="text-xs text-slate-500 mb-2 font-medium">このコードがやること：doGet()でHTTPリクエストを受け取り、Report.htmlテンプレートにスプレッドシートデータを流し込んで返す</p>
+          <pre class="bg-slate-900 text-green-300 rounded-lg p-4 text-xs overflow-x-auto"><code>// Code.gs（GASプロジェクト内のメインスクリプト）
+// doGet()はGASの予約関数名。ウェブアプリURLへのGETリクエストで自動実行される
+function doGet() {
+  const t = HtmlService.createTemplateFromFile('Report');
+  // 'Report' = 同じGASプロジェクト内にある Report.html ファイルを指す
+  t.data = SpreadsheetApp
+    .openById("ID")
+    .getActiveSheet()
+    .getDataRange()
+    .getValues();
+  return t.evaluate();
+}
+
+// Report.html（GASプロジェクト内のHTMLファイル）
+// &lt;?= ?&gt; はXSS対策の自動エスケープ付きで出力
+&lt;? for (var i = 0; i &lt; data.length; i++) { ?&gt;
+  &lt;td&gt;&lt;?= data[i][5] ?&gt;&lt;/td&gt;  // [5]は内容カラム（0始まりインデックス）
+&lt;? } ?&gt;</code></pre>
+          <div class="mt-3 term-box bg-blue-50 px-4 py-2 rounded-r-lg text-xs text-blue-800">
+            <strong>XSS（Cross-Site Scripting：クロスサイトスクリプティング）</strong> — 悪意のあるHTMLやJavaScriptをコンテンツに埋め込む攻撃手法。<code>&lt;?= ?&gt;</code>はこれを防ぐ自動エスケープが入るため安全。
+          </div>
+        </div>
+      </div>
+
+      <!-- パーツ4: 届ける先 -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="bg-slate-700 text-white px-5 py-3 flex items-center gap-3">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span class="font-semibold text-sm">パーツ4：届ける先 — LINE Messaging API で送信</span>
+        </div>
+        <div class="p-5">
+          <p class="text-sm text-slate-700 mb-3">LINEはHTMLをそのまま送れないため、「テキストサマリー」と「レポートURL」の2段構えで送信する。GASの<code class="bg-slate-100 px-1 rounded text-xs">UrlFetchApp.fetch()</code>でLINEサーバーにHTTPリクエストを送る。</p>
+
+          <!-- たとえ話 -->
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3 text-xs text-amber-800">
+            <strong>たとえ話：郵便局の窓口</strong><br>
+            GAS = 差出人（手紙を書いて窓口に持ち込む）<br>
+            LINEサーバー = 郵便局（配送インフラ）<br>
+            userId = 宛先の住所（届け先の特定に必須）<br>
+            チャネルアクセストークン = 差出人の身分証（なりすまし防止）
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3 text-xs text-blue-800">
+            <strong>LINE_USER_ID の取得方法：</strong> LINE Developers Console で公式アカウントを友達追加後、Webhookイベントの <code>event.source.userId</code> から取得する。詳細は <a href="https://developers.line.biz/en/docs/messaging-api/getting-user-ids" target="_blank" class="underline">LINE公式ドキュメント（Getting user IDs）</a> を参照。
+          </div>
+
+          <p class="text-xs text-slate-500 mb-2 font-medium">このコードがやること：LINE APIへPOSTリクエストを送り、テキストとURLの2メッセージを自分のLINEに送信する</p>
+          <pre class="bg-slate-900 text-green-300 rounded-lg p-4 text-xs overflow-x-auto"><code>function sendLineMessage(summary, reportUrl) {
+  // APIキーはコードに直書きせず、PropertiesServiceに保存
+  const token = PropertiesService
+    .getScriptProperties()
+    .getProperty("LINE_TOKEN");
+  const userId = PropertiesService
+    .getScriptProperties()
+    .getProperty("LINE_USER_ID");
+  // LINE_USER_ID: LINE DevelopersでBotを友達追加後、Webhookイベントから取得
+
+  UrlFetchApp.fetch("https://api.line.me/v2/bot/message/push", {
+    method: "post",
+    headers: {
+      "Content-Type": "application/json",
+      // "Bearer xxx" はHTTPベアラー認証の形式。LINEがこの形式でトークンを要求する
+      "Authorization": `Bearer ${token}`
+    },
+    payload: JSON.stringify({
+      to: userId,
+      messages: [
+        { type: "text", text: summary },    // 当日のサマリー
+        { type: "text", text: reportUrl }   // HTMLレポートのURL
+      ]
+    })
+  });
+}</code></pre>
+          <div class="mt-3 term-box bg-blue-50 px-4 py-2 rounded-r-lg text-xs text-blue-800">
+            <strong>Bearer認証（HTTPベアラー認証）</strong> — <code>Authorization: Bearer &lt;トークン&gt;</code>の形式でアクセストークンをHTTPヘッダーに添える認証方式。LINE Messaging APIはこの形式を必須とする。<br><br>
+            <strong>PropertiesService（プロパティ サービス）</strong> — GASでAPIキーやパスワードを安全に保管するサービス。環境変数に相当する仕組み。コードに直書きするとGitHub等への誤公開リスクがある。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- たとえ話まとめ -->
+    <div class="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-5">
+      <h3 class="font-semibold text-amber-800 mb-3 flex items-center gap-2 text-sm">
+        <i data-lucide="lightbulb" class="w-4 h-4"></i>
+        3つのたとえ話で全体像を掴む
+      </h3>
+      <div class="space-y-3 text-sm text-amber-900">
+        <div class="flex items-start gap-3">
+          <span class="bg-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded text-xs shrink-0 mt-0.5">1</span>
+          <p><strong>PLCのスケジュール実行</strong> — トリガーは「PLC（Programmable Logic Controller：プログラマブルロジックコントローラ）のタイムスケジュール機能」と同じ発想。「22:30になったら実行」という条件をあらかじめ設定しておくだけで、その後は無人でスクリプトが起動する。</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="bg-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded text-xs shrink-0 mt-0.5">2</span>
+          <p><strong>工場の一括発注</strong> — SpreadsheetAppのデータ一括取得は「1個ずつ倉庫に取りに行く」のではなく「まとめてトラックで一括搬出する」ような効率化。APIコール1回でシート全体を2次元配列として取得する。</p>
+        </div>
+        <div class="flex items-start gap-3">
+          <span class="bg-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded text-xs shrink-0 mt-0.5">3</span>
+          <p><strong>掲示板のURL連絡</strong> — LINEへのレポート送信は「HTMLを全文メールで送る（大きな荷物を手渡し）」のではなく「GASウェブアプリとして公開したレポートのURLをLINEで通知する（掲示板の場所を伝える）」発想。レポートの更新も同じURLで反映される。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Installable Trigger補足 -->
+    <div class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4">
+      <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-slate-400"></i>
+        Simple TriggerとInstallable Triggerの違い
+      </h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+        <div class="bg-white border border-slate-200 rounded-lg p-3">
+          <p class="font-semibold text-slate-600 mb-1">Simple Trigger（シンプルトリガー）</p>
+          <p class="text-slate-600">onOpen・onEditなど組み込みの関数名で自動発火。外部サービス（GmailApp・UrlFetchApp等）へのアクセス不可。</p>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <p class="font-semibold text-blue-700 mb-1">Installable Trigger（今回採用）</p>
+          <p class="text-blue-700">ScriptApp.newTrigger()で登録。外部APIへのアクセスが可能。時間指定による定期実行ができる。エラー時はGmailに通知が届く。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. 落とし穴 ─── -->
+  <section id="pitfalls" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="triangle-alert" class="w-5 h-5 text-red-500"></i>
+      5. 初心者がはまりやすい落とし穴
+    </h2>
+    <div class="space-y-4">
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          LINE Notify は2025年3月に廃止済み
+        </h3>
+        <p class="text-sm text-slate-700">旧来の LINE Notify は2025年3月31日をもってサービス終了。「LINE Notify GAS」で調べると古い記事が多いが、そのまま使おうとしてもエラーになる。<strong>正しい手段は LINE Messaging API（Push Message）</strong>。LINE Developers Console でのアカウント作成が必要。</p>
+      </div>
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          トリガーは「±30分」ズレる
+        </h3>
+        <p class="text-sm text-slate-700">GASの時間トリガーは指定時刻から最大1時間の幅でランダムに実行される（例：22:30指定 → 22:30〜23:30の間で実行）。「毎日ちょうど22:30に届く」は実現不可能。運用上の許容範囲を設けておくこと。</p>
+      </div>
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          セルを1つずつ読むと実行時間上限に引っかかる
+        </h3>
+        <p class="text-sm text-slate-700"><code class="bg-slate-100 px-1 rounded text-xs">sheet.getRange(i, j).getValue()</code>を ループで呼ぶと、毎回Googleサーバーとの通信が発生する。100行×11列で1,100回の通信となり、6分の実行時間上限を超えてタイムアウトすることがある。必ず<code class="bg-slate-100 px-1 rounded text-xs">getDataRange().getValues()</code>で一括取得する。</p>
+      </div>
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          APIキーをコードに直書きしない
+        </h3>
+        <p class="text-sm text-slate-700">LINEのチャネルアクセストークンをソースコードに書くと、GASのコードを共有・公開したとき漏洩する。<code class="bg-slate-100 px-1 rounded text-xs">PropertiesService.getScriptProperties()</code>に保存し、<code class="bg-slate-100 px-1 rounded text-xs">getProperty("KEY名")</code>で参照する形にする。</p>
+      </div>
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          GASウェブアプリの公開設定を忘れる
+        </h3>
+        <p class="text-sm text-slate-700">HtmlServiceで生成したレポートをLINEから開くには、GASウェブアプリとしてデプロイし、アクセス権を「全員（匿名ユーザーを含む）」に設定する必要がある。デフォルトでは自分のGoogleアカウントのみアクセス可能で、LINEからのアクセスはできない。操作手順：GASエディタ（スプレッドシート → 拡張機能 → Apps Script）の右上「デプロイ」→「新しいデプロイ」→ 種類「ウェブアプリ」→ アクセスできるユーザー「全員」に設定。</p>
+        <div class="mt-2 pitfall-box bg-red-50 px-4 py-2 rounded-r-lg text-xs text-red-800">
+          <strong>注意：</strong> デプロイのたびに新しいURLが生成される（バージョン管理）。コードを更新したら必ず「新しいデプロイ」ではなく「デプロイを管理」→「編集」でバージョンを更新することで同一URLを維持できる。
+        </div>
+      </div>
+
+      <div class="bg-white border border-red-200 rounded-xl p-5">
+        <h3 class="font-semibold text-red-700 mb-2 flex items-center gap-2 text-sm">
+          <i data-lucide="x-circle" class="w-4 h-4"></i>
+          OAuth認証ダイアログで止まる（初回実行時）
+        </h3>
+        <p class="text-sm text-slate-700">GASスクリプトを初めて実行すると「このアプリはGoogleによって確認されていません」という警告ダイアログが出る。不審なアプリに見えるが、これは自分で書いたスクリプトに対してGoogleアカウントへのアクセス権限を付与する正常なOAuth認証フロー。「詳細」→「安全ではないページに移動」→「許可」の順にクリックして進む。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 6. 料金プラン ─── -->
+  <section id="pricing" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="credit-card" class="w-5 h-5 text-blue-500"></i>
+      6. 料金プラン — 今回の用途では完全無料
+    </h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <!-- Google -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-700 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="database" class="w-4 h-4"></i>
+          Google Apps Script / Spreadsheet
+        </h3>
+        <table class="w-full text-xs">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-2 py-1.5 text-left font-medium text-slate-500">項目</th>
+              <th class="px-2 py-1.5 text-left font-medium text-slate-500">無料上限</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr><td class="px-2 py-1.5">1日の実行時間</td><td class="px-2 py-1.5 text-green-700 font-medium">90分</td></tr>
+            <tr><td class="px-2 py-1.5">トリガー数</td><td class="px-2 py-1.5 text-green-700 font-medium">20個</td></tr>
+            <tr><td class="px-2 py-1.5">月額費用</td><td class="px-2 py-1.5 text-green-700 font-bold">0円</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-slate-500 mt-3">今回の用途（1日1回・数秒の処理）では上限に到達しない。</p>
+      </div>
+
+      <!-- LINE -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5">
+        <h3 class="font-semibold text-slate-700 mb-3 flex items-center gap-2 text-sm">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          LINE Messaging API（日本・2026年時点）
+        </h3>
+        <table class="w-full text-xs">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-2 py-1.5 text-left font-medium text-slate-500">プラン</th>
+              <th class="px-2 py-1.5 text-left font-medium text-slate-500">月額</th>
+              <th class="px-2 py-1.5 text-left font-medium text-slate-500">無料通数</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="bg-green-50"><td class="px-2 py-1.5 font-medium">Communication Plan</td><td class="px-2 py-1.5 text-green-700 font-bold">0円</td><td class="px-2 py-1.5">月200通</td></tr>
+            <tr><td class="px-2 py-1.5">Light Plan</td><td class="px-2 py-1.5">5,000円</td><td class="px-2 py-1.5">月5,000通</td></tr>
+            <tr><td class="px-2 py-1.5">Standard Plan</td><td class="px-2 py-1.5">15,000円</td><td class="px-2 py-1.5">月30,000通</td></tr>
+          </tbody>
+        </table>
+        <p class="text-xs text-slate-500 mt-3">今回は毎日1通 × 31日 = 月31通。<strong class="text-green-700">無料プランで十分</strong>。月200通を超えるとエラーが返りメッセージが届かなくなる。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 7. 専門用語集 ─── -->
+  <section id="glossary" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="book-open" class="w-5 h-5 text-blue-500"></i>
+      7. 専門用語集
+    </h2>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">GAS（Google Apps Script：グーグル アップス スクリプト）</p>
+        <p class="text-sm text-slate-600 mt-1">Googleのクラウド上で動くJavaScript実行環境。Spreadsheet・Gmail・Driveなどとシームレスに連携できる。→ 関連：HtmlService、SpreadsheetApp</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">SpreadsheetApp</p>
+        <p class="text-sm text-slate-600 mt-1">GASからGoogleスプレッドシートを操作するためのクラス。<code class="bg-slate-100 px-1 rounded text-xs">openById()</code>でシートを開き、<code class="bg-slate-100 px-1 rounded text-xs">getDataRange().getValues()</code>でデータを一括取得する。→ 関連：GAS、HtmlService</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">HtmlService（HTML サービス）</p>
+        <p class="text-sm text-slate-600 mt-1">GASでHTMLページを生成・公開するためのサービス。<code class="bg-slate-100 px-1 rounded text-xs">createTemplateFromFile()</code>でHTMLテンプレートにデータを流し込み、固定URLのウェブアプリとして公開できる。→ 関連：GAS、XSS</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">Installable Trigger（インストール可能トリガー）</p>
+        <p class="text-sm text-slate-600 mt-1">GASで時刻・スプレッドシートのイベントなどを条件に関数を自動実行する仕組み。指定時刻から最大1時間のランダム幅がある点に注意。→ 関連：GAS、ScriptApp</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">LINE Messaging API（LINE メッセージング API）</p>
+        <p class="text-sm text-slate-600 mt-1">プログラムからLINEメッセージを送受信するための公式API。2025年3月廃止のLINE Notifyの後継。Push Messageを使うとユーザーIDを指定して能動的にメッセージを送れる。→ 関連：Push Message、UrlFetchApp</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">Push Message（プッシュ メッセージ）</p>
+        <p class="text-sm text-slate-600 mt-1">LINE Messaging APIの送信方式の一つ。ユーザーからのメッセージを待たず、ボット側から能動的にメッセージを送信できる。無料プランでは月200通が上限。→ 関連：LINE Messaging API</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">UrlFetchApp（URL フェッチ アップ）</p>
+        <p class="text-sm text-slate-600 mt-1">GASから外部URLにHTTPリクエストを送るためのクラス。LINEへのメッセージ送信はこのクラスを通じてLINEサーバーのAPIエンドポイントにPOSTリクエストを送る形で実現する。→ 関連：GAS、HTTP</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">PropertiesService（プロパティ サービス）</p>
+        <p class="text-sm text-slate-600 mt-1">GASでAPIキーやパスワードなどの秘密情報を安全に保管するサービス。コードに直書きするのは危険であり、このサービスを使って環境変数的に管理する。→ 関連：GAS、LINE Messaging API</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">XSS（Cross-Site Scripting：クロスサイトスクリプティング）</p>
+        <p class="text-sm text-slate-600 mt-1">悪意のあるスクリプトをWebページに埋め込む攻撃。HtmlServiceの<code class="bg-slate-100 px-1 rounded text-xs">&lt;?= ?&gt;</code>プリントスクリプトレットはHTMLを自動エスケープしてXSSを防ぐ。→ 関連：HtmlService</p>
+      </div>
+      <div class="px-5 py-4">
+        <p class="font-semibold text-sm text-slate-800">Flex Message（フレックス メッセージ）</p>
+        <p class="text-sm text-slate-600 mt-1">LINE Messaging APIのリッチメッセージ形式。カード・ボタン・グリッドなど複雑なレイアウトをJSON定義で表現できる。今回はテキスト+URLで十分だが、発展的活用として検討できる。→ 関連：LINE Messaging API</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 8. 次に学ぶと良いもの ─── -->
+  <section id="next" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="arrow-right-circle" class="w-5 h-5 text-blue-500"></i>
+      8. 次に学ぶと良いもの
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-400"></i>
+          LINE Flex Message
+        </h3>
+        <p class="text-xs text-slate-600">LINEのメッセージをカード型・グリッド型にリッチ化できる。ガントチャートのサマリーをテキストではなく視覚的なカードで送れるようになる。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="chart-bar" class="w-4 h-4 text-slate-400"></i>
+          Chart.js / D3.js
+        </h3>
+        <p class="text-xs text-slate-600">生成するHTMLレポートに動的なガントチャートや進捗グラフを描画するJavaScriptライブラリ。現在のCSS実装よりも柔軟で表現力が高い。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="git-branch" class="w-4 h-4 text-slate-400"></i>
+          GAS clasp（コマンドラインツール）
+        </h3>
+        <p class="text-xs text-slate-600">GASのコードをローカルでTypeScriptとして開発し、GitでバージョN管理できるCLIツール。本格開発に移行する際に必須の知識。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i>
+          Google Cloud Secret Manager
+        </h3>
+        <p class="text-xs text-slate-600">PropertiesServiceより高セキュリティな秘密情報管理サービス。複数のGASプロジェクトで共通のAPIキーを管理したい場合に有効。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+          GmailApp（メール送信の代替）
+        </h3>
+        <p class="text-xs text-slate-600">HTMLレポートをLINEではなくメールで配信する場合の代替手段。GASの<code class="bg-slate-100 px-1 rounded text-xs">GmailApp.sendEmail()</code>でHTML形式のメールを送信できる。</p>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-xl p-4">
+        <h3 class="font-semibold text-slate-700 mb-2 text-sm flex items-center gap-2">
+          <i data-lucide="webhook" class="w-4 h-4 text-slate-400"></i>
+          LINE Webhook（双方向通信）
+        </h3>
+        <p class="text-xs text-slate-600">LINEユーザーからのメッセージを受け取り、ボットが応答できるようにする仕組み。「進捗を聞けば即答するボット」へと発展させる際に必要。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 9. 参考文献 ─── -->
+  <section id="refs" class="mb-12">
+    <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+      <i data-lucide="external-link" class="w-5 h-5 text-blue-500"></i>
+      9. 参考文献・URL
+    </h2>
+    <div class="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">GAS トリガー</p>
+        <a href="https://developers.google.com/apps-script/guides/triggers/installable" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Installable Triggers — Google Developers
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">GAS ベストプラクティス</p>
+        <a href="https://developers.google.com/apps-script/guides/support/best-practices" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Best Practices — Apps Script
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">SpreadsheetApp リファレンス</p>
+        <a href="https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Class SpreadsheetApp — Apps Script Reference
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">HtmlService テンプレート</p>
+        <a href="https://developers.google.com/apps-script/guides/html/templates" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          HTML Service: Templated HTML — Google Developers
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">LINE Messaging API 料金</p>
+        <a href="https://developers.line.biz/en/docs/messaging-api/pricing" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Messaging API pricing — LINE Developers
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">LINE メッセージ送信</p>
+        <a href="https://developers.line.biz/en/docs/messaging-api/sending-messages" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Send messages — LINE Developers
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">LINE API リファレンス</p>
+        <a href="https://developers.line.biz/en/reference/messaging-api" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Messaging API reference — LINE Developers
+        </a>
+      </div>
+      <div class="px-5 py-3">
+        <p class="text-xs text-slate-400 mb-0.5">Flex Message</p>
+        <a href="https://developers.line.biz/en/docs/messaging-api/using-flex-messages" target="_blank" class="text-sm text-blue-600 hover:underline flex items-center gap-1.5">
+          <i data-lucide="external-link" class="w-3.5 h-3.5 shrink-0"></i>
+          Send Flex Messages — LINE Developers
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- フッター -->
+  <footer class="text-center text-xs text-slate-400 pt-6 border-t border-slate-200">
+    Techmap — 進捗報告自動化ツール：GAS × Spreadsheet × LINE Messaging API &nbsp;|&nbsp; 2026年4月
+  </footer>
+
+</div>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

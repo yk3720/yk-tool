@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ヘレニスティック占星術 - CuriosityMap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cmap-primary: #3d2c8d;
+      --cmap-accent: #9b59b6;
+      --cmap-warm: #e67e22;
+      --cmap-gradient: linear-gradient(135deg, #3d2c8d 0%, #9b59b6 100%);
+    }
+    body {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    }
+    .header-gradient {
+      background: var(--cmap-gradient);
+    }
+    .section-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .term-explain {
+      background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+      border-left: 4px solid #9b59b6;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .term-word {
+      color: #6b21a8;
+    }
+    .analogy-box {
+      background: linear-gradient(135deg, #fef9c3 0%, #fde68a 100%);
+      border-left: 4px solid #f59e0b;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .ref-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      color: #7c3aed;
+      transition: background 0.15s;
+    }
+    .ref-link:hover {
+      background: #f3e8ff;
+    }
+    .toc {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 50;
+      min-width: 160px;
+    }
+    @media (max-width: 1280px) {
+      .toc { display: none; }
+    }
+    .pdf-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--cmap-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(155, 89, 182, 0.4);
+      transition: opacity 0.15s, transform 0.15s;
+      z-index: 100;
+    }
+    .pdf-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+    @media print {
+      .toc, .pdf-btn { display: none !important; }
+      body { background: white; }
+      .section-card {
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .header-gradient {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      a[href]::after { content: none; }
+    }
+
+    /* タイムライン */
+    .timeline-item {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .timeline-dot {
+      flex-shrink: 0;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+    .timeline-line {
+      border-left: 2px dashed #c4b5fd;
+      margin-left: 1.25rem;
+      padding-left: 1.25rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- 目次（デスクトップ専用・フローティング） -->
+  <nav class="toc">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">目次</p>
+    <ul class="space-y-1 text-sm">
+      <li><a href="#summary" class="text-gray-600 hover:text-purple-600">概要</a></li>
+      <li><a href="#why" class="text-gray-600 hover:text-purple-600">なぜ注目？</a></li>
+      <li><a href="#mayuka" class="text-gray-600 hover:text-purple-600">真弓香さんとは</a></li>
+      <li><a href="#basics" class="text-gray-600 hover:text-purple-600">まず3つ</a></li>
+      <li><a href="#details" class="text-gray-600 hover:text-purple-600">しくみ</a></li>
+      <li><a href="#misconceptions" class="text-gray-600 hover:text-purple-600">よくある誤解</a></li>
+      <li><a href="#glossary" class="text-gray-600 hover:text-purple-600">用語集</a></li>
+      <li><a href="#related" class="text-gray-600 hover:text-purple-600">もっと知りたい</a></li>
+      <li><a href="#references" class="text-gray-600 hover:text-purple-600">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <!-- ヘッダー -->
+  <header class="header-gradient text-white py-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium tracking-wide">CuriosityMap</span>
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">占星術・歴史</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold">ヘレニスティック占星術</h1>
+      <p class="mt-2 text-lg opacity-90">2000年以上前に生まれた「星の読み方の原型」と、日本で伝えてくれる真弓香さん</p>
+    </div>
+  </header>
+
+  <!-- メインコンテンツ -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+
+    <!-- ひとことで言えば -->
+    <section id="summary" class="section-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="map" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">ひとことで言えば</h2>
+          <p class="text-gray-500">まずここだけ押さえてください</p>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-purple-50 to-violet-50 border border-purple-200 rounded-xl p-6">
+        <p class="text-xl font-bold text-purple-900">ヘレニスティック占星術とは、現代の星占いのすべての「土台」となった、古代ギリシャ時代の占星術です。</p>
+        <p class="mt-3 text-gray-700">いまあなたが知っている「12星座占い」や「ホロスコープ鑑定」は、この時代に作られた体系がもとになっています。紀元前1世紀ごろ、アレクサンドリア（現・エジプト）を中心に発展し、バビロニア（現・イラク）の天文観測、エジプトの神秘哲学、ギリシャの論理学がひとつに融合して生まれました。</p>
+        <p class="mt-2 text-gray-700">20世紀に一度ほとんど忘れられましたが、1990年代に研究者たちが古代の文献を翻訳し直すことで再発見されました。日本では、真弓香（まゆみ かおり）さんがその最先端の学びを日本語で伝えてくれている数少ない実践者のひとりです。</p>
+      </div>
+
+      <div class="mt-5 grid sm:grid-cols-3 gap-3">
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-purple-700">紀元前1世紀</div>
+          <div class="text-sm text-gray-500 mt-1">発祥の時代</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-purple-700">約800年</div>
+          <div class="text-sm text-gray-500 mt-1">実践された期間</div>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+          <div class="text-2xl font-bold text-purple-700">1992年〜</div>
+          <div class="text-sm text-gray-500 mt-1">現代での再発見</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- なぜ注目されているのか -->
+    <section id="why" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="history" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">なぜいま注目されているのか？</h2>
+          <p class="text-gray-500">歴史的背景と現代での再評価</p>
+        </div>
+      </div>
+
+      <h3 class="text-lg font-bold text-gray-700 mb-3">占星術の「原型」はどのように生まれたのか</h3>
+      <p class="text-gray-700 mb-4">紀元前323年、アレクサンドロス大王の死後、地中海世界ではギリシャ文化が広がる「ヘレニズム時代」が始まりました。この時代、バビロニア（現・イラク）の占星家たちが蓄積してきた精緻な天文観測データが、ギリシャの哲学・数学の論理体系と出会います。</p>
+      <p class="text-gray-700 mb-4">そこで生まれたのが「個人の出生チャート」をもとに人生を読む占星術です。それ以前の占星術は「この星の動きは王国に戦争をもたらす」という国家単位の前兆を読むものでした。ヘレニスティック占星術は、はじめて「一人ひとりの人生」を星で読もうとした革命的な試みだったのです。</p>
+
+      <div class="timeline-line mt-4">
+        <div class="timeline-item">
+          <div class="timeline-dot bg-purple-100 text-purple-700">BC1</div>
+          <div>
+            <div class="font-bold text-gray-800">紀元前1世紀ごろ</div>
+            <p class="text-gray-600 text-sm">アレクサンドリアを中心にヘレニスティック占星術が確立。アスケンダント（上昇点）、12ハウス、アスペクトといった現代占星術の基礎が生まれる</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot bg-purple-200 text-purple-800">AD7</div>
+          <div>
+            <div class="font-bold text-gray-800">紀元後7世紀ごろ</div>
+            <p class="text-gray-600 text-sm">イスラム世界へ伝わり、アラビア占星術として発展。一部の手法は変形され、一部は失われていく</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot bg-blue-100 text-blue-700">19</div>
+          <div>
+            <div class="font-bold text-gray-800">19〜20世紀</div>
+            <p class="text-gray-600 text-sm">「近代西洋占星術」が普及。ヘレニスティック時代の多くの技法は忘れられ、太陽星座中心の占いが広まる</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot bg-green-100 text-green-700">92</div>
+          <div>
+            <div class="font-bold text-gray-800">1992年 再発見</div>
+            <p class="text-gray-600 text-sm">米国で「Project Hindsight（プロジェクト・ハインドサイト）」が発足。ロバート・シュミット氏らが古代ギリシャ語の原典を英語に翻訳し始める</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot bg-emerald-200 text-emerald-800">17</div>
+          <div>
+            <div class="font-bold text-gray-800">2017年 体系化</div>
+            <p class="text-gray-600 text-sm">クリス・ブラナン氏が著書「Hellenistic Astrology」を出版。再発見された技法が初めて一冊に体系化される</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 mt-4">
+        <div class="flex items-start gap-3">
+          <i data-lucide="info" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
+          <p class="text-blue-800 text-sm"><strong>なぜ今注目されているのか：</strong>インターネットで古代文献が共有されやすくなり、英語圏を中心に「もとの占星術を学び直そう」という動きが加速しています。SNSやYouTubeでヘレニスティック占星術の解説が増え、日本でも関心を持つ人が増えています。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 真弓香さんとは -->
+    <section id="mayuka" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="user" class="w-6 h-6 text-violet-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">真弓香さんとは？</h2>
+          <p class="text-gray-500">日本でヘレニスティック占星術を伝える研究者</p>
+        </div>
+      </div>
+
+      <div class="term-explain">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-purple-500 flex-shrink-0"></i>
+          <div>
+            <div class="term-word text-xl font-bold">真弓香（まゆみ かおり）さん</div>
+            <div class="text-lg mt-2">
+              アストロカートグラフィ公認占星術研究者。メモの「真由香さん」はおそらくこの<span class="font-bold text-purple-700">真弓香（かおり）さん</span>のことを指していると考えられます。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-gray-700 mt-4 mb-3">真弓香さんは、ヘレニスティック占星術を日本語で学べる数少ない場を提供している研究者・実践者です。</p>
+
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <div class="bg-purple-50 rounded-xl p-4">
+          <div class="font-bold text-purple-800 mb-2 flex items-center gap-2">
+            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+            学びの経歴
+          </div>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>故ロバート・シュミット氏より<br>「アストロ・ロゴス」（ヘレニスティック時代のアストロ哲学）を習得</li>
+            <li class="mt-2">クリス・ブラナン氏より実践手法を習得し、「Hellenistic Astrology Course ディプロマ」を取得</li>
+          </ul>
+        </div>
+        <div class="bg-violet-50 rounded-xl p-4">
+          <div class="font-bold text-violet-800 mb-2 flex items-center gap-2">
+            <i data-lucide="star" class="w-4 h-4"></i>
+            主な活動
+          </div>
+          <ul class="text-sm text-gray-700 space-y-1">
+            <li>ゾディカル・リリース（人生全体の運勢予見）カウンセリング</li>
+            <li class="mt-1">アストロカートグラフィ（場所と運勢の関係）</li>
+            <li class="mt-1">レクティフィケーション（出生時間の鑑定・修正）</li>
+            <li class="mt-1">著書「あなたの運命を開く場所はここだ!」など</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="analogy-box mt-5">
+        <div class="flex items-start gap-3">
+          <i data-lucide="message-circle" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-amber-800 mb-1">真弓香さんの立ち位置をたとえると…</div>
+            <p class="text-gray-800">江戸時代に廃れてしまった「本物の茶道の作法」が、海外の文献から再発見されたとします。その文献を英語で書いた研究者が「クリス・ブラナン氏」。その英語の教えを日本に持ち帰り、日本語でわかりやすく鑑定してくれるのが「真弓香さん」のような存在です。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- まず理解する3つ -->
+    <section id="basics" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="list" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">まず理解する3つ</h2>
+          <p class="text-gray-500">これだけわかれば会話に参加できます</p>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex gap-4 p-5 bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl border border-purple-200">
+          <div class="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">1</div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">ホロスコープは「生まれた瞬間の空の地図」</div>
+            <p class="text-gray-600 mt-1">あなたが生まれた日時・場所をもとに、そのときの惑星の配置を円形の図に表したもの。ヘレニスティック占星術は、この地図を読む技術の「完全版」です。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 p-5 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl border border-amber-200">
+          <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">2</div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">「ゾディカル・リリース」は人生の年表</div>
+            <p class="text-gray-600 mt-1">ヘレニスティック占星術独自の手法で、0歳から100歳まで「どの時期にどんな出来事が起きやすいか」を予見します。過去の転機とすごい精度で一致することで知られています。</p>
+          </div>
+        </div>
+        <div class="flex gap-4 p-5 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+          <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">3</div>
+          <div>
+            <div class="font-bold text-gray-800 text-lg">現代占星術とは「別の技法」がある</div>
+            <p class="text-gray-600 mt-1">天王星・海王星・冥王星は使わない、ハウスの計算方式が違う、「ロット（幸運点）」という特殊な計算点を使うなど、現代の占星術では使われなくなった手法が数多く存在します。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主要概念・しくみ -->
+    <section id="details">
+
+      <!-- ホロスコープとハウス -->
+      <div class="section-card">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+            <i data-lucide="circle" class="w-6 h-6 text-purple-600"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">ホロスコープと12ハウスとは？</h2>
+        </div>
+
+        <div class="term-explain">
+          <div class="flex items-start gap-4">
+            <i data-lucide="lightbulb" class="w-8 h-8 text-purple-500 flex-shrink-0"></i>
+            <div>
+              <div class="term-word text-xl font-bold">「ホロスコープ」とは？</div>
+              <div class="text-lg mt-2">
+                ギリシャ語で「時刻を見る者」という意味。生まれた瞬間の<span class="font-bold text-purple-700">惑星の配置を円形に描いた図</span>のことです。占い師が使う「星の地図」です。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-gray-700 mt-3 mb-3">ホロスコープの円は「12のエリア」に分かれており、それぞれが人生の異なるテーマを表します。これを<strong>「ハウス（House）」</strong>と言います。</p>
+
+        <div class="grid sm:grid-cols-2 gap-2 mb-4">
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">1ハウス</span>：自分自身・外見・第一印象</div>
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">2ハウス</span>：お金・持ち物・資産</div>
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">3ハウス</span>：兄弟・近所・コミュニケーション</div>
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">4ハウス</span>：家庭・土地・ルーツ</div>
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">7ハウス</span>：パートナー・結婚・契約</div>
+          <div class="text-sm bg-gray-50 rounded-lg p-3"><span class="font-bold text-purple-700">10ハウス</span>：仕事・社会的地位・キャリア</div>
+        </div>
+
+        <div class="term-explain">
+          <div class="flex items-start gap-4">
+            <i data-lucide="lightbulb" class="w-8 h-8 text-purple-500 flex-shrink-0"></i>
+            <div>
+              <div class="term-word text-xl font-bold">「アセンダント（ASC）」とは？</div>
+              <div class="text-lg mt-2">
+                生まれた瞬間に<span class="font-bold text-purple-700">東の地平線から昇っていた星座の度数</span>のことです。ヘレニスティック占星術ではこのアセンダントを「ホロスコープの起点」として最重視します。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analogy-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="message-circle" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-amber-800 mb-1">たとえ話①：地図の「現在地マーク」</div>
+              <p class="text-gray-800">ナビアプリを使うとき、地図上に「現在地マーク」が表示されますよね。ホロスコープの「アセンダント」は、まさにその「現在地マーク」の役割です。アセンダントを基準にして、1ハウス〜12ハウスが並びます。同じ星座（たとえば天秤座）生まれでも、生まれた時刻によってアセンダントが変わるため、ホロスコープの「地図の向き」がまったく違ってくるのです。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ゾディカル・リリース -->
+      <div class="section-card">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+            <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">ゾディカル・リリースとは？</h2>
+        </div>
+
+        <div class="term-explain">
+          <div class="flex items-start gap-4">
+            <i data-lucide="lightbulb" class="w-8 h-8 text-purple-500 flex-shrink-0"></i>
+            <div>
+              <div class="term-word text-xl font-bold">「ゾディカル・リリース（Zodiacal Releasing）」とは？</div>
+              <div class="text-lg mt-2">
+                直訳すると「黄道上での解放」。生まれたときのホロスコープを使い、<span class="font-bold text-purple-700">0歳から100歳まで人生の「時代区分」を読み解く手法</span>です。「今はどんな時期なのか」「いつが人生の転換点か」を知ることができます。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-gray-700 mt-3 mb-4">真弓香さんのカウンセリングで最もよく使われるのがこの手法です。結婚・離婚・転職・引越し・病気など、過去の大きな出来事が「ドンピシャ」で出ていたというクライアントの声が多く寄せられています。</p>
+
+        <div class="bg-purple-50 rounded-xl p-5 mb-4">
+          <div class="font-bold text-purple-800 mb-2">ゾディカル・リリースで使う「ロット（Lot）」</div>
+          <p class="text-gray-700 text-sm mb-2">ゾディカル・リリースは「ロット」と呼ばれる特殊な計算点を起点に使います。代表的なものが次の2つです。</p>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div class="bg-white rounded-lg p-3">
+              <div class="font-bold text-amber-700">パートオブフォーチュン</div>
+              <div class="text-sm text-gray-600 mt-1">「幸運点」。物質的な幸運・身体・日常生活のテーマを読む起点。太陽・月・アセンダントから計算する。</div>
+            </div>
+            <div class="bg-white rounded-lg p-3">
+              <div class="font-bold text-blue-700">パートオブスピリット</div>
+              <div class="text-sm text-gray-600 mt-1">「魂の点」。精神的な幸運・意志・キャリアのテーマを読む起点。計算方法はパートオブフォーチュンの逆。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analogy-box">
+          <div class="flex items-start gap-3">
+            <i data-lucide="message-circle" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-amber-800 mb-1">たとえ話②：人生の「時刻表」</div>
+              <p class="text-gray-800">電車の時刻表には「何時何分に何番線のどの電車が来る」と書いてあります。ゾディカル・リリースはそれと似ていて、「あなたの人生には○歳〜○歳に"キャリアの転機の電車"が来る」という時刻表を読むようなものです。乗るかどうかはあなた次第ですが、電車が来る時期を知っているだけで準備の仕方が変わります。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- レクティフィケーション -->
+      <div class="section-card">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+            <i data-lucide="target" class="w-6 h-6 text-green-600"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">レクティフィケーションとは？</h2>
+        </div>
+
+        <div class="term-explain">
+          <div class="flex items-start gap-4">
+            <i data-lucide="lightbulb" class="w-8 h-8 text-purple-500 flex-shrink-0"></i>
+            <div>
+              <div class="term-word text-xl font-bold">「レクティフィケーション（Rectification）」とは？</div>
+              <div class="text-lg mt-2">
+                「修正・正確化」という意味。<span class="font-bold text-purple-700">出生時間を逆算して正確に特定する技術</span>です。母子手帳に書かれた時間が少しズレていたりすることがあり、真弓香さんはこの技術でチャートを正確に鑑定します。
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="analogy-box mt-4">
+          <div class="flex items-start gap-3">
+            <i data-lucide="message-circle" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-amber-800 mb-1">たとえ話③：カメラのピント合わせ</div>
+              <p class="text-gray-800">写真を撮るとき、ピントが少しでもズレると写真全体がぼんやりします。ホロスコープも同じで、出生時間が数分ズレるだけでアセンダント（起点）が変わり、読み取りがぼんやりしてしまいます。レクティフィケーションは「あなたの人生に起きた出来事」から逆算して、正確な出生時間を特定することで、ピントを合わせ直す作業です。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 現代占星術との違い -->
+      <div class="section-card">
+        <div class="flex items-center gap-3 mb-5">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <i data-lucide="git-compare" class="w-6 h-6 text-blue-600"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800">現代占星術との違いは？</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-purple-100">
+                <th class="text-left p-3 font-bold text-purple-800">比較ポイント</th>
+                <th class="text-left p-3 font-bold text-purple-800">ヘレニスティック占星術</th>
+                <th class="text-left p-3 font-bold text-gray-600">現代西洋占星術</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr>
+                <td class="p-3 font-medium text-gray-700">使う惑星</td>
+                <td class="p-3 text-gray-700">太陽・月・水星・金星・火星・木星・土星の7惑星のみ</td>
+                <td class="p-3 text-gray-500">天王星・海王星・冥王星も加えた10惑星以上</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-3 font-medium text-gray-700">ハウスの計算</td>
+                <td class="p-3 text-gray-700">「ホール・サイン・ハウス」方式（星座まるごと1ハウスに対応）</td>
+                <td class="p-3 text-gray-500">プラシーダス・コッホ等の複雑な計算方式が多い</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium text-gray-700">時代予測</td>
+                <td class="p-3 text-gray-700">ゾディカル・リリース・フィルダリア等の古典手法</td>
+                <td class="p-3 text-gray-500">プログレッションやソーラーアークなど近代手法</td>
+              </tr>
+              <tr class="bg-gray-50">
+                <td class="p-3 font-medium text-gray-700">特殊な計算点</td>
+                <td class="p-3 text-gray-700">ロット（アラビック・パーツ）を重視</td>
+                <td class="p-3 text-gray-500">ロットを使わないことが多い</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-medium text-gray-700">哲学的背景</td>
+                <td class="p-3 text-gray-700">ストア哲学・ネオプラトニズムと深く結びついている</td>
+                <td class="p-3 text-gray-500">心理学（ユング等）との融合が多い</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- よくある誤解 -->
+    <section id="misconceptions" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-red-500"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">よくある誤解・思い込み</h2>
+          <p class="text-gray-500">「実は違った」という気づきのポイント</p>
+        </div>
+      </div>
+
+      <div class="space-y-5">
+        <!-- 誤解1 -->
+        <div>
+          <div class="flex gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
+            <i data-lucide="x-circle" class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-700">誤解①：「星占いは太陽星座（○○座）だけで決まる」</div>
+              <p class="text-gray-700 mt-1">雑誌の「今週の乙女座の運勢」のような占いのイメージから、「星占い＝12星座占い」と思いがちです。</p>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 bg-green-50 rounded-xl border border-green-200 mt-2">
+            <i data-lucide="check-circle" class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-green-700">実際はこうです</div>
+              <p class="text-gray-700 mt-1">ヘレニスティック占星術では、生まれた日時・場所をもとに7つの惑星の配置すべてを読みます。太陽星座はその中の「一要素」にすぎません。アセンダント（上昇点）や月・金星・木星の配置が同じくらい重要とされています。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 誤解2 -->
+        <div>
+          <div class="flex gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
+            <i data-lucide="x-circle" class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-700">誤解②：「古い占星術だから、現代には合わない」</div>
+              <p class="text-gray-700 mt-1">2000年以上前の技法と聞くと、「現代の生活には関係ない」と感じる人も多いようです。</p>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 bg-green-50 rounded-xl border border-green-200 mt-2">
+            <i data-lucide="check-circle" class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-green-700">実際はこうです</div>
+              <p class="text-gray-700 mt-1">「古い＝精度が低い」とは限りません。むしろヘレニスティック占星術は、近代占星術が失ってしまった「人生のタイミングを読む技法」を多く持っています。結婚・出産・転職・病気などの転機が過去のデータと一致した、という報告が多く寄せられています。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 誤解3 -->
+        <div>
+          <div class="flex gap-4 p-4 bg-red-50 rounded-xl border border-red-200">
+            <i data-lucide="x-circle" class="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-red-700">誤解③：「占星術で運命は変えられない」</div>
+              <p class="text-gray-700 mt-1">「星で決まっているなら、努力しても意味がない」と感じる人もいます。</p>
+            </div>
+          </div>
+          <div class="flex gap-4 p-4 bg-green-50 rounded-xl border border-green-200 mt-2">
+            <i data-lucide="check-circle" class="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <div class="font-bold text-green-700">実際はこうです</div>
+              <p class="text-gray-700 mt-1">ヘレニスティック占星術の目的は「いつ波が来るかを知ること」です。波のサイクルを知っていれば、波が来たときに乗る準備ができます。嵐の時期には無理をせず体力を温存し、追い風の時期に全力で動く——そういった「タイミングを知ること」による自分らしい選択が、古代の実践者たちの目的でもありました。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 知っておきたい言葉 -->
+    <section id="glossary" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="book-open" class="w-6 h-6 text-indigo-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">知っておきたい言葉</h2>
+          <p class="text-gray-500">会話で登場する用語集</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">ホロスコープ（Horoscope）</span>
+            <p class="text-sm text-gray-600 mt-1">「時刻を見る者」の意。生まれた瞬間の惑星配置を円形に描いた星図。すべての鑑定の土台となる。</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">アセンダント（Ascendant / ASC）</span>
+            <p class="text-sm text-gray-600 mt-1">生まれた瞬間に東の地平線に昇っていた星座の度数。ホロスコープの「現在地マーク」であり、鑑定の起点。上昇点とも言う。→ ホロスコープ、ハウス</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">ハウス（House）</span>
+            <p class="text-sm text-gray-600 mt-1">ホロスコープの円を12分割した「人生のエリア」。1ハウス＝自分、2ハウス＝お金、7ハウス＝パートナーなど。→ アセンダント</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">アスペクト（Aspect）</span>
+            <p class="text-sm text-gray-600 mt-1">惑星同士の「角度による関係性」。0度（コンジャンクション）、60度（セクスタイル）、90度（スクエア）、120度（トライン）、180度（オポジション）が主要なもの。</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">ロット / アラビック・パーツ（Lots / Arabic Parts）</span>
+            <p class="text-sm text-gray-600 mt-1">惑星の位置を数式で計算して導き出す「仮想の点」。幸運・魂・愛情など特定のテーマを読むために使う。→ パートオブフォーチュン、ゾディカル・リリース</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">パートオブフォーチュン（Part of Fortune）</span>
+            <p class="text-sm text-gray-600 mt-1">「幸運点」とも呼ばれるロット。日常的な幸運や身体に関わる。ゾディカル・リリースの起点として使われる。→ ロット、ゾディカル・リリース</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">ゾディカル・リリース（Zodiacal Releasing）</span>
+            <p class="text-sm text-gray-600 mt-1">人生を年齢ごとに「時代区分」して読む時間技法。0〜100歳の転機を読み解く。真弓香さんの主要な鑑定手法。→ ロット</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">レクティフィケーション（Rectification）</span>
+            <p class="text-sm text-gray-600 mt-1">実際の人生の出来事を手がかりに、正確な出生時間を逆算・修正する技術。ホロスコープの精度を高めるために行う。→ ホロスコープ、アセンダント</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">ディグニティー（Dignity）</span>
+            <p class="text-sm text-gray-600 mt-1">惑星が「どの星座にいるか」によって決まる「強さの状態」。強いディグニティーにある惑星はその性質を発揮しやすいとされる。「品位」とも訳される。</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">プロジェクト・ハインドサイト（Project Hindsight）</span>
+            <p class="text-sm text-gray-600 mt-1">1992年に米国で始まった古代ギリシャ語占星術文献の英訳プロジェクト。ロバート・シュミット、ロバート・ハンド、ロバート・ゾラー氏が発足させた。現代への再発見の出発点。</p>
+          </div>
+        </div>
+        <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+          <i data-lucide="tag" class="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <span class="font-bold text-gray-800">アストロカートグラフィ（Astrocartography）</span>
+            <p class="text-sm text-gray-600 mt-1">「場所と運勢の関係」を読む占星術の手法。世界地図上に惑星の影響ラインを描き、どの場所に住むと何のテーマが強調されるかを読む。真弓香さんが公認資格を持つ専門分野。→ ホロスコープ</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- もっと知りたい人へ -->
+    <section id="related" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="compass" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">もっと知りたい人へ</h2>
+          <p class="text-gray-500">次に調べると面白いトピック</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">アラビア占星術</div>
+            <div class="text-sm text-gray-600 mt-1">ヘレニスティック占星術がイスラム世界に伝わり変化した形。ハウス計算など現代占星術への橋渡し役。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">ホラリー占星術</div>
+            <div class="text-sm text-gray-600 mt-1">「いつ質問したか」の瞬間のホロスコープを読む伝統占星術。「結婚できる？」「試験は受かる？」など具体的な質問に答える。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">アストロカートグラフィ</div>
+            <div class="text-sm text-gray-600 mt-1">住む場所・旅行先によって人生のテーマが変わるという占星術の手法。真弓香さんの専門でもある。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">ヘレニズム時代の哲学</div>
+            <div class="text-sm text-gray-600 mt-1">ストア哲学・エピクロス主義・ネオプラトニズム。ヘレニスティック占星術の背景にある思想で、「運命と自由意志」の問いに向き合う。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">ジョーティッシュ（インド占星術）</div>
+            <div class="text-sm text-gray-600 mt-1">ヘレニスティック占星術と同じ時代に影響を受け合いながら発展したインドの占星術。ホール・サイン・ハウスを今も使う。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">クリス・ブラナンの著作</div>
+            <div class="text-sm text-gray-600 mt-1">「Hellenistic Astrology」（2017年）。ヘレニスティック占星術を初めて英語で体系化した現代の決定版テキスト。英語だが詳細なリソースとして。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 参考文献 -->
+    <section id="references" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="external-link" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">参考文献・URL</h2>
+          <p class="text-gray-500">もっと詳しく知りたい場合に</p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <a href="https://astroagenda.com/hellenistic_astrology/" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>真弓香さんの公式サイト「ヘレニスティック・アストロロジー」解説ページ（日本語）</span>
+        </a>
+        <a href="https://astroagenda.com/" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>真弓香さんの公式サイト「アストロ・アジェンダ」トップページ（日本語）</span>
+        </a>
+        <a href="https://www.anahana.com/ja/astrology/hellenistic" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>ヘレニズム占星術：西洋実践の古典的基盤（Anahana・日本語解説）</span>
+        </a>
+        <a href="https://www.horary.jp/" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>伝統的占星術 ヘレニスティック占星術（ホラリー占星術・日本語）</span>
+        </a>
+        <a href="https://kakuyomu.jp/works/16817330653480109298/episodes/16817330662217704208" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>西洋占星術の歴史②ヘレニズムと占星術（カクヨム・読み物）</span>
+        </a>
+        <a href="https://hellenisticastrology.com/" target="_blank" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <span>Chris Brennan's Hellenistic Astrology（クリス・ブラナン公式・英語）</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PDFダウンロードボタン -->
+  <button class="pdf-btn" onclick="window.print()">
+    <i data-lucide="download" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

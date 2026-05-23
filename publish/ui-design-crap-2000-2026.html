@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UIデザインの変遷とデザイン4原則の相関分析（2000–2026）| Techmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    body { font-family: 'Noto Sans JP', sans-serif; }
+    code, .mono { font-family: 'JetBrains Mono', monospace; }
+    html { scroll-behavior: smooth; }
+    .toc-link { transition: color 0.15s, border-left-color 0.15s; }
+    .toc-link:hover { color: #3b82f6; border-left-color: #3b82f6; }
+    .term-box { border-left: 3px solid #3b82f6; }
+    .era-card { transition: transform 0.15s, box-shadow 0.15s; }
+    .era-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+    .principle-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+    @media print {
+      #pdf-btn, nav, #toc-float { display: none !important; }
+      section { break-inside: avoid; }
+      .era-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- PDF Button -->
+  <button id="pdf-btn" onclick="window.print()"
+    class="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium transition-colors">
+    <i data-lucide="file-text" class="w-4 h-4"></i>PDFで保存
+  </button>
+
+  <!-- Floating TOC (desktop) -->
+  <nav id="toc-float" class="hidden xl:block fixed top-24 left-6 w-52 z-40">
+    <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">目次</p>
+      <ul class="space-y-1 text-sm">
+        <li><a href="#summary" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">ひとことで言えば</a></li>
+        <li><a href="#history" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">なぜ生まれたのか</a></li>
+        <li><a href="#core3" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">まず理解する3つ</a></li>
+        <li><a href="#concepts" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">主要概念・時代別分析</a></li>
+        <li><a href="#pitfalls" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">落とし穴</a></li>
+        <li><a href="#glossary" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">専門用語集</a></li>
+        <li><a href="#nextsteps" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">次に学ぶと良いもの</a></li>
+        <li><a href="#refs" class="toc-link block text-slate-600 border-l-2 border-transparent pl-2 py-0.5">参考文献</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Header -->
+  <header class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white py-16 px-6">
+    <div class="max-w-3xl mx-auto">
+      <div class="flex items-center gap-2 text-blue-400 text-sm font-medium mb-4">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>TECHMAP</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold leading-tight mb-4">
+        UIデザインの変遷と<br class="hidden md:block" />デザイン4原則の相関分析
+      </h1>
+      <p class="text-blue-200 text-lg mb-6">2000–2026年：スキューモーフィズムからAIネイティブUIまで</p>
+      <div class="flex flex-wrap gap-2">
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">C.R.A.P原則</span>
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">スキューモーフィズム</span>
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">マテリアルデザイン</span>
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">デザインシステム</span>
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">visionOS</span>
+        <span class="bg-blue-800 text-blue-100 text-xs px-3 py-1 rounded-full">AIネイティブUI</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-6 py-12 space-y-16">
+
+    <!-- Section 1: ひとことで言えば -->
+    <section id="summary">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">ひとことで言えば</h2>
+      </div>
+
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+        <p class="text-blue-900 text-lg leading-relaxed font-medium">
+          UIデザインの26年間は、「物理世界を模倣してユーザーに教える」戦略から「ユーザーの意図を予測して最適な情報を提示する」戦略への段階的な移行であり、その各段階でデザイン4原則（C.R.A.P）の<strong>どれを主軸に置くか</strong>が変化してきた。
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">対象読者</p>
+          <p class="text-sm text-slate-700">実務経験のあるエンジニア・デザイナーで、UIトレンドの背景にある設計原理を体系化したい人</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">カバー範囲</p>
+          <p class="text-sm text-slate-700">2000–2026年の5つの時代区分と、各時代でのC.R.A.P原則の適用パターン・認知科学的根拠</p>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-500 font-medium uppercase tracking-wider mb-1">前提知識</p>
+          <p class="text-sm text-slate-700">HTML/CSSの基礎、UIとUXの違い、Figmaなどのデザインツール使用経験があると理解が早い</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: なぜ生まれたのか -->
+    <section id="history">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="clock" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">なぜ生まれたのか</h2>
+      </div>
+
+      <div class="term-box bg-white rounded-lg p-4 mb-6">
+        <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">用語解説</p>
+        <p class="text-sm"><strong>C.R.A.P（クラップ）原則</strong> = <strong>C</strong>ontrast（対比）・<strong>R</strong>epetition（反復）・<strong>A</strong>lignment（整列）・<strong>P</strong>roximity（接近）の頭字語。デザイナーのRobin Williams（ロビン・ウィリアムス）が著書『The Non-Designer's Design Book（ノンデザイナーズ・デザインブック）』（1994年初版）で体系化した。印刷物向けの原則だが、GUIデザインにも普遍的に適用できる。</p>
+      </div>
+
+      <p class="text-slate-700 leading-relaxed mb-6">
+        「なぜUIデザインにトレンドが存在するのか？」という問いの答えは、流行ではなく<strong>制約と目的の再最適化</strong>にある。デジタルUIは物理的な質感も重力も持たない。ユーザーが「ここをタップすると何かが起きる」と判断するためには、何らかの<strong>視覚的な手がかり（affordance：アフォーダンス）</strong>が必要で、その手がかりの最適解は、ハードウェアの進化・デバイスの多様化・ユーザーのリテラシー向上によって変化してきた。
+      </p>
+
+      <!-- Timeline -->
+      <div class="relative border-l-2 border-slate-200 ml-4 space-y-8 pl-8">
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 bg-amber-500 rounded-full border-2 border-white shadow"></div>
+          <p class="text-xs text-amber-600 font-semibold uppercase tracking-wider mb-1">2000–2010年</p>
+          <h3 class="text-lg font-bold mb-2">スキューモーフィズム期：物理メタファーで「教える」</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            タッチスマートフォンの黎明期（iPhoneは2007年）、多くのユーザーは「画面を直接触って操作する」経験を持たなかった。レザーの手帳・リアルなスイッチ・光沢のある金属ボタンといった質感の再現は、「押せる・触れる・開ける」という操作の可能性を直感的に伝えるための解法だった。低〜中解像度の制約下では、影と立体感がタップ領域の識別にも有効だった。
+          </p>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 bg-sky-500 rounded-full border-2 border-white shadow"></div>
+          <p class="text-xs text-sky-600 font-semibold uppercase tracking-wider mb-1">2010–2015年</p>
+          <h3 class="text-lg font-bold mb-2">フラットデザイン期：装飾を削いで情報設計を前に出す</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            フラットデザインの先駆けは<strong>Microsoft Windows Phone 7（2010年）のMetro UI</strong>で、タイポグラフィ中心・グリッド・装飾排除の思想をiOS 7より3年先行して実装した。続いてRetinaディスプレイの普及（2010年〜）が細線・細かいタイポグラフィを成立させ、スキューモーフィズムの「装飾でごまかす」手法は逆にノイズになった。Apple iOS 7（2013年）の大変革とGoogle Material Design（2014年）の発表は、「グリッド・タイポグラフィ・余白の意味」がUI品質の主軸になる業界全体への転換点だった。
+          </p>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 bg-violet-500 rounded-full border-2 border-white shadow"></div>
+          <p class="text-xs text-violet-600 font-semibold uppercase tracking-wider mb-1">2015–2020年</p>
+          <h3 class="text-lg font-bold mb-2">デザインシステム確立期：「個人の裁量」から「組織の規格」へ</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            プロダクト組織の拡大と多プラットフォーム対応により、個人のセンス頼みのデザインは破綻した。Brad Frostの<strong>Atomic Design</strong>（原子→分子→有機体→テンプレート→ページという階層）と、Figma（2016年〜）の共同編集環境が、「コンポーネントを共通規格として運用する」実務を可能にした。Repetition（反復）は「一貫性」という価値として最大化された時代。
+          </p>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 bg-rose-500 rounded-full border-2 border-white shadow"></div>
+          <p class="text-xs text-rose-600 font-semibold uppercase tracking-wider mb-1">2020–2023年</p>
+          <h3 class="text-lg font-bold mb-2">質感の再定義：フラット疲れと「読める奥行き」の模索</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            フラットデザインの成熟とともに「すべてが同じ重みに見える」という問題が顕在化した。Neumorphism（外影・内影で立体を作る手法）は試みとして注目されたがコントラスト不足でアクセシビリティ問題を引き起こした。Glassmorphism・Material You・Fluent Design 2などは「深度と光」でContrastを再定義しつつ、動的カラーと階層の両立を追求した。
+          </p>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -left-10 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow"></div>
+          <p class="text-xs text-emerald-600 font-semibold uppercase tracking-wider mb-1">2024–2026年</p>
+          <h3 class="text-lg font-bold mb-2">AIネイティブ・空間UI期：「固定画面」から「可変コンテキスト」へ</h3>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            Apple Vision Pro（visionOS）は平面キャンバス前提を崩し、深度・視線・環境光が設計変数になった。AI生成UIは「コンテンツが可変」なため、接近（Proximity）は画面上の物理距離ではなく<strong>意味的・文脈的な近接</strong>に拡張される。強調（Contrast）は「目立たせる」から「生成物の中で何を信頼できるか」を示すリスク設計に変化しつつある。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: まず理解する3つ -->
+    <section id="core3">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="triangle" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">まず理解する3つ</h2>
+      </div>
+      <p class="text-slate-600 mb-6">この分析を理解するうえで、この3点を押さえれば入門完了と言える。</p>
+
+      <div class="space-y-4">
+        <div class="bg-white border border-violet-200 rounded-xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="text-violet-700 font-bold text-lg">1</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold mb-2">トレンドは「流行」ではなく「制約の変化への適応」</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                スキューモからフラットへの移行は「古いものが嫌われた」のではなく、Retinaディスプレイ・タッチ操作の習熟・多解像度対応という制約の変化に対し、情報設計の最適解が変わった結果。トレンドを「なぜそれが選ばれたか」という問いで見ると、設計判断の根拠が見える。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-violet-200 rounded-xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="text-violet-700 font-bold text-lg">2</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold mb-2">C.R.A.P原則は「4つすべてを等しく使う」ものではない</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                4原則は同時に機能するが、各時代・各プロダクトで<strong>どれを主軸に置くか</strong>が変わる。デザインシステムは主にRepetitionの最大化、フラット期はAlignmentとProximityの精緻化という具合に、状況に応じた優先順位付けが実務の核心。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-violet-200 rounded-xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span class="text-violet-700 font-bold text-lg">3</span>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold mb-2">認知科学とC.R.A.Pは対応関係にある</h3>
+              <p class="text-slate-600 text-sm leading-relaxed">
+                ゲシュタルト原則の近接（Nähe）はProximityに、類似（Ähnlichkeit）はRepetitionに、図地分離（Figur-Grund）はContrastに対応する。UIデザイン原則は「経験則」ではなく、視覚認知の神経科学的特性に基づいた設計言語として捉えられる。フィッツの法則・ヒックの法則も合わせて理解すると設計判断の解像度が上がる。
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: 主要概念・アーキテクチャ -->
+    <section id="concepts">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+          <i data-lucide="grid" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">主要概念・時代別相関分析</h2>
+      </div>
+
+      <!-- C.R.A.P overview -->
+      <div class="bg-slate-900 text-white rounded-xl p-6 mb-8">
+        <h3 class="text-lg font-bold mb-4 text-slate-100">C.R.A.P原則の定義と認知科学的根拠</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 bg-red-500 rounded text-white text-xs font-bold flex items-center justify-center">C</span>
+              <span class="font-semibold">Contrast（対比・強調）</span>
+            </div>
+            <p class="text-slate-300 text-xs leading-relaxed">要素の差（色・サイズ・太さ・形状）で重要度の階層を作る。神経科学的根拠：視覚野のサリエンス（顕著性）検出。図地分離（Figure–Ground）と直結。</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 bg-emerald-500 rounded text-white text-xs font-bold flex items-center justify-center">R</span>
+              <span class="font-semibold">Repetition（反復）</span>
+            </div>
+            <p class="text-slate-300 text-xs leading-relaxed">同じ視覚要素の繰り返しで一貫性とブランドを作る。認知根拠：類似性のゲシュタルト（同じ見た目＝同じ機能という学習の形成）。</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 bg-blue-500 rounded text-white text-xs font-bold flex items-center justify-center">A</span>
+              <span class="font-semibold">Alignment（整列）</span>
+            </div>
+            <p class="text-slate-300 text-xs leading-relaxed">要素を見えない軸に沿わせ、視線導線と秩序を生む。認知根拠：連続性のゲシュタルト（軸が揃う＝一つの流れとして追いやすい）。</p>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="w-6 h-6 bg-amber-500 rounded text-white text-xs font-bold flex items-center justify-center">P</span>
+              <span class="font-semibold">Proximity（接近）</span>
+            </div>
+            <p class="text-slate-300 text-xs leading-relaxed">近いものをグループとして知覚させる。認知根拠：近接のゲシュタルト（物理的距離＝意味的関係の代理変数）。余白の設計が主武器。</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analogy 1 -->
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start gap-3">
+          <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <p class="font-semibold text-amber-900 mb-1">たとえ話①：スキューモーフィズム＝「実物大のATMモック（ボタンが押せる）」</p>
+            <p class="text-amber-800 text-sm leading-relaxed">
+              ATMを初めて使う人を訓練する際、実物大の訓練用モックアップ（ボタンが物理的に押せる・音がフィードバックされる）を使うと、「何を押せば何が起きるか」の学習が早い。スキューモーフィズムはこの発想で、「立体感のあるボタン・沈む感覚を想起させる影」が「ここを押すと何かが起きる」というインタラクション期待を作る。画面に慣れたユーザーには、この訓練用モックは必要なくなる——それがフラット移行の本質。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Era cards -->
+      <div class="space-y-6">
+
+        <!-- Era 1: Skeuomorphism -->
+        <div class="era-card bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-amber-500 px-6 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-amber-100 text-xs font-medium uppercase tracking-wider">2000–2010年</p>
+              <h3 class="text-white font-bold text-lg">スキューモーフィズム期</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-amber-100 text-xs mb-1">主役となったC.R.A.P原則</p>
+              <span class="principle-badge bg-red-500 text-white">Contrast（強調）</span>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-2">特徴的なUI表現</h4>
+                <ul class="space-y-1 text-sm text-slate-700">
+                  <li class="flex items-start gap-2"><i data-lucide="minus" class="w-3 h-3 text-amber-400 flex-shrink-0 mt-1"></i>レザー・ノート・木目調のテクスチャ</li>
+                  <li class="flex items-start gap-2"><i data-lucide="minus" class="w-3 h-3 text-amber-400 flex-shrink-0 mt-1"></i>光沢感・立体的なボタン（グラデーション＋影）</li>
+                  <li class="flex items-start gap-2"><i data-lucide="minus" class="w-3 h-3 text-amber-400 flex-shrink-0 mt-1"></i>Mac OS X Aqua、iOS Notes の罫線メモ帳</li>
+                  <li class="flex items-start gap-2"><i data-lucide="minus" class="w-3 h-3 text-amber-400 flex-shrink-0 mt-1"></i>App Store（iOS 6以前）のリアルな棚表示</li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-2">Contrastが主役の理由</h4>
+                <p class="text-sm text-slate-700 leading-relaxed">
+                  物理メタファーの再現は「影と光の差」で成立する。光が当たる面（ハイライト）と影になる面（シャドウ）のContrastが立体感を生み、「押せる場所」と「押せない場所」を区別していた。Contrastなしには「何が操作可能か」が伝わらない構造だった。
+                </p>
+                <div class="mt-3 bg-amber-50 rounded-lg p-3">
+                  <p class="text-xs text-amber-700"><strong>技術的制約との関係：</strong>低解像度では細線よりも面・影の方がタップ領域の識別に有利だった。Retinaの登場が状況を変えた。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Era 2: Flat Design -->
+        <div class="era-card bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-sky-500 px-6 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-sky-100 text-xs font-medium uppercase tracking-wider">2010–2015年</p>
+              <h3 class="text-white font-bold text-lg">フラットデザイン期</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-sky-100 text-xs mb-1">主役となったC.R.A.P原則</p>
+              <span class="principle-badge bg-blue-600 text-white mr-1">Alignment（整列）</span>
+              <span class="principle-badge bg-amber-500 text-white">Proximity（接近）</span>
+            </div>
+          </div>
+          <div class="p-6">
+
+            <!-- Analogy 2 -->
+            <div class="bg-sky-50 border border-sky-200 rounded-lg p-4 mb-5">
+              <div class="flex items-start gap-3">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-sky-600 flex-shrink-0 mt-0.5"></i>
+                <p class="text-sky-800 text-sm leading-relaxed">
+                  <strong>たとえ話②：フラットデザインのAlignment＝電車の時刻表</strong><br />
+                  駅の時刻表は装飾ゼロでも、グリッドと余白だけで数百の時刻を一瞬で読み分けられる。フラットデザインのAlignmentはこれと同じ——「装飾なしに情報の秩序を作れるか」を問う。列が揃っているから「上下は同じ路線」「左右は時間軸」と即座に読める。軸が1pxでもずれると認知上の「接続感」が失われる——Alignmentの厳密さがそのままUI品質の差になる。
+                </p>
+              </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 class="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-2">主要な転換点</h4>
+                <ul class="space-y-2 text-sm text-slate-700">
+                  <li class="flex items-start gap-2">
+                    <span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded font-medium flex-shrink-0 mt-0.5">2010</span>
+                    <span><strong>Windows Phone 7 Metro UI</strong>：タイポグラフィ中心・グリッド・装飾排除の先駆け。iOS 7より3年先行してフラット思想を実装</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="bg-sky-100 text-sky-700 text-xs px-2 py-0.5 rounded font-medium flex-shrink-0 mt-0.5">2013</span>
+                    <span>iOS 7：擬似立体を廃止。タイポグラフィ・レイヤー・動きに転換</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="bg-sky-100 text-sky-700 text-xs px-2 py-0.5 rounded font-medium flex-shrink-0 mt-0.5">2014</span>
+                    <span>Material Design：「紙とインク」メタファー。8dp（density-independent pixel：密度非依存ピクセル、画面解像度によらず同じ物理サイズに見えるよう計算された単位）グリッドでAlignment体系化</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="bg-sky-100 text-sky-700 text-xs px-2 py-0.5 rounded font-medium flex-shrink-0 mt-0.5">2010〜</span>
+                    <span>Retinaディスプレイ普及：細線・細かいタイポが成立し始める</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-2">Alignment・Proximityが主役の理由と両者の違い</h4>
+                <p class="text-sm text-slate-700 leading-relaxed">
+                  立体感の手がかりが消えると、ユーザーはグリッドの軸と余白の間隔から「何がグループか・何が見出しか」を読み取る。<br/><br/>
+                  <strong>Alignment（軸の一致）</strong>は「要素が同じ軸上にある＝同じ論理グループ・同じ階層」という視覚的シグナルを担う。ページ内の見えない縦軸・横軸を意識して設計しないと、フラットは「ただの散らかった色面」になる。<br/><br/>
+                  <strong>Proximity（余白の大小）</strong>は「隣接距離＝意味的関係の強さ」を担う。見出しとその本文の距離が、本文と次の見出しの距離より小さければ「これが対応関係」と即座に読める。逆に均等配置すると、何が何のグループか分からなくなる。<br/><br/>
+                  AlignmentはGlobal（ページ全体の秩序）、ProximityはLocal（要素間の関係）を担当すると覚えると、使い分けの設計判断基準になる。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Era 3: Design System -->
+        <div class="era-card bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-violet-600 px-6 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-violet-100 text-xs font-medium uppercase tracking-wider">2015–2020年</p>
+              <h3 class="text-white font-bold text-lg">デザインシステム確立期</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-violet-100 text-xs mb-1">主役となったC.R.A.P原則</p>
+              <span class="principle-badge bg-emerald-500 text-white">Repetition（反復）</span>
+            </div>
+          </div>
+          <div class="p-6">
+
+            <!-- Analogy 3 -->
+            <div class="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-5">
+              <div class="flex items-start gap-3">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-violet-600 flex-shrink-0 mt-0.5"></i>
+                <p class="text-violet-800 text-sm leading-relaxed">
+                  <strong>たとえ話③：デザインシステムのRepetition＝JIS規格のネジ</strong><br />
+                  JIS規格があると、どのメーカーのドライバーでもネジを締められる——互換性と品質が担保される。デザインシステムはUIのJIS規格で、ボタンのパディング・角丸・カラートークンを規格化することで、「誰が作っても同じ品質」を実現する。規格がなければ、画面が100になった時に100種類のボタンが生まれる。
+                </p>
+              </div>
+            </div>
+
+            <div class="term-box bg-slate-50 rounded-lg p-4 mb-4">
+              <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">用語解説</p>
+              <p class="text-sm"><strong>Atomic Design（アトミックデザイン）</strong>：Brad Frostが2013年に提唱したコンポーネント設計の考え方。化学の原子論から着想を得て、UI要素を原子（Atom：ボタン・入力欄）→分子（Molecule：フォームフィールド）→有機体（Organism：ナビゲーションバー）→テンプレート→ページの5段階で整理する。</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4">
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-slate-500 mb-1">Figma</p>
+                <p class="text-sm font-medium text-slate-700">共同編集・コンポーネント・デザイントークン</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-slate-500 mb-1">Storybook</p>
+                <p class="text-sm font-medium text-slate-700">コンポーネントカタログ・アクセシビリティ検証</p>
+              </div>
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <p class="text-xs text-slate-500 mb-1">Design Token</p>
+                <p class="text-sm font-medium text-slate-700">色・間隔・フォントの規格値（CSS変数の前身）</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Era 4: Texture Redefinition -->
+        <div class="era-card bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-rose-500 px-6 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-rose-100 text-xs font-medium uppercase tracking-wider">2020–2023年</p>
+              <h3 class="text-white font-bold text-lg">質感の再定義期</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-rose-100 text-xs mb-1">主役となったC.R.A.P原則</p>
+              <span class="principle-badge bg-red-700 text-white">Contrast（階層）</span>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="grid md:grid-cols-3 gap-3 mb-5">
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-xs font-semibold text-rose-600 mb-1">Neumorphism</p>
+                <p class="text-xs text-slate-600">外影・内影で「押せる塊」を表現。コントラスト不足でWCAG不適合になりやすく一般化せず</p>
+              </div>
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-xs font-semibold text-rose-600 mb-1">Glassmorphism</p>
+                <p class="text-xs text-slate-600">半透明＋ぼかしで階層を表現。背景依存でコントラスト管理が難所。iOS・macOSと親和性高い</p>
+              </div>
+              <div class="border border-slate-200 rounded-lg p-3">
+                <p class="text-xs font-semibold text-rose-600 mb-1">Material You（MD3）</p>
+                <p class="text-xs text-slate-600">動的カラー・大画面対応・形状の柔軟化。Contrastを「動的に調整可能」なシステムとして設計</p>
+              </div>
+            </div>
+            <p class="text-sm text-slate-700 leading-relaxed">
+              Contrastの意味が「目立たせる」から「<strong>深度によって読める</strong>」へと変化した時代。ガラス・光・影による奥行きは、Proximityと組み合わさることで情報の「層」を表現する。ただしアクセシビリティ（WCAG：Web Content Accessibility Guidelines）要件と相反しやすいため、Contrastの最小値を動的に保証するシステムが必要になった。
+            </p>
+          </div>
+        </div>
+
+        <!-- Era 5: AI Native -->
+        <div class="era-card bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-emerald-600 px-6 py-3 flex items-center justify-between">
+            <div>
+              <p class="text-emerald-100 text-xs font-medium uppercase tracking-wider">2024–2026年</p>
+              <h3 class="text-white font-bold text-lg">AIネイティブ・空間UI期</h3>
+            </div>
+            <div class="text-right">
+              <p class="text-emerald-100 text-xs mb-1">主役となったC.R.A.P原則</p>
+              <span class="principle-badge bg-amber-500 text-white mr-1">Proximity（可変）</span>
+              <span class="principle-badge bg-red-500 text-white">Contrast（リスク設計）</span>
+            </div>
+          </div>
+          <div class="p-6">
+
+            <!-- Analogy 4 -->
+            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-5">
+              <div class="flex items-start gap-3">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+                <p class="text-emerald-800 text-sm leading-relaxed">
+                  <strong>たとえ話④：AIネイティブUIの「可変する接近」＝ジャズのリードシート</strong><br />
+                  ジャズのリードシートはコード進行という骨格だけ書かれており、フレーズは文脈と演奏者の判断で即興される。AIネイティブUIはこれと同じ構造で、レイアウトの骨格（コンテナ・ロール）は固定しつつ、コンテンツと強調箇所は会話の文脈に応じて動的に変化する。固定された「スコア（仕様書通りのUI）」は機能しなくなる。
+                </p>
+              </div>
+            </div>
+
+            <!-- Analogy 5 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 mb-5">
+              <div class="flex items-start gap-3">
+                <i data-lucide="lightbulb" class="w-4 h-4 text-slate-500 flex-shrink-0 mt-0.5"></i>
+                <p class="text-slate-700 text-sm leading-relaxed">
+                  <strong>たとえ話⑤：visionOSの空間UI＝水族館のガラス越し観察</strong><br />
+                  水族館では、展示物（現実世界）とガラス（UIウィンドウ）が共存し、照明・反射・距離感が体験を作る。visionOSのWindow・Volume・Spaceはまさにこの構造で、UIと現実環境の「重なり方」「光の整合性」「視線とのエルゴノミクス」が平面UIにはなかった設計変数になる。
+                </p>
+              </div>
+            </div>
+
+            <!-- AI era concrete examples -->
+            <div class="bg-white border border-slate-200 rounded-lg p-5 mb-4">
+              <h4 class="font-semibold text-sm text-slate-500 uppercase tracking-wider mb-3">2024–2026年の具体的なUI設計課題</h4>
+              <div class="space-y-3 text-sm text-slate-700">
+                <div class="bg-slate-50 rounded-lg p-3">
+                  <p class="font-medium text-slate-800 mb-1">ChatGPT・Claude等のAIチャットUI</p>
+                  <p class="text-slate-600">生成中のテキストが逐次レンダリングされるため「どこまでが確定した情報か」をContrastで示す設計が必要。引用・コード・警告のContrastが弱いと、生成ミス（ハルシネーション）を見逃すリスクが高まる。</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                  <p class="font-medium text-slate-800 mb-1">Vercel v0・GitHub Copilot WorkspaceのUI生成</p>
+                  <p class="text-slate-600">AIがコードとUIを同時生成するため、生成物の「意図された強調（Contrast）」と「偶発的な強調」の区別が設計者に要求される。C.R.A.Pの適用が「人間のレビュー工程」として残り続ける理由。</p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                  <p class="font-medium text-slate-800 mb-1">Apple Intelligence（2024年〜）のContext-aware UI</p>
+                  <p class="text-slate-600">アプリ横断のコンテキスト理解に基づき、通知の優先度・表示タイミング・要約の粒度を動的調整。ProximityとContrastが「ユーザーの現在状態」によって変化する「可変な設計」の実例。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="term-box bg-white border border-slate-200 rounded-lg p-4">
+              <p class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-2">用語解説</p>
+              <div class="space-y-2 text-sm">
+                <p><strong>visionOS（ビジョンOS）</strong>：Apple Vision ProのOS。UIをWindow（2D）・Volume（3D）・Space（フル空間）の3タイプに分類し、視線・手・深度を入力とする。</p>
+                <p><strong>Adaptive UI（アダプティブUI）</strong>：デバイス・時間・タスク・ユーザー状態に応じてナビゲーション・密度・優先表示を動的に変えるUI設計。コンテキストアウェアUIとも呼ばれる。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Causality Chain (upgraded from simple matrix) -->
+      <div class="mt-8">
+        <h3 class="text-lg font-bold mb-2">C.R.A.P優先順位の変化と因果チェーン</h3>
+        <p class="text-sm text-slate-500 mb-4">「なぜその時代にその原則が主役になったか」——トリガーと結果を連鎖で読む</p>
+
+        <div class="space-y-3">
+
+          <!-- Era 1 chain -->
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs bg-amber-500 text-white px-2 py-1 rounded font-bold">2000–2010</span>
+              <span class="font-bold text-slate-800">スキューモ期</span>
+              <span class="ml-auto text-xs text-amber-700 font-semibold">主役：Contrast（質感の差）</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <div class="bg-white rounded-lg px-3 py-2 border border-amber-200 text-slate-700">タッチ操作が新規体験<br/><span class="text-xs text-slate-400">メンタルモデルが存在しない</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+              <div class="bg-white rounded-lg px-3 py-2 border border-amber-200 text-slate-700">物理オブジェクトを模倣<br/><span class="text-xs text-slate-400">Affordanceの代替手段として</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+              <div class="bg-amber-100 rounded-lg px-3 py-2 border border-amber-300 font-medium text-amber-900">光と影のContrast<br/><span class="text-xs font-normal">「押せる」を立体感で伝える</span></div>
+            </div>
+          </div>
+
+          <!-- Transition arrow -->
+          <div class="flex items-center gap-3 pl-4">
+            <i data-lucide="arrow-down" class="w-5 h-5 text-slate-400"></i>
+            <p class="text-xs text-slate-500 italic">転換トリガー：Retinaディスプレイ普及（2010〜）＋ Metro UI先行（2010）＋ ユーザーリテラシーの向上 → 装飾がノイズに変わる</p>
+          </div>
+
+          <!-- Era 2 chain -->
+          <div class="bg-sky-50 border border-sky-200 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs bg-sky-500 text-white px-2 py-1 rounded font-bold">2010–2015</span>
+              <span class="font-bold text-slate-800">フラット期</span>
+              <span class="ml-auto text-xs text-sky-700 font-semibold">主役：Alignment（秩序）＋ Proximity（余白）</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <div class="bg-white rounded-lg px-3 py-2 border border-sky-200 text-slate-700">立体感の手がかりが消滅<br/><span class="text-xs text-slate-400">Contrastが「装飾」から「情報」に</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-sky-400 flex-shrink-0"></i>
+              <div class="bg-white rounded-lg px-3 py-2 border border-sky-200 text-slate-700">グリッドと余白が<br/>情報構造の唯一の担い手に<br/><span class="text-xs text-slate-400">8dp（density-independent pixel）グリッド体系化</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-sky-400 flex-shrink-0"></i>
+              <div class="bg-sky-100 rounded-lg px-3 py-2 border border-sky-300 font-medium text-sky-900">Alignment＋Proximityが主役<br/><span class="text-xs font-normal">軸が崩れると分かりにくくなる</span></div>
+            </div>
+          </div>
+
+          <!-- Transition arrow -->
+          <div class="flex items-center gap-3 pl-4">
+            <i data-lucide="arrow-down" class="w-5 h-5 text-slate-400"></i>
+            <p class="text-xs text-slate-500 italic">転換トリガー：プロダクト組織の拡大＋多プラットフォーム対応 → 個人センス頼みのAlignmentが破綻し始める</p>
+          </div>
+
+          <!-- Era 3 chain -->
+          <div class="bg-violet-50 border border-violet-200 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs bg-violet-600 text-white px-2 py-1 rounded font-bold">2015–2020</span>
+              <span class="font-bold text-slate-800">デザインシステム期</span>
+              <span class="ml-auto text-xs text-violet-700 font-semibold">主役：Repetition（規格の一貫性）＋ Alignment（体系化）</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <div class="bg-white rounded-lg px-3 py-2 border border-violet-200 text-slate-700">100画面・3プラットフォームで<br/>Alignmentが崩壊<br/><span class="text-xs text-slate-400">個人判断では再現不能</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-violet-400 flex-shrink-0"></i>
+              <div class="bg-white rounded-lg px-3 py-2 border border-violet-200 text-slate-700">Alignmentをトークン・コンポーネントで固定<br/><span class="text-xs text-slate-400">Design Tokenで間隔・色を変数化</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-violet-400 flex-shrink-0"></i>
+              <div class="bg-violet-100 rounded-lg px-3 py-2 border border-violet-300 font-medium text-violet-900">Repetitionが品質担保の機構に<br/><span class="text-xs font-normal">同一トークン＝同一体験の保証</span></div>
+            </div>
+            <p class="text-xs text-slate-500 mt-3 italic">※ RepetitionとAlignmentは相互補完：AlignmentをRepetitionで固定したのがデザインシステムの本質。どちらが主役というより「Alignmentの値をRepetitionで強制する」仕組みといえる。</p>
+          </div>
+
+          <!-- Transition arrow -->
+          <div class="flex items-center gap-3 pl-4">
+            <i data-lucide="arrow-down" class="w-5 h-5 text-slate-400"></i>
+            <p class="text-xs text-slate-500 italic">転換トリガー：フラット疲れ（「全部同じ重みに見える」問題）＋ ダークモード普及 → 奥行きによる階層表現の需要</p>
+          </div>
+
+          <!-- Era 4 chain -->
+          <div class="bg-rose-50 border border-rose-200 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs bg-rose-500 text-white px-2 py-1 rounded font-bold">2020–2023</span>
+              <span class="font-bold text-slate-800">質感再定義期</span>
+              <span class="ml-auto text-xs text-rose-700 font-semibold">主役：Contrast（深度・光による階層）</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <div class="bg-white rounded-lg px-3 py-2 border border-rose-200 text-slate-700">フラットで「全部同じ重み」問題<br/><span class="text-xs text-slate-400">情報の優先度が伝わらない</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
+              <div class="bg-white rounded-lg px-3 py-2 border border-rose-200 text-slate-700">ガラス・ぼかし・影で奥行きを復活<br/><span class="text-xs text-slate-400">ただし装飾ではなく「層の意味」として</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-rose-400 flex-shrink-0"></i>
+              <div class="bg-rose-100 rounded-lg px-3 py-2 border border-rose-300 font-medium text-rose-900">Contrastが「読める階層」へ再定義<br/><span class="text-xs font-normal">WCAG数値で担保が必要に</span></div>
+            </div>
+          </div>
+
+          <!-- Transition arrow -->
+          <div class="flex items-center gap-3 pl-4">
+            <i data-lucide="arrow-down" class="w-5 h-5 text-slate-400"></i>
+            <p class="text-xs text-slate-500 italic">転換トリガー：生成AIの実用化（ChatGPT：2022年11月）＋ Apple Vision Pro発売（2024年2月）→ 「固定画面」前提が崩壊</p>
+          </div>
+
+          <!-- Era 5 chain -->
+          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-xs bg-emerald-600 text-white px-2 py-1 rounded font-bold">2024–2026</span>
+              <span class="font-bold text-slate-800">AIネイティブ・空間期</span>
+              <span class="ml-auto text-xs text-emerald-700 font-semibold">主役：Proximity（意味的近接）＋ Contrast（信頼性設計）</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <div class="bg-white rounded-lg px-3 py-2 border border-emerald-200 text-slate-700">コンテンツが可変・生成物が増殖<br/><span class="text-xs text-slate-400">固定レイアウトが機能しない</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+              <div class="bg-white rounded-lg px-3 py-2 border border-emerald-200 text-slate-700">関連情報の近接が「文脈」で変化<br/><span class="text-xs text-slate-400">信頼できる情報の強調が安全設計に</span></div>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>
+              <div class="bg-emerald-100 rounded-lg px-3 py-2 border border-emerald-300 font-medium text-emerald-900">可変するProximity＋Contrast<br/><span class="text-xs font-normal">骨格（Repetition・Alignment）は不変</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cognitive science connection -->
+      <div class="mt-8 bg-slate-900 text-white rounded-xl p-6">
+        <h3 class="text-lg font-bold mb-4 text-slate-100 flex items-center gap-2">
+          <i data-lucide="brain" class="w-5 h-5 text-blue-400"></i>
+          認知科学とUIデザイン原則の対応関係
+        </h3>
+        <div class="space-y-3">
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-xs bg-blue-600 text-white px-2 py-1 rounded font-medium flex-shrink-0">フィッツの法則</span>
+              <p class="text-slate-300 text-sm">ターゲットが大きく・近いほど選択が速い（移動時間 ∝ log(距離/サイズ)）。スキューモの「大きなボタン」・モバイルの最小タップ領域44pxの根拠。Proximityと直結：関連するコントロールを近づけると操作効率が上がる。</p>
+            </div>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-xs bg-emerald-600 text-white px-2 py-1 rounded font-medium flex-shrink-0">ヒックの法則</span>
+              <p class="text-slate-300 text-sm">選択肢の数が増えると意思決定時間が対数的に増加（RT ∝ log₂(n+1)）。AIの「提案の数」・ナビゲーションの項目数はここで悪化しやすい。Contrastで「最優先選択肢」を強調することが補完手段になる。</p>
+            </div>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-xs bg-amber-600 text-white px-2 py-1 rounded font-medium flex-shrink-0">ミラーの法則（7±2）</span>
+              <p class="text-slate-300 text-sm">ワーキングメモリのチャンク容量は約7±2。これを超えると認知負荷が急増する。Proximity（グルーピング）とRepetition（一貫したパターン）でチャンク化すれば、見かけの情報量を削減できる。</p>
+            </div>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-xs bg-violet-600 text-white px-2 py-1 rounded font-medium flex-shrink-0">ゲシュタルト原則</span>
+              <p class="text-slate-300 text-sm">近接（Nähe）→Proximity、類似（Ähnlichkeit）→Repetition、連続（Fortsetzung）→Alignment、図地（Figur-Grund）→Contrastに対応。1920年代の知覚心理学がUIデザイン原則の認知科学的基盤になっている。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: 落とし穴 -->
+    <section id="pitfalls">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+          <i data-lucide="alert-triangle" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">初心者がはまりやすい落とし穴</h2>
+      </div>
+
+      <div class="space-y-4">
+
+        <div class="bg-white border border-red-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-bold mb-1">「フラット＝シンプル」「スキューモ＝複雑」という誤解</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                フラットデザインは装飾の削減であり、<strong>情報設計の簡略化ではない</strong>。装飾を削いだ分だけ「グリッドの精度・余白の意味・タイポグラフィの階層」の設計精度が上がらなければ、視覚的な混乱が増す。スキューモーフィズムも「装飾が多い」のではなく、Contrastで操作性を担保する明確な設計意図がある。<br/>
+                <strong>回避策：</strong>スタイル（見た目）と情報アーキテクチャ（構造）を分離して議論する習慣を持つ。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-red-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-bold mb-1">C.R.A.P原則を「チェックリスト」として使う</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                「Contrastはある・Alignmentもある・4つ全部使った」という確認で終わると、原則が形骸化する。C.R.A.Pは<strong>判断基準であり、目的（誰が何を達成するか）と制約（デバイス・法規・ブランド）なしには適用できない</strong>。「このProximityは、ユーザーのどのメンタルモデルを支援しているか」まで問うのが実務レベル。<br/>
+                <strong>回避策：</strong>各原則の適用について「なぜこの配置・なぜこの差」を言語化する。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-red-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-bold mb-1">デザインシステムを「作ること」がゴールになる</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                コンポーネントを整理して「完成」と思った瞬間から形骸化が始まる。デザインシステムは<strong>運用（採用・非推奨・廃止・計測・ガバナンス）が本体</strong>であり、コンポーネント定義はその一部にすぎない。例外コンポーネントが増えると「どれを使えばいいか分からない」という状態になる。<br/>
+                <strong>回避策：</strong>「このコンポーネントはいつ廃止するか」という判断基準を設計段階で決めておく。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-red-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-bold mb-1">Glassmorphism・Neumorphismをアクセシビリティ検証なしに採用する</h3>
+              <p class="text-sm text-slate-600 leading-scale">
+                半透明・外内影のUIは視覚的には魅力的だが、WCAG（Web Content Accessibility Guidelines：Webコンテンツアクセシビリティガイドライン）のコントラスト比要件（テキスト：4.5:1以上）を満たせないケースが多い。NeumorphismはAAレベルをほぼクリアできないことで知られる。<br/>
+                <strong>回避策：</strong>デザインツールのアクセシビリティプラグイン（Figmaの「A11y（Accessibility：アクセシビリティの略称）- Color Contrast Checker」等）でContrastを数値検証してから採用する。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-red-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="x-circle" class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-bold mb-1">AIツールで生成したUIをそのまま採用する</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                AI生成UIは高速でプロトタイプを作れるが、<strong>アクセシビリティ・ブランドの一貫性・エラー状態の設計</strong>が欠落しやすい。見た目のPolishが高いほど「問題がないように見える」錯覚が起きる。<br/>
+                <strong>回避策：</strong>AI生成物を「叩き台」として扱い、C.R.A.Pの観点・WCAG基準・コンポーネント規約を手動でレビューするフローを維持する。
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Section 6: 専門用語集 -->
+    <section id="glossary">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center">
+          <i data-lucide="book-open" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">専門用語集</h2>
+      </div>
+
+      <div class="space-y-3">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="font-bold text-slate-900">C.R.A.P原則</p>
+              <p class="text-xs text-blue-600 font-medium mb-1">Contrast・Repetition・Alignment・Proximity</p>
+              <p class="text-sm text-slate-600">Robin Williamsが体系化したデザイン4原則。印刷物起源だがGUIにも普遍的に適用される。→ Skeuomorphism, Flat Design, Gestalt と関連</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Skeuomorphism（スキューモーフィズム）</p>
+          <p class="text-sm text-slate-600 mt-1">物理世界の素材・質感・重力をデジタルUIに模倣する設計手法。Affordanceの代替手段として機能するが、多解像度・多デバイス対応でスケーラビリティが課題に。→ Affordance, Flat Design と対比</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Affordance（アフォーダンス）</p>
+          <p class="text-sm text-slate-600 mt-1">デザイン心理学者Donald Normanが普及させた概念。「このオブジェクトで何ができるか」をユーザーが知覚できる視覚的手がかり。ボタンの立体感・リンクの下線がその例。→ Skeuomorphism, Contrast と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Material Design（マテリアルデザイン）</p>
+          <p class="text-sm text-slate-600 mt-1">Googleが2014年に発表した「紙とインク」メタファーに基づくデザイン言語。Elevation（Z軸の深度）・Ripple（タップフィードバック）・8dpグリッドを体系化。現行バージョンはMaterial Design 3（Material You）。→ Flat Design, Design System と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Atomic Design（アトミックデザイン）</p>
+          <p class="text-sm text-slate-600 mt-1">Brad Frostが2013年に提唱。UI要素を原子（Atom）→分子（Molecule）→有機体（Organism）→テンプレート→ページと5段階で分解・再利用する設計思想。→ Design System, Repetition と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Design Token（デザイントークン）</p>
+          <p class="text-sm text-slate-600 mt-1">色・タイポサイズ・余白・角丸などのデザイン値を変数として管理する仕組み。CSS変数・JSON形式で実装され、デザインツールと開発環境を橋渡しする。Repetitionを技術的に担保する手段。→ Design System, Figma と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Neumorphism（ニューモーフィズム）</p>
+          <p class="text-sm text-slate-600 mt-1">外影（ドロップシャドウ）と内影（インナーシャドウ）を組み合わせて「柔らかい突起」を表現する手法。コントラスト不足によるアクセシビリティ問題で一般プロダクトでは採用されにくい。→ Glassmorphism, WCAG と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Glassmorphism（グラスモーフィズム）</p>
+          <p class="text-sm text-slate-600 mt-1">半透明＋ぼかし（backdrop-filter: blur）＋薄い境界線で階層と深度を表現する手法。iOS・macOSのシステムUIと親和性が高いが、背景依存でContrastの保証が難所。→ Contrast, WCAG と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">WCAG（ウィカグ）</p>
+          <p class="text-xs text-blue-600 font-medium mb-1">Web Content Accessibility Guidelines（Webコンテンツアクセシビリティガイドライン）</p>
+          <p class="text-sm text-slate-600">W3CのWAI（Web Accessibility Initiative）が策定するアクセシビリティ基準。テキストContrastは4.5:1以上（AA）・7:1以上（AAA）が要件。UIデザインのContrastはここで数値化される。→ Contrast, Neumorphism と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Gestalt（ゲシュタルト）原則</p>
+          <p class="text-sm text-slate-600 mt-1">1920年代のドイツ心理学から生まれた視知覚の法則群。近接（Nähe）・類似（Ähnlichkeit）・閉合（Schließung）・連続（Fortsetzung）・図地（Figur-Grund）がC.R.A.P原則の認知科学的根拠。→ C.R.A.P, Proximity, Repetition と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">Fitts' Law（フィッツの法則）</p>
+          <p class="text-sm text-slate-600 mt-1">ポインティングデバイスでターゲットに到達する時間は「距離が大きいほど・ターゲットが小さいほど」増加する（MT = a + b × log₂(2D/W)）。モバイルUIの最小タップ領域44px設定の理論的根拠。→ Proximity, Affordance と関連</p>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="font-bold text-slate-900">visionOS（ビジョンOS）</p>
+          <p class="text-sm text-slate-600 mt-1">Apple Vision ProのOS（2024年〜）。UIをWindow（2D平面）・Volume（3Dオブジェクト）・Full Space（没入型）の3タイプに分類。視線・ピンチ・音声を入力とし、深度・環境光・エルゴノミクスが平面UIにはなかった設計変数になる。→ Proximity（空間拡張）, Adaptive UI と関連</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: 次に学ぶと良いもの -->
+    <section id="nextsteps">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <i data-lucide="arrow-right-circle" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">次に学ぶと良いもの</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="book" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">タイポグラフィとUXの関係</h3>
+              <p class="text-sm text-slate-600">行長（45〜75文字が最適）・行間・字間と可読性の関係。フラット以降のUIでContrastとAlignmentの実装手段として機能するタイポグラフィ階層（Heading/Body/Caption）を体系的に理解する。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="palette" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">カラー理論とデザイントークン設計</h3>
+              <p class="text-sm text-slate-600">色相・彩度・明度のHSL空間でカラースケール（50〜950）を生成する手法。Material YouのDynamic ColorのアルゴリズムであるHCT色空間（Hue：色相・Chroma：彩度・Tone：明度を基にCAM16知覚モデルで計算する色空間。WCAGのコントラスト比とも整合性がある）も含む。ダークモード対応では彩度・Elevation表現の再設計が必要。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="accessibility" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">WCAG 2.2 / 3.0 とアクセシビリティ設計</h3>
+              <p class="text-sm text-slate-600">コントラスト比・フォーカス可視化・スクリーンリーダー対応・モーション制御（prefers-reduced-motion）。C.R.A.PのContrastが「法的要件」として数値化される世界を理解する。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="move" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">モーションデザインと空間的連続性</h3>
+              <p class="text-sm text-slate-600">UIアニメーションの役割（フィードバック・空間の連続性・注意誘導）と、過剰アニメーションによる認知負荷・酔い（VR/AR）との関係。Easing・DurationType・Spring Physicsの設計原則。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="cpu" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">AIによるAdaptive UI設計</h3>
+              <p class="text-sm text-slate-600">コンテキストアウェアUIの実装（ユーザー状態・タスク・デバイスに応じた動的レイアウト）。説明可能性・プライバシー・A/Bテストとの関係。C.R.A.Pを「可変な設計」に適用するアーキテクチャパターン。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-5">
+          <div class="flex items-start gap-3">
+            <i data-lucide="glasses" class="w-5 h-5 text-indigo-500 flex-shrink-0 mt-0.5"></i>
+            <div>
+              <h3 class="font-semibold mb-1">空間コンピューティングとUI設計</h3>
+              <p class="text-sm text-slate-600">visionOSのWindow/Volume/Space分類・視線入力のUI設計原則・エルゴノミクス（テキストの最適配置距離・角度）・環境光との整合性。平面UIの設計知識を3D空間に拡張するための思考フレーム。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: 参考文献 -->
+    <section id="refs">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 bg-slate-500 rounded-lg flex items-center justify-center">
+          <i data-lucide="link" class="w-4 h-4 text-white"></i>
+        </div>
+        <h2 class="text-2xl font-bold">参考文献・URL</h2>
+      </div>
+
+      <div class="space-y-3">
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2">デザインシステム・公式ドキュメント</p>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://m3.material.io/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Material Design 3（Material You）</a>
+                <p class="text-xs text-slate-500">Google公式。動的カラー・コンポーネント・アクセシビリティガイドラインを包括的に提供。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://developer.apple.com/design/human-interface-guidelines/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Apple Human Interface Guidelines（HIG）</a>
+                <p class="text-xs text-slate-500">Apple公式。iOS・macOS・visionOSなど全プラットフォームのUI設計原則を一元管理。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://developer.apple.com/visionos/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Apple Developer: visionOS</a>
+                <p class="text-xs text-slate-500">visionOSのUI設計・開発リソース。WWDC動画へのリンクも含む。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://fluent2.microsoft.design/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Microsoft Fluent 2 Design System</a>
+                <p class="text-xs text-slate-500">Microsoft公式。Acrylic・Depth・Light・Scaleの設計原則を解説。</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2">書籍・学習リソース</p>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.oreilly.com/library/view/the-non-designers-design/9780321563088/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">The Non-Designer's Design Book — Robin Williams（O'Reilly）</a>
+                <p class="text-xs text-slate-500">C.R.A.P原則の出典。1994年初版。印刷物向けだが原則はGUIにも普遍的に適用できる。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.basicbooks.com/titles/don-norman/the-design-of-everyday-things/9780465050659/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">The Design of Everyday Things — Don Norman（Basic Books）</a>
+                <p class="text-xs text-slate-500">Affordance（アフォーダンス）概念の出典。UIがなぜ「分かりにくい」かの認知心理学的分析。デザイン原則の文脈理解に必読。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://atomicdesign.bradfrost.com/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Atomic Design — Brad Frost</a>
+                <p class="text-xs text-slate-500">デザインシステムの基礎概念書。Webで全文無料公開。</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-lg p-4">
+          <p class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-2">UXリサーチ・認知法則・アクセシビリティ</p>
+          <ul class="space-y-2">
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.nngroup.com/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Nielsen Norman Group（NNg）</a>
+                <p class="text-xs text-slate-500">UXリサーチの権威。フィッツの法則・ヒックの法則の実務適用事例が豊富。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.nngroup.com/articles/fitts-law/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Fitts' Law（フィッツの法則）の実務適用 — NNg</a>
+                <p class="text-xs text-slate-500">タップ領域設計・ボタンサイズとUIの関係を認知科学的に解説。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.nngroup.com/articles/hicks-law/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">Hick's Law（ヒックの法則）の実務適用 — NNg</a>
+                <p class="text-xs text-slate-500">選択肢の数と意思決定時間の関係。ナビゲーション設計・AIの提案数の設計根拠。</p>
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5"></i>
+              <div>
+                <a href="https://www.w3.org/WAI/standards-guidelines/wcag/" target="_blank" class="text-blue-600 hover:underline font-medium text-sm">WCAG（Web Content Accessibility Guidelines）— W3C WAI</a>
+                <p class="text-xs text-slate-500">Contrastの数値要件（4.5:1以上でAA、7:1以上でAAA）の一次資料。</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-900 text-slate-400 text-center py-8 mt-16 text-sm">
+    <p>UIデザインの変遷とデザイン4原則の相関分析（2000–2026）| Techmap</p>
+    <p class="text-xs mt-1 text-slate-500">生成日：2026年4月10日</p>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

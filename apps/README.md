@@ -2,7 +2,5 @@
 
 図解以外のアプリ・ツールを置くフォルダです。
 
-- **移行候補（予定）:** `c:/yk-memo/output/commit-report-tool/` → `apps/commit-report-tool/`
-- **移行済み:** `workspace-ui-kit/` · `flowchart-web/` · `playwright-test/` は `yk-tool` 直下
-
-**2026-05-23:** 骨格のみ作成。物理移動は未実施。
+- **収容済み:** `apps/commit-report-tool/`（**2026-05-23** · 内側 `.git` 削除 · yk-tool 単一リポ）
+- **yk-tool 直下:** `workspace-ui-kit/` · `flowchart-web/` · `playwright-test/`

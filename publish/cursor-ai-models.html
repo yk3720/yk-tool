@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cursorで使えるAIモデル完全ガイド（2026年3月）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @media print {
+      #pdf-btn, #toc-sidebar { display: none !important; }
+      section { break-inside: avoid; }
+    }
+    html { scroll-behavior: smooth; }
+    .term-box {
+      background: #f0f9ff;
+      border-left: 4px solid #0ea5e9;
+      padding: 0.5rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+      font-size: 0.875rem;
+    }
+    .analogy-box {
+      background: #f0fdf4;
+      border-left: 4px solid #22c55e;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .pitfall-box {
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 0.75rem 1rem;
+      margin: 0.75rem 0;
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    #toc-sidebar {
+      position: fixed;
+      top: 2rem;
+      left: 1rem;
+      width: 200px;
+      max-height: 85vh;
+      overflow-y: auto;
+      z-index: 40;
+    }
+    @media (max-width: 1280px) {
+      #toc-sidebar { display: none; }
+    }
+    .provider-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: box-shadow 0.2s;
+    }
+    .provider-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .model-tag {
+      display: inline-block;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 9999px;
+      padding: 2px 10px;
+      font-size: 0.78rem;
+      font-family: monospace;
+      margin: 2px;
+    }
+    .cost-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .cost-low { background: #dcfce7; color: #166534; }
+    .cost-mid { background: #fef9c3; color: #854d0e; }
+    .cost-high { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
+
+  <!-- TOC Sidebar -->
+  <nav id="toc-sidebar" class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">目次</p>
+    <ul class="space-y-1 text-sm text-gray-600">
+      <li><a href="#summary" class="hover:text-blue-600 block py-0.5">ひとことで言えば</a></li>
+      <li><a href="#why" class="hover:text-blue-600 block py-0.5">なぜ生まれたのか</a></li>
+      <li><a href="#three-concepts" class="hover:text-blue-600 block py-0.5">まず理解する3つ</a></li>
+      <li><a href="#architecture" class="hover:text-blue-600 block py-0.5">主要概念・構造</a></li>
+      <li><a href="#pitfalls" class="hover:text-blue-600 block py-0.5">落とし穴</a></li>
+      <li><a href="#pricing" class="hover:text-blue-600 block py-0.5">料金プラン</a></li>
+      <li><a href="#glossary" class="hover:text-blue-600 block py-0.5">専門用語集</a></li>
+      <li><a href="#next" class="hover:text-blue-600 block py-0.5">次に学ぶと良いもの</a></li>
+      <li><a href="#references" class="hover:text-blue-600 block py-0.5">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <!-- PDF Button -->
+  <button id="pdf-btn" onclick="window.print()"
+    class="fixed bottom-6 right-6 z-50 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 transition">
+    <i data-lucide="download" class="w-4 h-4"></i> PDFで保存
+  </button>
+
+  <main class="max-w-3xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <header class="mb-10">
+      <div class="flex items-center gap-2 text-sm text-blue-600 font-medium mb-3">
+        <i data-lucide="zap" class="w-4 h-4"></i>
+        <span>Techmap — 2026年3月28日時点</span>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-900 leading-tight mb-4">
+        Cursorで使えるAIモデル<br>完全ガイド
+      </h1>
+      <p class="text-gray-500 text-sm">
+        対象: AIコードエディタ Cursor を日常的に使うエンジニア ／
+        Anthropic・OpenAI・Google・Cursor製モデルの選択基準を理解する
+      </p>
+    </header>
+
+    <!-- 1. ひとことで言えば -->
+    <section id="summary" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-500"></i>
+        ひとことで言えば
+      </h2>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-4">
+        <p class="text-blue-900 font-semibold text-base leading-relaxed">
+          Cursorは複数のAIプロバイダ（Anthropic・OpenAI・Google・Cursor自社製）のモデルを
+          <strong>1つのエディタから切り替えて使えるプラットフォーム</strong>。
+          「Auto」に任せるか、タスクの複雑さに応じてモデルを手動選択するかが、
+          コスト効率と出力品質を決める核心的な判断軸になる。
+        </p>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-center text-sm">
+        <div class="bg-white border border-gray-200 rounded-lg p-3">
+          <i data-lucide="layers" class="w-5 h-5 text-purple-500 mx-auto mb-1"></i>
+          <div class="font-semibold">6プロバイダ以上</div>
+          <div class="text-gray-500 text-xs">Anthropic/OpenAI/Google/Cursor/xAI/Moonshot</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3">
+          <i data-lucide="split" class="w-5 h-5 text-blue-500 mx-auto mb-1"></i>
+          <div class="font-semibold">2つの使用プール</div>
+          <div class="text-gray-500 text-xs">Auto+Composer / API（月次リセット）</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-3">
+          <i data-lucide="brain" class="w-5 h-5 text-green-500 mx-auto mb-1"></i>
+          <div class="font-semibold">Thinking対応</div>
+          <div class="text-gray-500 text-xs">Claude・GPT系の推論強化モード</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. なぜ生まれたのか -->
+    <section id="why" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="history" class="w-5 h-5 text-gray-500"></i>
+        なぜ生まれたのか
+      </h2>
+      <p class="text-gray-700 mb-4">
+        2021〜2022年頃、GitHub CopilotがVS Code拡張としてコード補完を実現した。これはエディタの外部にAIを「接続する」アーキテクチャだった。
+        Cursor（Anysphere社、2022年末にパブリックベータ開始・2023年に正式リリース）は発想を逆転させ、<strong>AIをエディタの中核設計として組み込んだ</strong>。
+      </p>
+      <p class="text-gray-700 mb-4">
+        LLM（Large Language Model：大規模言語モデル）の進化により、Anthropic・OpenAI・Googleなどが競合モデルを次々投入した結果、
+        「どのモデルが最強か」は時期によって変わる状況になった。
+        Cursorはマルチモデル対応にすることで、<strong>ユーザーがモデルの競争に依存せず、最新の最強モデルを常に選べる構造</strong>にした。
+      </p>
+      <div class="bg-gray-100 rounded-xl p-4 text-sm text-gray-700">
+        <div class="flex items-center gap-2 mb-2 font-semibold text-gray-800">
+          <i data-lucide="git-branch" class="w-4 h-4"></i>
+          解決したかった課題
+        </div>
+        <ul class="space-y-1 list-disc list-inside">
+          <li>単一モデルへの依存（モデルが陳腐化するリスク）</li>
+          <li>コード補完の精度とエージェント的な多ファイル編集の両立</li>
+          <li>コンテキスト（プロジェクト全体像）を理解したうえでの提案</li>
+          <li>コストとインテリジェンスのトレードオフを使い手が制御できること</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. まず理解する3つ -->
+    <section id="three-concepts" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="list-checks" class="w-5 h-5 text-blue-500"></i>
+        まず理解する3つ
+      </h2>
+      <p class="text-gray-500 text-sm mb-4">これだけ把握すれば、モデル選択で迷わなくなる。</p>
+
+      <div class="space-y-4">
+        <!-- 概念1 -->
+        <div class="bg-white border-2 border-blue-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">01</span>
+            <h3 class="font-bold text-gray-900">2つの使用プールがある</h3>
+          </div>
+          <p class="text-gray-700 text-sm">
+            Cursorの使用量は <strong>Auto+Composerプール</strong> と <strong>APIプール</strong> の2種類に分かれており、それぞれ独立して月次リセットされる。
+            AutoまたはComposer 2を使う場合は低コストのAuto+Composerプールから消費され、
+            特定モデルを手動で指定するとAPIプールから消費される（Proプランは月$20のAPI枠つき）。
+          </p>
+          <div class="analogy-box text-sm">
+            <strong>たとえ話①: 社内の交通費精算ルール</strong><br>
+            「電車はプリペイド交通カード（Auto+Composerプール：月額チャージ上限まで使える）、タクシーは別財布の実費精算（APIプール：月$20上限）」というルールに似ている。
+            タクシー（特定モデル指定）を乱発すると$20の上限に達し、それ以降は自腹（従量課金）が自動的に始まる。
+            ※電車カード（Auto）も月間上限はあるが、Autoプールの方がAPIプールより大幅に多い枠が確保されている。
+          </div>
+        </div>
+
+        <!-- 概念2 -->
+        <div class="bg-white border-2 border-green-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-green-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">02</span>
+            <h3 class="font-bold text-gray-900">Autoに任せるか、モデルを手動指定するか</h3>
+          </div>
+          <p class="text-gray-700 text-sm">
+            <strong>Auto</strong> はCursorがタスクの複雑さに応じてモデルを自動選択するモード。コスパ重視の日常作業に最適。
+            <strong>Premium</strong> はCursorが「最も能力の高いモデル」を選ぶルーティング（コストは選ばれたモデルのAPIレート）。
+            手動指定は特定の得意分野（例：画像生成にはGemini 3 Pro Image Preview）が明確な場合に使う。
+          </p>
+          <div class="analogy-box text-sm">
+            <strong>たとえ話②: レストランの注文方法</strong><br>
+            Autoは「おまかせコース（シェフが最適な料理を出す）」、Premium は「今日一番の素材でお願い（最上級食材を使う）」、
+            手動指定は「このワインに合う魚料理を特定で頼む」イメージ。おまかせは外れが少なく安い。
+          </div>
+        </div>
+
+        <!-- 概念3 -->
+        <div class="bg-white border-2 border-purple-200 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-purple-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">03</span>
+            <h3 class="font-bold text-gray-900">Thinking（推論強化）モードとMax Modeは別物</h3>
+          </div>
+          <p class="text-gray-700 text-sm">
+            <strong>Thinking（ディープシンク）</strong>はモデルが「中間推論を内部で展開してから回答する」機能（主にClaudeのThinkingバリアント、GPT系のreasoning effort）。
+            難問・複雑なロジック設計に有効。
+            <strong>Max Mode</strong>はコンテキストウィンドウを最大まで広げる機能（例：200k→1Mトークン）。
+            両者は独立して設定できるが、組み合わせるとコスト消費が急増する。
+          </p>
+          <div class="analogy-box text-sm">
+            <strong>たとえ話③: 試験の解答プロセス</strong><br>
+            Thinkingは「解答用紙の前に下書き用紙で考える（試験本番の見直し時間込み）」モード。
+            Max Modeは「教科書を全ページ机の上に広げて解く」モード。
+            両方やると時間（コスト）がかかるが、難問には強い。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 主要概念・アーキテクチャ -->
+    <section id="architecture" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+        <i data-lucide="map" class="w-5 h-5 text-indigo-500"></i>
+        主要概念・プロバイダ別モデルマップ
+      </h2>
+
+      <!-- フローチャート -->
+      <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6 overflow-x-auto">
+        <p class="text-sm font-semibold text-gray-600 mb-4 flex items-center gap-1">
+          <i data-lucide="git-fork" class="w-4 h-4"></i>
+          モデル選択フロー
+        </p>
+        <div class="flex flex-col items-center gap-2 text-sm min-w-[480px]">
+          <div class="bg-indigo-100 text-indigo-800 rounded-lg px-6 py-2 font-semibold">タスク発生</div>
+          <div class="text-gray-400">↓</div>
+          <div class="bg-white border-2 border-indigo-300 rounded-lg px-5 py-2">ルーティング方法を選ぶ</div>
+          <div class="flex gap-6 items-start">
+            <div class="flex flex-col items-center gap-2">
+              <div class="text-gray-400 text-xs">任せる</div>
+              <div class="bg-green-100 text-green-800 rounded-lg px-4 py-2 text-center font-semibold">Auto<br><span class="text-xs font-normal">低コスト・日常作業</span></div>
+              <div class="text-gray-400">↓</div>
+              <div class="bg-green-50 border border-green-200 rounded-lg px-3 py-1 text-xs text-center">Auto+Composerプール<br>消費</div>
+            </div>
+            <div class="flex flex-col items-center gap-2">
+              <div class="text-gray-400 text-xs">最高性能</div>
+              <div class="bg-purple-100 text-purple-800 rounded-lg px-4 py-2 text-center font-semibold">Premium<br><span class="text-xs font-normal">複雑タスク</span></div>
+              <div class="text-gray-400">↓</div>
+              <div class="bg-purple-50 border border-purple-200 rounded-lg px-3 py-1 text-xs text-center">APIプール消費<br>（最強モデルが選ばれる）</div>
+            </div>
+            <div class="flex flex-col items-center gap-2">
+              <div class="text-gray-400 text-xs">手動指定</div>
+              <div class="bg-blue-100 text-blue-800 rounded-lg px-4 py-2 text-center font-semibold">特定モデル<br><span class="text-xs font-normal">用途が明確な場合</span></div>
+              <div class="text-gray-400">↓</div>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg px-3 py-1 text-xs text-center">APIプール消費<br>（各モデルの単価）</div>
+            </div>
+          </div>
+          <div class="text-gray-400 text-xs mt-2">↓ Max Mode が必要か？</div>
+          <div class="flex gap-4">
+            <div class="bg-yellow-50 border border-yellow-300 rounded-lg px-4 py-1.5 text-xs text-center">
+              <span class="font-semibold text-yellow-800">No（通常）</span><br>
+              <span class="text-gray-600">デフォルトのコンテキスト</span>
+            </div>
+            <div class="bg-orange-50 border border-orange-300 rounded-lg px-4 py-1.5 text-xs text-center">
+              <span class="font-semibold text-orange-800">Yes（大規模コードベース）</span><br>
+              <span class="text-gray-600">APIレート +20%、最大1Mトークン</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- プロバイダ別カード -->
+      <div class="space-y-4">
+
+        <!-- Cursor -->
+        <div class="provider-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+              <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-900">Cursor（自社製）</h3>
+              <p class="text-xs text-gray-500">エージェントコーディングに特化した自社モデル</p>
+            </div>
+            <span class="cost-badge cost-low ml-auto">低コスト</span>
+          </div>
+          <div class="mb-2">
+            <span class="model-tag">Composer 2</span>
+            <span class="model-tag">Composer 1.5</span>
+            <span class="model-tag">Composer 1</span>
+          </div>
+          <p class="text-sm text-gray-700">
+            <strong>Composer 2</strong>（2026年3月リリース）はCursorの主力モデル。
+            Input $0.50/1Mトークン・Output $2.50/1Mトークンと他プロバイダの上位モデルの<strong>1/6〜1/10程度の価格</strong>で、
+            Cursorの社内ベンチマーク・評価によればClaude Opus 4.6に匹敵するコーディング性能を実現（<a href="https://cursor.com/blog/composer-2" class="text-blue-600 underline text-xs" target="_blank">公式ブログ参照</a>）。長時間のエージェントタスク（数百ステップの連続操作）向けに設計されており、
+            コンテキストを自己圧縮する「self-summarization」機構を持つ。
+            <span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full ml-1 font-semibold">2026年3月現在の推奨（コスパ）</span>
+          </p>
+          <div class="term-box text-xs">
+            <strong>Composer</strong>: Cursor内でのマルチファイル編集・エージェント操作モード。単一ファイル補完（Tab）と区別される。
+          </div>
+          <div class="mt-2 text-xs text-gray-500">用途: 日常のコーディング全般・エージェントタスク / Context: 200k tokens</div>
+        </div>
+
+        <!-- Anthropic -->
+        <div class="provider-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+              <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-900">Anthropic（Claude）</h3>
+              <p class="text-xs text-gray-500">安全性・指示追従・長文コンテキスト運用に定評</p>
+            </div>
+            <span class="cost-badge cost-mid ml-auto">中〜高コスト</span>
+          </div>
+          <div class="mb-2">
+            <span class="model-tag">Claude 4.6 Sonnet</span>
+            <span class="model-tag">Claude 4.6 Opus</span>
+            <span class="model-tag">Claude 4.5 Sonnet</span>
+            <span class="model-tag">Claude 4.5 Opus</span>
+            <span class="model-tag">Claude 4.5 Haiku</span>
+            <span class="model-tag">Claude 4 Sonnet</span>
+          </div>
+          <p class="text-sm text-gray-700 mb-2">
+            <strong>Claude 4.6 Sonnet</strong>はコーディング性能・指示追従のバランスが良く、Cursor上でも安定して使われる。
+            <strong>Claude 4.6 Opus</strong>は最上位帯（Max Mode必須・Input $5/1M）。難問・設計判断・長文要約に向く。
+            <strong>Claude 4.5 Haiku</strong>は軽量・高速（Input $1/1M）で単純なタスクに最適。
+          </p>
+          <div class="term-box text-xs">
+            <strong>Thinking バリアント</strong>: Claude 4.5/4.6 系は「内部推論ステップを展開してから回答する」Thinkingモードを持つ。
+            旧レガシー料金では2リクエスト扱い（現行プランは通常課金）。難問・バグ解析に有効。
+          </div>
+          <div class="pitfall-box text-xs">
+            <strong>注意</strong>: Claude 4.5 Sonnet・Opus・Claude 4.6 Sonnet/Opusは「Max Mode必須」の注記あり。
+            リクエストベースプランでは有効化が必要。
+          </div>
+          <div class="mt-2 text-xs text-gray-500">Sonnet（バランス）/ Opus（最高精度）/ Haiku（軽量）の三階層構造</div>
+        </div>
+
+        <!-- OpenAI -->
+        <div class="provider-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+              <i data-lucide="cpu" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-900">OpenAI（GPT）</h3>
+              <p class="text-xs text-gray-500">エージェント・推論・Codex系でコーディングに特化</p>
+            </div>
+            <span class="cost-badge cost-mid ml-auto">中〜高コスト</span>
+          </div>
+          <div class="mb-2">
+            <span class="model-tag">GPT-5</span>
+            <span class="model-tag">GPT-5 Fast</span>
+            <span class="model-tag">GPT-5 Mini</span>
+            <span class="model-tag">GPT-5 Nano</span>
+            <span class="model-tag">GPT-5-Codex</span>
+            <span class="model-tag">GPT-5.1/5.2/5.3 Codex</span>
+            <span class="model-tag">GPT-5.4</span>
+          </div>
+          <p class="text-sm text-gray-700 mb-2">
+            OpenAIモデルは<strong>汎用系（GPT-5〜5.4）</strong>と<strong>コード特化系（Codex系）</strong>の2系統に分かれる。
+            Codex（GPT-5-Codex〜GPT-5.3 Codex）はコードエージェント向けに特化した推論モデル群でバージョンが細かく分かれているが、
+            「数字が大きいほど新しい・高性能」と考えてよい（5.1→5.2→5.3の順）。
+            <strong>GPT-5.4</strong>はOpenAI系の現行最上位（Max Mode必須・Input $2.5/1M）で、1Mトークン対応・キャッシュ90%割引が特徴。
+            <strong>reasoning effort（推論強度）</strong>として <code class="text-xs bg-gray-100 px-1 rounded">gpt-5-high</code>（=深く考えるモード）等のバリアントがある（ClaudeのThinkingモードに相当）。
+            Mini / Nano は単純補完・コスト最優先向けの軽量版。
+          </p>
+          <div class="term-box text-xs">
+            <strong>reasoning effort（推論強度）</strong>: GPT系の「どれだけ深く考えるか」のパラメータ。
+            <code>high</code> にすると中間推論を多く展開し、精度は上がるがレイテンシ・コストが増える。
+          </div>
+          <div class="mt-2 text-xs text-gray-500">GPT-5 Mini / Nano は単純タスク向けの軽量版</div>
+        </div>
+
+        <!-- Google -->
+        <div class="provider-card">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <i data-lucide="sparkles" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-gray-900">Google（Gemini）</h3>
+              <p class="text-xs text-gray-500">マルチモーダル・長コンテキスト・画像生成対応</p>
+            </div>
+            <span class="cost-badge cost-low ml-auto">低〜中コスト</span>
+          </div>
+          <div class="mb-2">
+            <span class="model-tag">Gemini 3.1 Pro</span>
+            <span class="model-tag">Gemini 3 Pro</span>
+            <span class="model-tag">Gemini 3 Flash</span>
+            <span class="model-tag">Gemini 2.5 Flash</span>
+            <span class="model-tag">Gemini 3 Pro Image Preview</span>
+          </div>
+          <p class="text-sm text-gray-700 mb-2">
+            <strong>Gemini 3.1 Pro</strong>がGoogleの現行主力（Input $2/1M）。長文コンテキスト処理と多言語に強い。
+            <strong>Gemini 3 Flash</strong>（Input $0.5/1M）は高速・低コストで日常的な補助タスクに適する。
+            <strong>Gemini 3 Pro Image Preview</strong>はテキストに加え<strong>ネイティブ画像生成</strong>が可能な特殊モデル（Image Output: $120/1M tokens）。
+          </p>
+          <div class="term-box text-xs">
+            <strong>マルチモーダル</strong>: テキスト・画像・音声など複数の情報様式（モダリティ）を同時に処理できる能力。
+            Gemini 3 Pro Image Preview は画像の入出力が可能。
+          </div>
+          <div class="mt-2 text-xs text-gray-500">Web情報収集＋図解タスク: Gemini 3.1 Pro または Auto が実績あり</div>
+        </div>
+
+        <!-- Others -->
+        <div class="provider-card bg-gray-50">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">
+              <i data-lucide="plus-circle" class="w-4 h-4 text-white"></i>
+            </div>
+            <h3 class="font-bold text-gray-900">その他プロバイダ</h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <span class="font-semibold">xAI（Grok 4.20）</span>
+              <p class="text-xs text-gray-600">Input $2/1M。200k超で2倍課金。</p>
+            </div>
+            <div>
+              <span class="font-semibold">Moonshot（Kimi K2.5）</span>
+              <p class="text-xs text-gray-600">Input $0.6/1M。デフォルト非表示（設定で有効化）。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ユースケース別推奨 -->
+      <div class="mt-6 bg-white border border-gray-200 rounded-xl p-5">
+        <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+          <i data-lucide="target" class="w-4 h-4 text-red-500"></i>
+          ユースケース別モデル推奨（2026年3月）
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 text-left text-gray-500 text-xs">
+                <th class="py-2 pr-4">場面</th>
+                <th class="py-2 pr-4">推奨モデル</th>
+                <th class="py-2">理由</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr>
+                <td class="py-2 pr-4 font-medium">日常のコーディング</td>
+                <td class="py-2 pr-4"><span class="model-tag">Composer 2</span> / <span class="model-tag">Auto</span></td>
+                <td class="py-2 text-gray-600 text-xs">コスパ最強。Auto+Composerプールで大量利用可</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">難バグ・アーキテクチャ設計</td>
+                <td class="py-2 pr-4"><span class="model-tag">Claude 4.6 Opus</span> / <span class="model-tag">GPT-5.4</span></td>
+                <td class="py-2 text-gray-600 text-xs">Thinking+Max Modeで深く考える。コストは高い</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">Web調査＋図解生成</td>
+                <td class="py-2 pr-4"><span class="model-tag">Claude 4.6 Sonnet</span> / <span class="model-tag">Gemini 3.1 Pro</span></td>
+                <td class="py-2 text-gray-600 text-xs">長文要約・Markdown/HTML生成の指示追従が安定</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">画像を含むUI設計</td>
+                <td class="py-2 pr-4"><span class="model-tag">Gemini 3 Pro Image Preview</span></td>
+                <td class="py-2 text-gray-600 text-xs">ネイティブ画像入出力に唯一対応</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">単純補完・高速レスポンス</td>
+                <td class="py-2 pr-4"><span class="model-tag">Claude 4.5 Haiku</span> / <span class="model-tag">Gemini 3 Flash</span></td>
+                <td class="py-2 text-gray-600 text-xs">低価格・高速。頻繁なインタラクションに向く</td>
+              </tr>
+              <tr>
+                <td class="py-2 pr-4 font-medium">任せて最高性能</td>
+                <td class="py-2 pr-4"><span class="model-tag">Premium</span></td>
+                <td class="py-2 text-gray-600 text-xs">Cursorがベンチ基準で最強モデルを自動選択</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 落とし穴 -->
+    <section id="pitfalls" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="triangle-alert" class="w-5 h-5 text-orange-500"></i>
+        初心者がはまりやすい落とし穴
+      </h2>
+
+      <div class="space-y-3">
+        <div class="pitfall-box">
+          <p class="font-semibold text-sm text-orange-900 mb-1">① 「最高モデル ＝ 常に正解」ではない</p>
+          <p class="text-sm text-gray-700">
+            Claude 4.6 Opusでのコード補完は遅く高価。「タイポ修正」レベルならComposer 2やHaikuで十分速く安い。
+            モデルの能力と<strong>タスクの難易度を合わせること</strong>がコスト最適化の基本。
+          </p>
+        </div>
+        <div class="pitfall-box">
+          <p class="font-semibold text-sm text-orange-900 mb-1">② 2つのプールを混同してクレジットを溶かす</p>
+          <p class="text-sm text-gray-700">
+            Auto（Auto+Composerプール）と手動指定（APIプール）は残高が別々。
+            手動でClaudeやGPTを指定し続けると$20のAPIプールが数日で尽きる。
+            特に指定理由がなければAutoが推奨。
+          </p>
+        </div>
+        <div class="pitfall-box">
+          <p class="font-semibold text-sm text-orange-900 mb-1">③ Max Modeを常時ONにするとコストが急増する</p>
+          <p class="text-sm text-gray-700">
+            Max Modeは通常のAPIレートに<strong>20%上乗せ</strong>（個人プラン）で、コンテキスト全体を毎回送るため
+            消費トークン数が跳ね上がる。大規模リポジトリの難問専用と割り切るのが得策。
+          </p>
+        </div>
+        <div class="pitfall-box">
+          <p class="font-semibold text-sm text-orange-900 mb-1">④ 「Deep Think」「DeepSeek」「Thinking」の混同</p>
+          <p class="text-sm text-gray-700">
+            <strong>DeepSeek</strong>: 中国系のLLMファミリー（Cursor公式プールには非掲載、BYOKが必要）。
+            <strong>Thinking</strong>: Claude系・GPT系の内部推論強化バリアント（公式に存在）。
+            <strong>Deep Think</strong>: Google Gemini製品の高度推論モード（Cursor UIとは別物）。
+            全部「深く考えるやつ」と雑にまとめると選択ミスが起きる。
+          </p>
+        </div>
+        <div class="pitfall-box">
+          <p class="font-semibold text-sm text-orange-900 mb-1">⑤ 「Hidden by default」モデルの見逃し</p>
+          <p class="text-sm text-gray-700">
+            Composer 1/1.5、Gemini Flash系、GPT-5 Mini等はデフォルトでモデルピッカーに表示されない。
+            Cursorの設定 → Model Picker → 非表示モデルを手動で有効化することで選択肢に追加できる。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 料金プラン -->
+    <section id="pricing" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="credit-card" class="w-5 h-5 text-blue-500"></i>
+        料金プラン（個人向け）
+      </h2>
+
+      <div class="bg-gray-100 border border-gray-200 rounded-xl p-4 mb-4 text-sm">
+        <div class="font-semibold text-gray-700 mb-1 flex items-center gap-1">
+          <i data-lucide="gift" class="w-4 h-4 text-gray-500"></i>
+          無料プラン（Hobby）
+        </div>
+        <p class="text-gray-600 text-xs">
+          Cursorには<strong>無料のHobbyプラン</strong>が存在する。Tabコンプリート（Pro版）・AIチャット・Composerの試用が可能だが、
+          月間の利用回数に制限がある（具体的な上限は公式ダッシュボードで確認）。
+          まず試してから有料プランを検討する流れが一般的。
+        </p>
+      </div>
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <div class="text-lg font-bold text-gray-900">Pro</div>
+          <div class="text-2xl font-bold text-blue-600 my-1">$20<span class="text-sm font-normal text-gray-500">/mo</span></div>
+          <div class="text-xs text-gray-600">API枠: $20<br>Tabコンプリート: 無制限<br>エージェント利用枠: 拡張</div>
+          <div class="text-xs text-green-700 bg-green-50 rounded-lg px-2 py-1 mt-2 font-semibold">Daily Tab users向け</div>
+        </div>
+        <div class="bg-blue-600 text-white rounded-xl p-4 text-center shadow">
+          <div class="text-lg font-bold">Pro Plus</div>
+          <div class="text-2xl font-bold my-1">$60<span class="text-sm font-normal opacity-70">/mo</span></div>
+          <div class="text-xs opacity-90">API枠: $70<br>エージェント日常使用 向け</div>
+          <div class="text-xs bg-blue-500 rounded-lg px-2 py-1 mt-2 font-semibold">Daily Agent users向け</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-xl p-4 text-center">
+          <div class="text-lg font-bold text-gray-900">Ultra</div>
+          <div class="text-2xl font-bold text-purple-600 my-1">$200<span class="text-sm font-normal text-gray-500">/mo</span></div>
+          <div class="text-xs text-gray-600">API枠: $400<br>マルチエージェント・<br>自動化ヘビーユーザー</div>
+          <div class="text-xs text-purple-700 bg-purple-50 rounded-lg px-2 py-1 mt-2 font-semibold">Power users向け</div>
+        </div>
+      </div>
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 mb-4">
+        <strong>用語の注意:</strong> 「Premiumルーティング」（モデル選択モード）と「Pro Plus プラン」（料金プラン名）は別物。
+        Premiumルーティングはどのプランでも有効化できる機能であり、上位モデルのAPIレートで課金される。
+      </div>
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800 mb-4">
+        <strong>月間上限を超えたら:</strong> APIプールの$20（Proプランの場合）を使い切っても、リクエストが止まるわけではない。
+        同じAPIレートで<strong>従量課金（Pay-as-you-go）が自動的に継続</strong>される（品質・速度の低下なし）。
+        または上位プランにアップグレードすることで枠を増やすことも可能。
+      </div>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-4 text-sm">
+        <h3 class="font-semibold mb-2 flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-blue-500"></i>
+          主要モデルのAPIレート比較（抜粋）
+        </h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="border-b border-gray-200 text-gray-500">
+                <th class="text-left py-1.5 pr-3">モデル</th>
+                <th class="text-right py-1.5 pr-3">Input (/1M)</th>
+                <th class="text-right py-1.5">Output (/1M)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr><td class="py-1.5 pr-3 font-medium">Composer 2</td><td class="text-right pr-3 text-green-700">$0.50</td><td class="text-right text-green-700">$2.50</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">GPT-5 Mini</td><td class="text-right pr-3 text-green-700">$0.25</td><td class="text-right text-green-700">$2.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Gemini 3 Flash</td><td class="text-right pr-3 text-green-700">$0.50</td><td class="text-right text-green-700">$3.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Claude 4.5 Haiku</td><td class="text-right pr-3 text-green-700">$1.00</td><td class="text-right text-green-700">$5.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">GPT-5</td><td class="text-right pr-3 text-yellow-700">$1.25</td><td class="text-right text-yellow-700">$10.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Claude 4.6 Sonnet</td><td class="text-right pr-3 text-yellow-700">$3.00</td><td class="text-right text-yellow-700">$15.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Gemini 3.1 Pro</td><td class="text-right pr-3 text-yellow-700">$2.00</td><td class="text-right text-yellow-700">$12.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Claude 4.6 Opus</td><td class="text-right pr-3 text-red-700">$5.00</td><td class="text-right text-red-700">$25.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">GPT-5.4</td><td class="text-right pr-3 text-red-700">$2.50</td><td class="text-right text-red-700">$15.00</td></tr>
+              <tr><td class="py-1.5 pr-3 font-medium">Claude 4.6 Opus Fast</td><td class="text-right pr-3 text-red-700 font-bold">$30.00</td><td class="text-right text-red-700 font-bold">$150.00</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">
+          Auto+Composerプールは固定単価（Input $1.25 / Output $6.00 / 1Mトークン）。
+          上表のAPIレートとは別枠。
+        </p>
+      </div>
+    </section>
+
+    <!-- 7. 専門用語集 -->
+    <section id="glossary" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="book-open" class="w-5 h-5 text-gray-600"></i>
+        専門用語集
+      </h2>
+      <div class="space-y-3">
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">LLM（Large Language Model：大規模言語モデル）</div>
+          <div class="text-gray-700">大量のテキストデータで事前学習されたニューラルネットワーク。Claude・GPT・Geminiすべてがこれに該当。</div>
+          <div class="text-xs text-gray-500 mt-1">→ 関連: Transformer, トークン</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">Transformer（トランスフォーマー）</div>
+          <div class="text-gray-700">現代のLLMが採用する基本アーキテクチャ。「Self-Attention（自己注意機構）」によってシーケンス内の任意位置間の依存関係を並列計算できる点が特徴。GPT・Claude・Geminiすべてがこのアーキテクチャをベースとしている。</div>
+          <div class="text-xs text-gray-500 mt-1">→ 関連: LLM, コンテキストウィンドウ</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">コンテキストウィンドウ（Context Window）</div>
+          <div class="text-gray-700">モデルが一度に参照できるテキストの最大量（トークン数）。200kトークン ≈ 英文書150,000語相当。Max Modeはこれを最大まで広げる。</div>
+          <div class="text-xs text-gray-500 mt-1">→ 関連: Max Mode, トークン</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">トークン（Token）</div>
+          <div class="text-gray-700">LLMの処理単位。英語なら1単語≒1.3トークン程度、日本語は1文字≒1〜2トークン。料金はこの数で決まる。</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">Thinking / reasoning effort（推論強度）</div>
+          <div class="text-gray-700">モデルが回答前に内部で「中間推論ステップ」を展開するモード。ClaudeはThinkingバリアント、GPTはreasoning effort（high/low）で制御。精度↑・速度↓・コスト↑。</div>
+          <div class="text-xs text-gray-500 mt-1">→ 関連: Max Mode, Chain-of-Thought</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">Max Mode</div>
+          <div class="text-gray-700">モデルのコンテキストウィンドウを最大値まで拡張するCursorの機能。個人プランはAPIレート+20%の上乗せ。大規模コードベースの深い理解が必要な場合に使う。</div>
+          <div class="text-xs text-gray-500 mt-1">→ 関連: コンテキストウィンドウ</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">Composer（コンポーザー）</div>
+          <div class="text-gray-700">Cursorのマルチファイル編集・エージェントモード。単一ファイルのTab補完と区別され、複数ファイルにまたがる変更や自動実行ステップを管理する。</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">BYOK（Bring Your Own Key）</div>
+          <div class="text-gray-700">ユーザーが自身のAPIキーをCursorに登録して使う方式。DeepSeekなどCursorのプールに含まれないモデルを使う場合に必要。</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">キャッシュ読み取り（Cache Read）</div>
+          <div class="text-gray-700">同一のプロンプト先頭部分が以前のリクエストと一致する場合、再計算を省略して安価に処理する仕組み。Claudeは Cache Read $0.03/1M など大幅に安い。</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">マルチモーダル（Multimodal）</div>
+          <div class="text-gray-700">テキスト・画像・音声など複数の情報様式を扱える能力。Gemini 3 Pro Image Preview はCursor上で画像出力が可能な唯一のモデル（2026年3月時点）。</div>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4 text-sm">
+          <div class="font-bold text-gray-900 mb-0.5">self-summarization（自己要約）</div>
+          <div class="text-gray-700">Composer 2が持つ長時間エージェントタスク向けの技術。コンテキストが長くなると途中で自動圧縮し、次のステップに引き渡す。処理の継続性を保ちながらコストを抑える。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 次に学ぶと良いもの -->
+    <section id="next" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="arrow-right-circle" class="w-5 h-5 text-indigo-500"></i>
+        次に学ぶと良いもの
+      </h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="code-2" class="w-4 h-4 text-blue-500"></i>
+            Cursor Rulesの設定
+          </div>
+          <p class="text-xs text-gray-600">プロジェクト固有のコーディング規約・禁止事項をAIに記憶させる仕組み。モデル選択の次に効率化インパクトが大きい。</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="bot" class="w-4 h-4 text-green-500"></i>
+            LLMエージェントの設計パターン
+          </div>
+          <p class="text-xs text-gray-600">
+            <strong>ReAct</strong>（Reason+Act: 推論と行動の交互実行）・
+            <strong>Chain-of-Thought</strong>（思考過程を段階的に展開する手法）・
+            <strong>Multi-Agent</strong>（複数LLMが協調してタスクを分担する構造）などの設計パターン。
+            Composerの動作原理を深く理解するために有効。
+          </p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="key" class="w-4 h-4 text-yellow-500"></i>
+            プロンプトエンジニアリング
+          </div>
+          <p class="text-xs text-gray-600">モデルの能力を引き出すプロンプト設計。モデルを変えるより、プロンプトを改善する方が出力品質への影響が大きいことが多い。</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="gauge" class="w-4 h-4 text-red-500"></i>
+            LLMベンチマークの読み方
+          </div>
+          <p class="text-xs text-gray-600">
+            <strong>HumanEval</strong>（Pythonコード生成の正解率）・
+            <strong>SWE-bench</strong>（GitHubのバグ修正タスクでの成功率）・
+            <strong>MMLU</strong>（57分野の知識問題の正解率）など。
+            「最強モデル」の主張を検証する基礎知識。参考: <a href="https://huggingface.co/spaces/bigcode/bigcode-models-leaderboard" class="text-blue-500 hover:underline" target="_blank">BigCode Leaderboard</a>
+          </p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="shield" class="w-4 h-4 text-purple-500"></i>
+            Anthropic Constitutional AI
+          </div>
+          <p class="text-xs text-gray-600">Claudeの安全性設計の根拠となる技術。「なぜClaudeは指示追従が丁寧か」の背景を理解できる。</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg p-4">
+          <div class="font-semibold text-sm mb-1 flex items-center gap-1">
+            <i data-lucide="server" class="w-4 h-4 text-gray-500"></i>
+            Claude Code / GitHub Copilot との比較
+          </div>
+          <p class="text-xs text-gray-600">Cursorのライバルツール。使い分けの判断軸を持つことでCursorをより意識的に選べるようになる。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. 参考文献 -->
+    <section id="references" class="mb-12">
+      <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="link" class="w-5 h-5 text-gray-500"></i>
+        参考文献・URL
+      </h2>
+      <ul class="space-y-2 text-sm">
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/docs/models" target="_blank" class="text-blue-600 hover:underline">
+            Cursor 公式: Models & Pricing（モデル一覧・プール・Max Mode）
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/help/models-and-usage/available-models" target="_blank" class="text-blue-600 hover:underline">
+            Cursor 公式: Available models（Auto/Premium選択ガイド）
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/help/ai-features/max-mode" target="_blank" class="text-blue-600 hover:underline">
+            Cursor 公式: Max Mode 解説
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/blog/composer-2" target="_blank" class="text-blue-600 hover:underline">
+            Cursor Blog: Composer 2 リリースノート
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/help/account-and-billing/pricing" target="_blank" class="text-blue-600 hover:underline">
+            Cursor 公式: Pricing and Plans
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://cursor.com/dashboard/usage" target="_blank" class="text-blue-600 hover:underline">
+            Cursor 利用ダッシュボード（使用量確認）
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://www.anthropic.com/claude" target="_blank" class="text-blue-600 hover:underline">
+            Anthropic: Claude モデル一覧
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://platform.openai.com/docs/models" target="_blank" class="text-blue-600 hover:underline">
+            OpenAI: Models Documentation
+          </a>
+        </li>
+        <li class="flex items-start gap-2">
+          <i data-lucide="external-link" class="w-4 h-4 text-blue-500 mt-0.5 shrink-0"></i>
+          <a href="https://ai.google.dev/gemini-api/docs" target="_blank" class="text-blue-600 hover:underline">
+            Google: Gemini API Documentation
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 pt-6 text-xs text-gray-400 text-center">
+      <p>Techmap — Cursorで使えるAIモデル完全ガイド（2026年3月28日時点）</p>
+      <p class="mt-1">モデル・料金は頻繁に更新されます。最新情報は <a href="https://cursor.com/docs/models" class="text-blue-500 hover:underline">cursor.com/docs/models</a> で確認してください。</p>
+    </footer>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

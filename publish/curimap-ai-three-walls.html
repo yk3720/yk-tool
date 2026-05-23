@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIの3つの越えられない壁 — ChatGPTはなぜ嘘をつくのか</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  :root {
+    --sp-0: 4px; --sp-1: 8px; --sp-2: 16px; --sp-3: 24px; --sp-4: 32px; --sp-6: 48px;
+    --c-page: #fafaf9; --c-card: #ffffff; --c-stripe: #f8fafc; --c-bd: #e5e7eb; --c-bds: #9ca3af;
+    --c-t1: #1c1917; --c-t2: #44403c; --c-t3: #78716c;
+    --wall1: #dc2626; --wall1-light: #fef2f2; --wall1-mid: #fecaca;
+    --wall2: #d97706; --wall2-light: #fffbeb; --wall2-mid: #fde68a;
+    --wall3: #7c3aed; --wall3-light: #f5f3ff; --wall3-mid: #ddd6fe;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: system-ui, 'YuGothic', 'Yu Gothic', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--c-page); color: var(--c-t1); margin: 0; line-height: 1.8; font-size: 15px;
+  }
+  /* ===== TOC ===== */
+  #toc {
+    position: fixed; top: var(--sp-4); left: var(--sp-2); width: 196px;
+    background: var(--c-card); border: 1px solid var(--c-bd); border-radius: 10px;
+    padding: var(--sp-2); z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: none;
+  }
+  @media (min-width: 1280px) { #toc { display: block; } }
+  #toc h3 { font-size: 11px; font-weight: 700; color: var(--c-t3); margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.08em; }
+  #toc a { display: block; font-size: 13px; color: var(--c-t2); text-decoration: none; padding: 3px 4px; border-radius: 4px; transition: all 0.15s; }
+  #toc a:hover { color: #1d4ed8; background: #eff6ff; }
+  /* ===== LAYOUT ===== */
+  .container { max-width: 860px; margin: 0 auto; padding: var(--sp-4) var(--sp-3); }
+  @media (min-width: 1280px) { .container { margin-left: 224px; } }
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #1c1917 0%, #292524 100%);
+    color: white; border-radius: 16px; padding: var(--sp-6) var(--sp-4); margin-bottom: var(--sp-4);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(220,38,38,0.3) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -40px; left: 30%;
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 9999px; padding: 4px 14px; font-size: 12px; font-weight: 600; margin-bottom: var(--sp-2);
+  }
+  .hero h1 { font-size: 30px; font-weight: 800; margin: 0 0 var(--sp-2) 0; line-height: 1.25; position: relative; z-index: 1; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); margin: 0; position: relative; z-index: 1; }
+  .hero-question { font-size: 18px; font-weight: 700; color: #fbbf24; margin-bottom: 6px; position: relative; z-index: 1; }
+  /* ===== SECTION ===== */
+  .section { background: var(--c-card); border-radius: 14px; padding: var(--sp-4); margin-bottom: var(--sp-3); border: 1px solid var(--c-bd); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+  .section-title { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 800; color: var(--c-t1); margin: 0 0 var(--sp-3) 0; padding-bottom: var(--sp-2); border-bottom: 2px solid var(--c-bd); }
+  /* ===== TERM BOX ===== */
+  .term-box { background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; border-radius: 8px; padding: 12px var(--sp-3); margin: var(--sp-2) 0; }
+  .term-box .lbl { font-size: 11px; font-weight: 700; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .term-box p { margin: 0; font-size: 14px; color: var(--c-t2); line-height: 1.7; }
+  /* ===== WALL SECTIONS ===== */
+  .wall { border-radius: 12px; padding: var(--sp-4); margin-bottom: var(--sp-3); }
+  .wall-1 { background: var(--wall1-light); border: 1px solid var(--wall1-mid); }
+  .wall-2 { background: var(--wall2-light); border: 1px solid var(--wall2-mid); }
+  .wall-3 { background: var(--wall3-light); border: 1px solid var(--wall3-mid); }
+  .wall-header { display: flex; align-items: flex-start; gap: var(--sp-2); margin-bottom: var(--sp-2); }
+  .wall-num { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; color: white; flex-shrink: 0; }
+  .wall-num-1 { background: var(--wall1); }
+  .wall-num-2 { background: var(--wall2); }
+  .wall-num-3 { background: var(--wall3); }
+  .wall-title-wrap h3 { font-size: 18px; font-weight: 800; margin: 0 0 2px 0; }
+  .wall-title-1 { color: var(--wall1); }
+  .wall-title-2 { color: var(--wall2); }
+  .wall-title-3 { color: var(--wall3); }
+  .wall-subtitle { font-size: 13px; color: var(--c-t3); }
+  /* ===== ANALOGY ===== */
+  .analogy { display: flex; gap: var(--sp-2); background: white; border-radius: 10px; padding: var(--sp-3); margin: var(--sp-2) 0; border: 1px solid var(--c-bd); }
+  .analogy-icon { color: #7c3aed; flex-shrink: 0; margin-top: 2px; }
+  .analogy-label { font-size: 11px; font-weight: 700; color: #6d28d9; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .analogy p { margin: 0; font-size: 14px; color: var(--c-t2); line-height: 1.7; }
+  /* ===== PROBLEM BULLETS ===== */
+  .prob-list { list-style: none; padding: 0; margin: var(--sp-2) 0 0 0; }
+  .prob-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--c-t2); margin-bottom: 8px; }
+  .prob-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .prob-dot-1 { background: var(--wall1); }
+  .prob-dot-2 { background: var(--wall2); }
+  .prob-dot-3 { background: var(--wall3); }
+  /* ===== THREE CORE ===== */
+  .core-card { border-radius: 12px; padding: var(--sp-3); margin-bottom: var(--sp-2); display: flex; gap: var(--sp-3); align-items: flex-start; }
+  .core-card-1 { background: var(--wall1-light); border: 1px solid var(--wall1-mid); }
+  .core-card-2 { background: var(--wall2-light); border: 1px solid var(--wall2-mid); }
+  .core-card-3 { background: var(--wall3-light); border: 1px solid var(--wall3-mid); }
+  .core-num { font-size: 32px; font-weight: 800; line-height: 1; flex-shrink: 0; }
+  .core-num-1 { color: var(--wall1); }
+  .core-num-2 { color: var(--wall2); }
+  .core-num-3 { color: var(--wall3); }
+  .core-title { font-size: 15px; font-weight: 700; margin: 0 0 4px 0; }
+  .core-desc { font-size: 14px; color: var(--c-t2); margin: 0; line-height: 1.7; }
+  /* ===== MISCONCEPTION ===== */
+  .misc-item { border-radius: 10px; padding: var(--sp-3); margin-bottom: var(--sp-2); }
+  .misc-wrong { background: #fef2f2; border: 1px solid #fecaca; margin-bottom: 0; border-radius: 10px 10px 0 0; }
+  .misc-right { background: #f0fdf4; border: 1px solid #bbf7d0; border-top: none; border-radius: 0 0 10px 10px; margin-bottom: var(--sp-3); }
+  .misc-label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+  .misc-label.wrong { color: #be123c; }
+  .misc-label.right  { color: #166534; }
+  .misc-item p { margin: 0; font-size: 14px; line-height: 1.7; }
+  .misc-wrong p { color: #7f1d1d; }
+  .misc-right p  { color: #14532d; }
+  /* ===== TIMELINE ===== */
+  .tl { position: relative; padding-left: 28px; }
+  .tl::before { content: ''; position: absolute; left: 9px; top: 0; bottom: 0; width: 2px; background: var(--c-bd); }
+  .tl-item { position: relative; margin-bottom: var(--sp-3); }
+  .tl-dot { position: absolute; left: -23px; width: 16px; height: 16px; border-radius: 50%; top: 3px; }
+  .tl-year { font-size: 12px; font-weight: 700; color: var(--c-t3); margin-bottom: 2px; }
+  .tl-event { font-size: 15px; font-weight: 700; color: var(--c-t1); margin-bottom: 3px; }
+  .tl-desc { font-size: 14px; color: var(--c-t2); line-height: 1.7; }
+  /* ===== GLOSSARY ===== */
+  .glossary-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+  @media (min-width: 560px) { .glossary-grid { grid-template-columns: 1fr 1fr; } }
+  .gl-item { background: var(--c-stripe); border-radius: 8px; padding: var(--sp-2) var(--sp-2); border: 1px solid var(--c-bd); }
+  .gl-term { font-size: 14px; font-weight: 700; color: var(--c-t1); margin-bottom: 4px; }
+  .gl-def  { font-size: 13px; color: var(--c-t2); line-height: 1.6; }
+  /* ===== NEXT ===== */
+  .next-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-2); }
+  @media (min-width: 560px) { .next-grid { grid-template-columns: 1fr 1fr; } }
+  .next-item { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: var(--sp-2) var(--sp-3); display: flex; gap: 10px; align-items: flex-start; }
+  .next-item .ni-ic { color: #2563eb; margin-top: 2px; flex-shrink: 0; }
+  .next-item .ni-t { font-size: 14px; font-weight: 700; color: #1e40af; margin-bottom: 2px; }
+  .next-item .ni-d { font-size: 13px; color: var(--c-t2); }
+  /* ===== REF ===== */
+  .ref-list { list-style: none; padding: 0; margin: 0; }
+  .ref-list li { padding: 6px 0; border-bottom: 1px solid var(--c-bd); font-size: 13px; color: var(--c-t2); }
+  .ref-list li:last-child { border-bottom: none; }
+  .ref-list a { color: #2563eb; text-decoration: none; }
+  .ref-list a:hover { text-decoration: underline; }
+  /* ===== FLOW ===== */
+  .flow { display: flex; flex-direction: column; gap: 0; align-items: center; margin: var(--sp-3) 0; }
+  .flow-node { border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 700; text-align: center; width: 100%; max-width: 400px; }
+  .flow-arrow-down { font-size: 22px; color: var(--c-t3); line-height: 1; padding: 2px 0; }
+  .flow-node-1 { background: var(--wall1-light); border: 2px solid var(--wall1); color: var(--wall1); }
+  .flow-node-2 { background: var(--wall2-light); border: 2px solid var(--wall2); color: var(--wall2); }
+  .flow-node-3 { background: var(--wall3-light); border: 2px solid var(--wall3); color: var(--wall3); }
+  .flow-node-result { background: #f1f5f9; border: 2px solid #64748b; color: #1e293b; }
+  /* ===== STAT HIGHLIGHT ===== */
+  .stat-row { display: flex; gap: var(--sp-2); flex-wrap: wrap; margin: var(--sp-2) 0; }
+  .stat-box { flex: 1; min-width: 130px; border-radius: 10px; padding: var(--sp-2); text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .stat-desc { font-size: 12px; color: var(--c-t2); margin-top: 2px; }
+  /* ===== PDF BTN ===== */
+  #pdf-btn {
+    position: fixed; bottom: var(--sp-3); right: var(--sp-3); z-index: 200;
+    background: #1c1917; color: white; border: none; border-radius: 9999px;
+    padding: 11px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  }
+  #pdf-btn:hover { background: #292524; }
+  @media print {
+    #pdf-btn, #toc { display: none !important; }
+    .section, .wall, .misc-wrong, .misc-right { break-inside: avoid; }
+  }
+  /* ===== STORY BOX ===== */
+  .story { border-left: 4px solid var(--c-bds); background: var(--c-stripe); border-radius: 8px; padding: var(--sp-2) var(--sp-3); margin: var(--sp-2) 0; font-style: italic; font-size: 14px; color: var(--c-t2); }
+</style>
+</head>
+<body>
+
+<!-- TOC -->
+<nav id="toc">
+  <h3>目次</h3>
+  <a href="#summary">ひとことで言えば</a>
+  <a href="#why">なぜ注目されているのか</a>
+  <a href="#core3">まず理解する3つ</a>
+  <a href="#wall1">壁1：注意の壁</a>
+  <a href="#wall2">壁2：記憶の壁</a>
+  <a href="#wall3">壁3：嘘つきの壁</a>
+  <a href="#together">3つが重なると</a>
+  <a href="#misc">よくある誤解</a>
+  <a href="#words">知っておきたい言葉</a>
+  <a href="#next">もっと知りたい人へ</a>
+  <a href="#refs">参考文献</a>
+</nav>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <i data-lucide="book-open" style="width:13px;height:13px;"></i>
+    CuriosityMap — AI入門
+  </div>
+  <div class="hero-question">ChatGPTはなぜ嘘をつくのか？なぜ長い文書が苦手なのか？</div>
+  <h1>AIの3つの<br>越えられない壁</h1>
+  <p>バグや未熟さではなく、設計の根っこにある「原理的な限界」をやさしく解説します</p>
+</div>
+
+<!-- SECTION 1: ひとことで言えば -->
+<div class="section" id="summary">
+  <h2 class="section-title"><i data-lucide="zap" style="color:#f59e0b;width:22px;height:22px;"></i>ひとことで言えば</h2>
+  <p style="font-size:17px; font-weight:700; color:var(--c-t1); line-height:1.6; margin-bottom:var(--sp-2);">
+    ChatGPTなどのAIには、「どれだけ技術が進歩しても、構造上どうしても越えられない3つの壁」が存在します。
+  </p>
+  <p style="font-size:15px; color:var(--c-t2); margin-bottom:var(--sp-2);">
+    これらはバグ（不具合）でも、まだ技術が追いついていないだけの問題でもありません。AIの根っこの設計に組み込まれた、<strong>原理的な限界</strong>です。2026年には世界中の研究者が52種類のAIの仕組みを分析した結果、「この3つの壁は、どんな技術革新があっても同時になくすことは不可能だ」と数学的に証明されました。
+  </p>
+  <p style="font-size:15px; color:var(--c-t2);">
+    この3つを知ると、「なぜAIはときどき嘘をつくのか」「なぜ長い文書の処理が苦手なのか」「なぜ使うほど費用がかさむのか」がすっきり理解できます。
+  </p>
+  <div style="display:flex; gap:var(--sp-2); margin-top:var(--sp-3); flex-wrap:wrap;">
+    <div style="background:var(--wall1-light);border:1px solid var(--wall1-mid);border-radius:9999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--wall1);display:flex;align-items:center;gap:5px;">
+      <i data-lucide="brain" style="width:14px;height:14px;"></i>壁1：注意しすぎで疲れる（計算の爆発）
+    </div>
+    <div style="background:var(--wall2-light);border:1px solid var(--wall2-mid);border-radius:9999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--wall2);display:flex;align-items:center;gap:5px;">
+      <i data-lucide="box" style="width:14px;height:14px;"></i>壁2：話の途中を忘れる（記憶の限界）
+    </div>
+    <div style="background:var(--wall3-light);border:1px solid var(--wall3-mid);border-radius:9999px;padding:5px 14px;font-size:13px;font-weight:700;color:var(--wall3);display:flex;align-items:center;gap:5px;">
+      <i data-lucide="alert-circle" style="width:14px;height:14px;"></i>壁3：嘘に気づけない（連鎖する誤り）
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: なぜ注目されているのか -->
+<div class="section" id="why">
+  <h2 class="section-title"><i data-lucide="history" style="color:#7c3aed;width:22px;height:22px;"></i>なぜ注目されているのか</h2>
+  <p style="color:var(--c-t2); font-size:15px; margin-bottom:var(--sp-3);">
+    「AIに限界なんてあるの？」と思う方も多いでしょう。この3つの壁が注目されるようになった経緯をたどってみます。
+  </p>
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#6366f1;"></div>
+      <div class="tl-year">2017年</div>
+      <div class="tl-event">「Transformer（トランスフォーマー）」の登場</div>
+      <div class="tl-desc">Googleの研究チームが、現在のAIチャットの基盤となる仕組みを発表。文章の意味を理解するのがとても得意な仕組みでしたが、そこには後に「壁」となる設計が組み込まれていました。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#dc2626;"></div>
+      <div class="tl-year">2020年</div>
+      <div class="tl-event">GPT-3登場——「嘘をつく」問題が広く知られる</div>
+      <div class="tl-desc">驚くほど流暢に文章を書くAIが登場。しかし同時に「存在しない本を紹介する」「間違った歴史的事実を自信満々に言う」という問題が話題になり始めました。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#d97706;"></div>
+      <div class="tl-year">2022〜2023年</div>
+      <div class="tl-event">ChatGPT爆発的普及——限界が多くの人に体験される</div>
+      <div class="tl-desc">ChatGPTが世界中で使われ始め、「長い書類を読ませると途中の内容を忘れる」「たくさん使うと費用が急増する」という問題が実感されるようになりました。研究者たちも「話の中ほどの情報が見落とされる」現象（"Lost in the Middle"）を論文で報告。</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:#292524;"></div>
+      <div class="tl-year">2026年</div>
+      <div class="tl-event">「この限界は原理的に解決不可能」と数学的に証明 ——これが今日このページを読む理由です</div>
+      <div class="tl-desc">世界中の研究者が52種類のAIの仕組みを分析。「速さ・省メモリ・正確な記憶」の3つを同時に実現するAIは、数学の定理（情報理論）として絶対に作れないことが証明されました。これを「<strong>不可能性三角形</strong>」と呼びます。AIの限界をどれだけ改善できても、この三角形の外に出ることはできないのです。</div>
+    </div>
+  </div>
+  <div class="story">
+    「次世代のAIが出れば解決するはず」——そう思っていた期待は、2026年の研究によって打ち砕かれました。これは現在の技術力の問題ではなく、構造の根っこにある限界なのです。
+  </div>
+</div>
+
+<!-- SECTION 3: まず理解する3つ -->
+<div class="section" id="core3">
+  <h2 class="section-title"><i data-lucide="layers" style="color:#2563eb;width:22px;height:22px;"></i>まず理解する3つ</h2>
+  <p style="color:var(--c-t2); margin-bottom:var(--sp-3); font-size:15px;">この3つを押さえるだけで、AIの限界について「なるほど」と話せるようになります。</p>
+
+  <div class="core-card core-card-1">
+    <div class="core-num core-num-1">1</div>
+    <div>
+      <div class="core-title">全員と話そうとすると疲弊する（注意の壁）</div>
+      <p class="core-desc">AIは文章を読むとき、すべての単語が他のすべての単語と「どれくらい関係があるか」を計算します。単語が2倍になると計算量は4倍、10倍になると100倍に膨らみます。長い文章を処理するほど、時間もお金もかかる理由はここにあります。</p>
+    </div>
+  </div>
+
+  <div class="core-card core-card-2">
+    <div class="core-num core-num-2">2</div>
+    <div>
+      <div class="core-title">話の「途中」が抜け落ちる（記憶の壁）</div>
+      <p class="core-desc">長い文章を読ませると、最初の部分と最後の部分はよく覚えているのに、中ほどの内容はぼんやりとしか覚えられません。「128万文字対応」と書かれていても、実際に正確に使える量はずっと少ないのです。</p>
+    </div>
+  </div>
+
+  <div class="core-card core-card-3">
+    <div class="core-num core-num-3">3</div>
+    <div>
+      <div class="core-title">「もっともらしい続き」を作り続ける（嘘つきの壁）</div>
+      <p class="core-desc">AIは「正しい答えを探す」ように作られていません。「次に来そうな言葉」を予測し続ける仕組みです。知らないことでも、知っているかのように「もっともらしい文章」を作り出してしまいます。これがいわゆる「AIの嘘（ハルシネーション）」の原因です。</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4-6: 3つの壁 詳細 -->
+<div class="section">
+  <h2 class="section-title"><i data-lucide="triangle-alert" style="color:#dc2626;width:22px;height:22px;"></i>3つの壁のしくみ</h2>
+
+  <!-- 壁1 -->
+  <div class="wall wall-1" id="wall1">
+    <div class="wall-header">
+      <div class="wall-num wall-num-1">1</div>
+      <div class="wall-title-wrap">
+        <h3 class="wall-title-1">注意の壁（アテンションの壁）</h3>
+        <div class="wall-subtitle">文章が長くなるほど、計算量が雪だるま式に増える問題</div>
+      </div>
+    </div>
+
+    <div class="term-box">
+      <div class="lbl">言葉の説明：アテンション（Attention）</div>
+      <p>英語で「注意・注目」の意味。AIが文章の意味を理解するために、「この単語はどの単語と関係が深いか」を全組み合わせで計算する仕組みのこと。ChatGPTなどが文脈を理解できる理由はここにあります。</p>
+    </div>
+
+    <p style="color:var(--c-t2); font-size:15px;">AIが文章を読むとき、すべての単語どうしの「関連度」を計算します。10単語なら10×10=100回の計算で済みますが、100単語だと100×100=10,000回。1,000単語なら1,000,000回（100万回）になります。</p>
+
+    <div class="analogy">
+      <i data-lucide="users" class="analogy-icon" style="width:20px;height:20px;"></i>
+      <div>
+        <div class="analogy-label">たとえ話 — 大人数の飲み会</div>
+        <p>10人の飲み会なら、全員と少しずつ話せます。2人ずつ会話する組み合わせは「10人×9人÷2（同じペアを2回数えないため）＝45通り」。でも100人になると同じ計算で4,950通り——とても全員とは話せません。AIも同じです。文章が長くなるほど「全単語と全単語の組み合わせ」を計算する量が増えて、処理が重くなります。</p>
+      </div>
+    </div>
+
+    <h4 style="font-size:15px; font-weight:700; color:var(--wall1); margin:var(--sp-2) 0 8px 0;">これが引き起こす問題</h4>
+    <ul class="prob-list">
+      <li><span class="prob-dot prob-dot-1"></span><strong>費用が急増する：</strong>長い文章ほど処理コストが二乗で増えるため、API（有料サービス）の利用料が一気に跳ね上がります</li>
+      <li><span class="prob-dot prob-dot-1"></span><strong>返答が遅くなる：</strong>長い質問・長い資料を渡すほど、回答が返ってくるまでの時間が増えます</li>
+      <li><span class="prob-dot prob-dot-1"></span><strong>コンピューターのメモリが足りなくなる：</strong>研究用の大規模AIでは、長文処理でメモリが溢れてしまうことがあります</li>
+    </ul>
+  </div>
+
+  <!-- 壁2 -->
+  <div class="wall wall-2" id="wall2">
+    <div class="wall-header">
+      <div class="wall-num wall-num-2">2</div>
+      <div class="wall-title-wrap">
+        <h3 class="wall-title-2">記憶の壁（コンテキストウィンドウの壁）</h3>
+        <div class="wall-subtitle">カタログスペックと実際の性能の大きなギャップ</div>
+      </div>
+    </div>
+
+    <div class="term-box">
+      <div class="lbl">言葉の説明：コンテキストウィンドウ</div>
+      <p>AIが一度に読める文章の長さ（記憶の範囲）のこと。「128Kトークン対応」などと書かれているもの。トークンとは、日本語でおおよそ1〜2文字に相当する単位。128Kトークンは文庫本1〜2冊分くらいの量です。</p>
+    </div>
+
+    <p style="color:var(--c-t2); font-size:15px;">「最大128万文字まで読める」と宣伝されていても、実際には文章の<strong>はじめと終わり</strong>の部分しか正確に参照できないことが多く、<strong>中ほどの内容は大幅に見落とされます</strong>。</p>
+
+    <div class="stat-row">
+      <div class="stat-box" style="background:var(--wall2-light); border:1px solid var(--wall2-mid);">
+        <div class="stat-num" style="color:var(--wall2);">最大99%</div>
+        <div class="stat-desc">カタログ値と実際の性能の乖離<br><span style="font-size:11px;color:var(--c-t3);">※2026年Zylos Research調査</span></div>
+      </div>
+      <div class="stat-box" style="background:#fef2f2; border:1px solid #fecaca;">
+        <div class="stat-num" style="color:#dc2626;">-30%</div>
+        <div class="stat-desc">文章の中ほどの正答率の低下<br><span style="font-size:11px;color:var(--c-t3);">※Liu et al. 2023「Lost in the Middle」論文</span></div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <i data-lucide="book" class="analogy-icon" style="width:20px;height:20px;"></i>
+      <div>
+        <div class="analogy-label">たとえ話 — 長い小説の速読家</div>
+        <p>本の序章と最終章の内容はよく覚えているのに、第3章〜第5章で起きた重要な事件をすっかり忘れている速読家のようなものです。「全部読んだ」と言っているのに、中盤の肝心な部分が抜けています。</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <i data-lucide="battery-low" class="analogy-icon" style="width:20px;height:20px;"></i>
+      <div>
+        <div class="analogy-label">たとえ話 — 家電のカタログスペック</div>
+        <p>「最大バッテリー持続時間15時間」と書かれたノートパソコンが、実際には7〜8時間しか持たないのと同じです。「最大」は理想的な条件の話で、現実とのギャップが大きいのです。</p>
+      </div>
+    </div>
+
+    <h4 style="font-size:15px; font-weight:700; color:var(--wall2); margin:var(--sp-2) 0 8px 0;">これが引き起こす問題</h4>
+    <ul class="prob-list">
+      <li><span class="prob-dot prob-dot-2"></span><strong>長い契約書・報告書の分析が不正確：</strong>文書の中ほどにある重要な条件や数字が見落とされることがあります</li>
+      <li><span class="prob-dot prob-dot-2"></span><strong>長い会議の記録を要約させると抜けが出る：</strong>会議の前半と後半は要約されても、中盤の議論が消えることがあります</li>
+      <li><span class="prob-dot prob-dot-2"></span><strong>費用の割に効果が出ない：</strong>大きなコンテキスト（記憶量）に課金しても、実際の精度は期待ほど上がりません</li>
+    </ul>
+  </div>
+
+  <!-- 壁3 -->
+  <div class="wall wall-3" id="wall3">
+    <div class="wall-header">
+      <div class="wall-num wall-num-3">3</div>
+      <div class="wall-title-wrap">
+        <h3 class="wall-title-3">嘘つきの壁（オートリグレッションの壁）</h3>
+        <div class="wall-subtitle">「次の言葉」を予測し続けることで生まれる誤りの連鎖</div>
+      </div>
+    </div>
+
+    <div class="term-box">
+      <div class="lbl">言葉の説明：オートリグレッション（自己回帰）</div>
+      <p>AIが文章を1文字（1単語）ずつ順番に予測・生成する仕組みのこと。前に出てきた言葉を手がかりにして、次に来そうな言葉を選び続けます。「東京の」→「首都は」→「日本で」のように次々と続けるイメージです。</p>
+    </div>
+
+    <div class="term-box">
+      <div class="lbl">言葉の説明：ハルシネーション（Hallucination）</div>
+      <p>AIが事実と異なることを、まるで本当のことのように自信満々に言ってしまう現象。「幻覚」という意味の英語から来ています。「存在しない本の書評を書く」「間違った歴史を詳しく解説する」などが代表例です。</p>
+    </div>
+
+    <p style="color:var(--c-t2); font-size:15px;">AIは「正しい答えを探す」のではなく、「次に来そうな言葉を選ぶ」を繰り返します。これが根本的な問題です。最初に少し間違えると、その誤りを土台に次の言葉を選ぶため、<strong>誤りが雪だるま式に膨らんで</strong>いきます。</p>
+
+    <div class="analogy">
+      <i data-lucide="phone" class="analogy-icon" style="width:20px;height:20px;"></i>
+      <div>
+        <div class="analogy-label">たとえ話 — 電話の伝言ゲーム</div>
+        <p>最初の人が「田中さんは3時に来ます」と言ったのに、10人の伝言を経て「田中さんは3時に来て金メダルを取りました」になってしまう、あの感覚です。AIも最初の1言葉で方向が少しずれると、その後の言葉すべてが「もっともらしい続き」として積み重なって、全然違う話になってしまいます。</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <i data-lucide="book-x" class="analogy-icon" style="width:20px;height:20px;"></i>
+      <div>
+        <div class="analogy-label">たとえ話 — 「続きを書いて」のゲーム</div>
+        <p>「昔々、あるところにお姫様が」という書き出しを渡して「続きを書いて」と頼むとき、私たちは「姫が魔法使いに呪われる話」や「王子様に会う話」など、ありそうな話を作ります。AIも同じです。「正しい歴史」を知っているかどうかではなく、「それっぽい続き」を作るのが得意なのです。</p>
+      </div>
+    </div>
+
+    <h4 style="font-size:15px; font-weight:700; color:var(--wall3); margin:var(--sp-2) 0 8px 0;">これが引き起こす問題</h4>
+    <ul class="prob-list">
+      <li><span class="prob-dot prob-dot-3"></span><strong>ハルシネーション（AIの嘘）：</strong>存在しない研究論文、間違った歴史的事実、架空の人物などを自信満々に作り出します</li>
+      <li><span class="prob-dot prob-dot-3"></span><strong>長い回答ほど誤りが増える：</strong>短い回答は比較的正確でも、長い文章を書かせると後半になるほど誤りが混じりやすくなります</li>
+      <li><span class="prob-dot prob-dot-3"></span><strong>「わからない」と言えない：</strong>AIは評価のために「なんでも答える」よう訓練されており、知らないことでも知っているかのように答えてしまいます</li>
+    </ul>
+
+    <div style="margin-top:var(--sp-2); background:white; border-radius:10px; padding:var(--sp-2) var(--sp-3); border:1px solid var(--c-bd);">
+      <div style="font-size:13px; font-weight:700; color:var(--c-t3); margin-bottom:8px;">ハルシネーション発生率の改善（参考）</div>
+      <div style="display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:#dc2626;">39.6%</div>
+          <div style="font-size:12px; color:var(--c-t3);">GPT-3.5</div>
+        </div>
+        <i data-lucide="arrow-right" style="color:var(--c-t3);width:18px;height:18px;"></i>
+        <div style="text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:#f97316;">28.6%</div>
+          <div style="font-size:12px; color:var(--c-t3);">GPT-4</div>
+        </div>
+        <div style="font-size:13px; color:var(--c-t2); flex:1; min-width:160px;">技術の進歩で割合は減らせますが、<strong>ゼロにはできません</strong>。この限界は構造上の問題だからです。<br><span style="font-size:11px;color:var(--c-t3);">※複数の評価研究の参考値</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: 3つが重なると -->
+<div class="section" id="together">
+  <h2 class="section-title"><i data-lucide="share-2" style="color:#4b5563;width:22px;height:22px;"></i>3つが重なると何が起きるか</h2>
+  <p style="color:var(--c-t2); font-size:15px; margin-bottom:var(--sp-3);">
+    3つの壁はそれぞれ独立した問題ですが、実際の利用場面では組み合わさって、より深刻な問題を引き起こします。
+  </p>
+
+  <div class="flow">
+    <div class="flow-node flow-node-1">
+      壁1：注意の壁<br><span style="font-size:12px; font-weight:400;">長い文章を読ませるほど計算コストが爆発する</span>
+    </div>
+    <div class="flow-arrow-down">↓</div>
+    <div class="flow-node flow-node-2">
+      壁2：記憶の壁<br><span style="font-size:12px; font-weight:400;">頑張って読ませても中ほどの内容が抜け落ちる</span>
+    </div>
+    <div class="flow-arrow-down">↓</div>
+    <div class="flow-node flow-node-3">
+      壁3：嘘つきの壁<br><span style="font-size:12px; font-weight:400;">抜け落ちた部分を「もっともらしい話」で補完してしまう</span>
+    </div>
+    <div class="flow-arrow-down">↓</div>
+    <div class="flow-node flow-node-result">
+      結果：費用がかかったのに、中盤の重要情報が抜けていて、<br>その穴が事実と違う内容で埋まっている
+    </div>
+  </div>
+
+  <div class="story" style="margin-top:var(--sp-3);">
+    たとえば「30ページの契約書を分析して」と頼んだとき。費用はかかるし（壁1）、15〜25ページ目あたりの条件は正確に読まれないし（壁2）、その抜けた部分は「よくある契約書にありそうな内容」で自動補完されてしまう（壁3）——これが3つの壁が複合した状態です。
+  </div>
+</div>
+
+<!-- SECTION: よくある誤解 -->
+<div class="section" id="misc">
+  <h2 class="section-title"><i data-lucide="lightbulb" style="color:#f59e0b;width:22px;height:22px;"></i>よくある誤解・思い込み</h2>
+
+  <div class="misc-wrong">
+    <div class="misc-label wrong"><i data-lucide="x" style="width:14px;height:14px;"></i>よくある思い込み1</div>
+    <p>「次世代のAIが出れば、これらの問題はすべて解決される」</p>
+  </div>
+  <div class="misc-right">
+    <div class="misc-label right"><i data-lucide="check" style="width:14px;height:14px;"></i>実際は</div>
+    <p>2026年の数学的証明により、「速さ・省メモリ・正確な記憶」の3つを同時に満たすAIは<strong>原理上作ることができない</strong>と示されました。これは技術力の問題ではなく、情報の性質そのものに起因する限界です。改善はできても、なくすことはできません。</p>
+  </div>
+
+  <div class="misc-wrong">
+    <div class="misc-label wrong"><i data-lucide="x" style="width:14px;height:14px;"></i>よくある思い込み2</div>
+    <p>「AIが嘘をついたのは学習データが足りないから。データを増やせば嘘はなくなる」</p>
+  </div>
+  <div class="misc-right">
+    <div class="misc-label right"><i data-lucide="check" style="width:14px;height:14px;"></i>実際は</div>
+    <p>データ量は関係あっても、根本的な原因ではありません。AIは「正しい答えを探す」のではなく「次に来そうな言葉を選ぶ」という仕組みで動いています。この設計上、知らないことでも「それっぽい答え」を作り続けることは避けられません。</p>
+  </div>
+
+  <div class="misc-wrong">
+    <div class="misc-label wrong"><i data-lucide="x" style="width:14px;height:14px;"></i>よくある思い込み3</div>
+    <p>「100万文字まで読めると書いてあったから、長い書類はすべて正確に処理できる」</p>
+  </div>
+  <div class="misc-right">
+    <div class="misc-label right"><i data-lucide="check" style="width:14px;height:14px;"></i>実際は</div>
+    <p>「最大100万文字」はあくまで技術上の上限値。実際の精度は文書が長くなるほど下がります。特に文書の中ほどにある情報は大幅に見落とされます。家電の「最大バッテリー15時間」が実際には7〜8時間しか持たないのと同じ感覚です。</p>
+  </div>
+
+  <div class="misc-wrong">
+    <div class="misc-label wrong"><i data-lucide="x" style="width:14px;height:14px;"></i>よくある思い込み4</div>
+    <p>「AIに詳しく、段階を追って考えさせれば、ハルシネーションは防げる」</p>
+  </div>
+  <div class="misc-right">
+    <div class="misc-label right"><i data-lucide="check" style="width:14px;height:14px;"></i>実際は</div>
+    <p>「まず〇〇を考えて、次に△△を考えて…」と段階を追って考えさせる手法（「Chain of Thought（チェーン・オブ・ソート）」と呼ばれます）は精度を上げますが、根本的な仕組みは同じです。「次の言葉を予測する」を繰り返す構造が変わらない限り、嘘をゼロにすることはできません。</p>
+  </div>
+</div>
+
+<!-- SECTION: 知っておきたい言葉 -->
+<div class="section" id="words">
+  <h2 class="section-title"><i data-lucide="book-open" style="color:#059669;width:22px;height:22px;"></i>知っておきたい言葉</h2>
+  <div class="glossary-grid">
+    <div class="gl-item">
+      <div class="gl-term">AI / ChatGPT</div>
+      <div class="gl-def">AI（人工知能）は人間のような思考をコンピューターで実現する技術の総称。ChatGPTはその代表的なサービスで、文章を理解・生成するのが得意。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">LLM（大規模言語モデル）</div>
+      <div class="gl-def">Large Language Model の略。大量の文章で学習した、文章を理解・生成するAIのこと。ChatGPT・Claude・Gemini などがこれにあたる。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">トークン</div>
+      <div class="gl-def">AIが文章を処理する際の最小単位。日本語では1〜2文字が目安。「1万トークン」は文庫本の十数ページ分くらいのボリューム。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">ハルシネーション</div>
+      <div class="gl-def">AIが事実と異なることを確信を持って言ってしまう現象。「幻覚」の意味。存在しない本を詳細に紹介するなどが典型例。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">コンテキストウィンドウ</div>
+      <div class="gl-def">AIが一度に読める文章の範囲（記憶の枠）。カタログ値より実際に有効に機能する量は大幅に少ない。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">Lost in the Middle（ロスト・イン・ザ・ミドル）</div>
+      <div class="gl-def">文章の「中ほど」の情報が見落とされる現象。最初と最後は覚えているのに、真ん中だけ抜け落ちる記憶のU字型の歪み。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">Transformer（トランスフォーマー）</div>
+      <div class="gl-def">2017年にGoogleが発表した、現在のAIチャットの基盤となる仕組みの名前。映画の「トランスフォーマー」とは無関係。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">不可能性三角形</div>
+      <div class="gl-def">「速さ・省メモリ・正確な記憶」の3つを同時に実現するAIは原理上作れない、という2026年に数学的に証明された法則。</div>
+    </div>
+    <div class="gl-item">
+      <div class="gl-term">RAG（検索拡張生成）</div>
+      <div class="gl-def">Retrieval-Augmented Generation の略。AIが回答する前に、信頼できる資料を検索して参照する仕組み。ハルシネーションを減らす現実的な対策の一つ。</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: もっと知りたい人へ -->
+<div class="section" id="next">
+  <h2 class="section-title"><i data-lucide="arrow-right-circle" style="color:#2563eb;width:22px;height:22px;"></i>もっと知りたい人へ</h2>
+  <div class="next-grid">
+    <div class="next-item">
+      <i data-lucide="search" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">RAG（検索してから回答する仕組み）</div>
+        <div class="ni-d">AIが答える前にGoogle検索のように信頼できる資料を調べてから回答する手法。「嘘つきの壁」への最も現実的な対策として注目されています。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="cpu" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">プロンプトエンジニアリング</div>
+        <div class="ni-d">AIに上手に質問・指示する技術。「記憶の壁」への実践対策として、重要な情報を文章の最初と最後に置く工夫などがある。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="shield" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">AIのファクトチェック・検証の方法</div>
+        <div class="ni-d">AIの出力を鵜呑みにしないための確認方法。特に重要な事実は必ず別の情報源で確認することの大切さ。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="layers" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">次世代AIの仕組み（Mamba・ハイブリッド型）</div>
+        <div class="ni-d">「注意の壁」に挑戦する新しいアーキテクチャ。壁は越えられないが、トレードオフを工夫で調整しようとしている最前線の研究。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="dollar-sign" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">AIサービスの料金体系とコスト管理</div>
+        <div class="ni-d">「注意の壁」により長い文章ほどコストが爆発する理由と、実際のAPIコストを最適化する実践的な方法。</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <i data-lucide="scale" class="ni-ic" style="width:18px;height:18px;"></i>
+      <div>
+        <div class="ni-t">AIと法律・倫理（ハルシネーションの責任）</div>
+        <div class="ni-d">AIが嘘をついた場合の法的責任は誰にあるか。ハルシネーションが避けられない以上、社会としてどう向き合うかという議論。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION: 参考文献 -->
+<div class="section" id="refs">
+  <h2 class="section-title"><i data-lucide="external-link" style="color:#4b5563;width:22px;height:22px;"></i>参考文献・URL</h2>
+  <ul class="ref-list">
+    <li><a href="https://ai-papers.net/impossibility-triangle-long-context-llm-efficiency-compactness-recall" target="_blank">長文脈LLMの不可能性三角形とは？</a> — AI-Papers（日本語）、「3つの壁は越えられない」という証明の解説</li>
+    <li><a href="https://openai.com/ja-JP/index/why-language-models-hallucinate/" target="_blank">言語モデルでハルシネーションが起きる理由</a> — OpenAI公式（日本語）</li>
+    <li><a href="https://zenn.dev/lluminai_tech/articles/c2558295190551" target="_blank">長文コンテキストをLLMが読んでくれない — 実践対策</a> — Zenn（日本語）、記憶の壁への対策まとめ</li>
+    <li><a href="https://dev.to/gabrielanhaia/lost-in-the-middle-is-still-real-in-2026-even-on-1m-token-models-2ehj" target="_blank">Lost-in-the-Middle Is Still Real in 2026</a> — Dev.to、2026年時点でも解決していないという報告</li>
+    <li><a href="https://arxiv.org/abs/2605.05066" target="_blank">The Impossibility Triangle of Long-Context Modeling（論文）</a> — 不可能性を数学的に証明した学術論文（英語）</li>
+    <li><a href="https://arxiv.org/abs/2403.06963v3" target="_blank">The pitfalls of next-token prediction（論文）</a> — 次の言葉予測の落とし穴を分析した学術論文（英語）</li>
+    <li><a href="https://a-x.inc/blog/llm-attention/" target="_blank">LLMのアテンションとは？</a> — 株式会社AX（日本語）、注意の仕組みを詳しく解説</li>
+    <li><a href="https://towardsai.net/p/machine-learning/the-context-window-paradox-engineering-trade-offs-in-modern-llm-architecture" target="_blank">The Context Window Paradox</a> — Towards AI（英語）、記憶の壁のトレードオフ分析</li>
+  </ul>
+</div>
+
+<div style="height:var(--sp-6);"></div>
+</div><!-- /container -->
+
+<!-- PDF BUTTON -->
+<button id="pdf-btn" onclick="window.print()">
+  <i data-lucide="download" style="width:16px;height:16px;"></i>
+  PDFで保存
+</button>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

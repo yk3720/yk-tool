@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>インド占星術（ジョーティシュ） - Techmap</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --techmap-primary: #1e3a5f;
+      --techmap-accent: #0ea5e9;
+      --techmap-gradient: linear-gradient(135deg, #1e3a5f 0%, #0ea5e9 100%);
+    }
+
+    body {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    }
+
+    .header-gradient {
+      background: var(--techmap-gradient);
+    }
+
+    .section-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .term-explain {
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      border-left: 4px solid #0ea5e9;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .term-word {
+      color: #0369a1;
+    }
+
+    .badge-essential {
+      background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-recommended {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .badge-optional {
+      background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .toc {
+      position: fixed;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 50;
+      min-width: 160px;
+    }
+    @media (max-width: 1280px) {
+      .toc { display: none; }
+    }
+
+    .pdf-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--techmap-gradient);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+      transition: opacity 0.15s, transform 0.15s;
+      z-index: 100;
+    }
+    .pdf-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    @media print {
+      .toc, .pdf-btn { display: none !important; }
+      body { background: white; }
+      .section-card {
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
+        break-inside: avoid;
+      }
+      .header-gradient {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* 12ハウスのグリッド図 */
+    .house-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+      background: #e2e8f0;
+      border: 2px solid #cbd5e1;
+      width: 300px;
+      height: 300px;
+      margin: 2rem auto;
+    }
+    .house-cell {
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #64748b;
+    }
+    .house-cell.empty {
+      background: #f8fafc;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <nav class="toc">
+    <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">目次</p>
+    <ul class="space-y-1 text-sm">
+      <li><a href="#summary" class="text-gray-600 hover:text-sky-600">概要</a></li>
+      <li><a href="#origin" class="text-gray-600 hover:text-sky-600">誕生の背景</a></li>
+      <li><a href="#basics" class="text-gray-600 hover:text-sky-600">まず理解する3つ</a></li>
+      <li><a href="#data-structure" class="text-gray-600 hover:text-sky-600">データ構造：メモリマップ</a></li>
+      <li><a href="#architecture" class="text-gray-600 hover:text-sky-600">時系列制御と座標補正</a></li>
+      <li><a href="#pitfalls" class="text-gray-600 hover:text-sky-600">よくある落とし穴</a></li>
+      <li><a href="#glossary" class="text-gray-600 hover:text-sky-600">専門用語集</a></li>
+      <li><a href="#related" class="text-gray-600 hover:text-sky-600">次に学ぶと良いもの</a></li>
+      <li><a href="#references" class="text-gray-600 hover:text-sky-600">参考文献</a></li>
+    </ul>
+  </nav>
+
+  <header class="header-gradient text-white py-10">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium tracking-wide">Techmap</span>
+        <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-medium">思想・天文学</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold">インド占星術（ジョーティシュ）</h1>
+      <p class="mt-2 text-lg opacity-90">天文学的アルゴリズムに基づく「人生のデバッグツール」</p>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-8">
+
+    <section id="summary" class="section-card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="map" class="w-6 h-6 text-sky-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">ひとことで言えば</h2>
+          <p class="text-gray-500">まずここだけ押さえる</p>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-sky-50 to-blue-50 border border-sky-200 rounded-xl p-6">
+        <p class="text-xl font-bold text-sky-900">インド占星術とは、天体の精密な座標計算に基づき、個人の「カルマ（因果）」という変数の出力タイミングを予測する動的システムである。</p>
+        <p class="mt-3 text-gray-700">数千年前、ヴェーダ（Veda：古代の知識体系）に基づく祭儀（Yajna：ヤジュニャ、システム最適化プロセス）を「いつ」行うべきかという高精度なタイミング決定（Muhurta：ムフルタ）のために誕生しました。現在は、過去の行為の蓄積（カルマ）がいつどのような結果として出力されるかを可視化する「人生のロードマップ」として活用されています。</p>
+      </div>
+    </section>
+
+    <section id="origin" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="history" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">なぜ生まれたのか</h2>
+          <p class="text-gray-500">歴史的背景と解決したかった課題</p>
+        </div>
+      </div>
+      <div class="space-y-4 text-gray-700">
+        <p>インド占星術（Jyotish：ジョーティシュ）は「光の科学」を意味し、古代インドの聖典ヴェーダの補助学の一つとして発展しました。</p>
+        <ul class="list-disc list-inside space-y-2 ml-4">
+          <li><strong>儀式のタイミング制御</strong>: 神聖な儀式を最大限に効果的な「時」に執行するための、高精度なカレンダー計算が必要だった。</li>
+          <li><strong>因果応報のモデル化</strong>: 人生で起きる不条理や幸運を、過去の行動（カルマ）の「出力」として論理的に体系化。</li>
+          <li><strong>リスク管理</strong>: 地球の歳差運動（約72年で1度ずれる時定数）まで考慮した「再現性のある天体データ」を用いて、未来を予測しようとした。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="basics" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center">
+          <i data-lucide="star" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">まず理解する3つ</h2>
+          <p class="text-gray-500">コアとなる設計思想</p>
+        </div>
+      </div>
+      <div class="grid gap-4">
+        <div class="flex items-start gap-4 p-4 bg-gradient-to-r from-red-50 to-red-100 rounded-xl border-l-4 border-red-500">
+          <div class="w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0">1</div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-lg text-gray-800">サイデリアル座標系</span>
+              <span class="badge-essential">必須</span>
+            </div>
+            <p class="text-gray-600">「実際の恒星の位置」を基準にする。歳差運動によるズレをアヤナムシャというオフセット値で補正する「物理的な宇宙」に忠実なモデル。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border-l-4 border-blue-500">
+          <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0">2</div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-lg text-gray-800">ダシャー（ジョブスケジューラ）</span>
+              <span class="badge-recommended">推奨</span>
+            </div>
+            <p class="text-gray-600">人生のどの時期にどの惑星の「プログラム」が実行されるかを規定する。時期による運勢の変動を動的に予測できる。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border-l-4 border-emerald-500">
+          <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0">3</div>
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="font-bold text-lg text-gray-800">ヴァルガ（高解像度分析）</span>
+              <span class="badge-optional">参考</span>
+            </div>
+            <p class="text-gray-600">1つの星座をさらに細分化して作る高次元チャート。特定領域（職業、才能、結婚等）を深掘りするための「顕微鏡」のような仕組み。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="data-structure" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="database" class="w-6 h-6 text-indigo-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">データ構造：メモリマップ</h2>
+          <p class="text-gray-500">バースチャートを配列として理解する</p>
+        </div>
+      </div>
+      <div class="text-gray-700 mb-6">
+        <p>インド占星術の基本データ構造（バースチャート）は、360度の黄道を12個の「ハウス（Bhava：バーヴァ）」に等分割した**12セルの固定長配列**とみなせます。</p>
+      </div>
+
+      <div class="flex flex-col md:flex-row items-center justify-around bg-gray-50 p-6 rounded-xl border border-gray-200">
+        <div class="text-center">
+          <p class="text-xs text-gray-500 mb-2">南インド式チャート形式</p>
+          <div class="house-grid">
+            <div class="house-cell">12</div><div class="house-cell">1</div><div class="house-cell">2</div><div class="house-cell">3</div>
+            <div class="house-cell">11</div><div class="house-cell empty"></div><div class="house-cell empty"></div><div class="house-cell">4</div>
+            <div class="house-cell">10</div><div class="house-cell empty"></div><div class="house-cell empty"></div><div class="house-cell">5</div>
+            <div class="house-cell">9</div><div class="house-cell">8</div><div class="house-cell">7</div><div class="house-cell">6</div>
+          </div>
+        </div>
+        <div class="max-w-xs space-y-4 text-sm mt-6 md:mt-0">
+          <div class="bg-white p-3 rounded shadow-sm border-l-4 border-indigo-500">
+            <span class="font-bold">セル（ハウス）</span>: 
+            メモリのアドレス空間。12個それぞれに「身体」「富」「才能」などの物理的な属性が割り当てられている。
+          </div>
+          <div class="bg-white p-3 rounded shadow-sm border-l-4 border-amber-500">
+            <span class="font-bold">惑星（Graha）</span>: 
+            セル内に配置される「オブジェクト」。各惑星は特定の性質（ポインタ）を持ち、配置されたセルの属性を操作する。
+          </div>
+          <div class="bg-white p-3 rounded shadow-sm border-l-4 border-emerald-500">
+            <span class="font-bold">カルマ</span>: 
+            イベントキュー。過去の行動（データ入力）に基づき、「いつ」「どのセル」からイベントが発生するかを定義する。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="cpu" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">主要概念と構造</h2>
+          <p class="text-gray-500">エンジニア視点でのマッピング</p>
+        </div>
+      </div>
+
+      <div class="term-explain">
+        <div class="flex items-start gap-4">
+          <i data-lucide="lightbulb" class="w-8 h-8 text-sky-500 flex-shrink-0"></i>
+          <div>
+            <div class="term-word text-xl font-bold">「アヤナムシャ」とは？</div>
+            <div class="text-lg mt-2">
+              要は<span class="font-bold text-sky-700">「座標系のオフセット補正値」</span>。地球の歳差運動（約72年に1度、春分点が1度移動する物理現象）による、季節（トロピカル）と実際の恒星（サイデリアル）のズレを解消するための定数です。
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-sky-50 to-blue-50 p-6 rounded-xl border border-sky-200 my-6">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="cpu" class="w-6 h-6 text-sky-600"></i>
+          <span class="font-bold text-sky-800">制御で考えると：ダシャーは「ジョブスケジューラ」</span>
+        </div>
+        <div class="space-y-3 text-gray-700">
+          <p>「どの時期に何が起きるか」を管理するダシャーシステムは、OSのジョブスケジューラと同じ階層構造を持ちます。</p>
+          <div class="grid grid-cols-2 gap-4 my-4">
+            <div class="bg-sky-100 p-3 rounded-lg text-center">
+              <i data-lucide="list-checks" class="w-8 h-8 text-sky-600 mx-auto mb-2"></i>
+              <p class="font-bold text-sky-800">OSのスケジューラ</p>
+              <p class="text-sm text-gray-600 mt-1">タスクの実行順序を管理</p>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-lg text-center">
+              <i data-lucide="clock" class="w-8 h-8 text-blue-600 mx-auto mb-2"></i>
+              <p class="font-bold text-blue-800">ダシャーシステム</p>
+              <p class="text-sm text-gray-600 mt-1">支配惑星のタイムラインを管理</p>
+            </div>
+          </div>
+          <ul class="list-disc list-inside space-y-1 ml-2">
+            <li><strong>メインプロセス（Mahadasha）</strong>: 最優先。数年〜20年単位の大きなテーマ。</li>
+            <li><strong>サブルーチン（Antardasha）</strong>: 第2優先。メインプロセスの影響下での具体的な変動。</li>
+            <li><strong>優先度制御</strong>: 特定の惑星（ラグナの支配星など）は高い「実行権限」を持ち、他の影響をオーバーライドします。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-6 rounded-xl border border-amber-200 my-6">
+        <div class="flex items-center gap-2 mb-3">
+          <i data-lucide="crosshair" class="w-6 h-6 text-amber-600"></i>
+          <span class="font-bold text-amber-800">天文学で考えると：座標系のキャリブレーション</span>
+        </div>
+        <div class="space-y-3 text-gray-700">
+          <p>インド占星術がサイデリアル（Sidereal）式を採用しているのは、センサーの値を「生の物理データ（恒星の位置）」に戻すためです。</p>
+          <p class="text-sm bg-amber-100 p-3 rounded-lg">
+            <strong>ポイント：</strong>約2000年前は両者にズレはありませんでしたが、地球の自転軸の首振り運動（歳差）により、現在は約24度ずれています。この「原点ずれ」を補正しないと、正確な座標（惑星位置）を取得できません。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="pitfalls" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="triangle-alert" class="w-6 h-6 text-red-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">初心者がはまりやすい落とし穴</h2>
+          <p class="text-gray-500">よくある誤解と回避策</p>
+        </div>
+      </div>
+      <div class="space-y-4 text-gray-700">
+        <div class="flex items-start gap-3">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 mt-1"></i>
+          <div>
+            <div class="font-bold text-gray-800">星座（サイン）が違うことに混乱する</div>
+            <p class="text-sm text-gray-600">西洋占星術で「牡羊座」の人が、インド占星術では「魚座」になることがよくあります。座標系の違い（オフセットの有無）を認識しましょう。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 mt-1"></i>
+          <div>
+            <div class="font-bold text-gray-800">完全な「決定論」だと思い込む</div>
+            <p class="text-sm text-gray-600">「天候予測」と同じです。嵐が来るとわかれば、自由意志（Kriyamana Karma）による「補強」や「回避」というパッチを適用することが可能です。</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <i data-lucide="x-circle" class="w-5 h-5 text-red-500 mt-1"></i>
+          <div>
+            <div class="font-bold text-gray-800">凶星を過剰に怖がる</div>
+            <p class="text-sm text-gray-600">土星や火星などは「エラーチェック」や「負荷テスト」の担当。これらが実行されることで、システム全体の堅牢性が向上します。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="glossary" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="book" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">専門用語集</h2>
+          <p class="text-gray-500">覚えておくべき5語</p>
+        </div>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <div class="font-bold text-sky-800">ラグナ (Lagna / Ascendant)</div>
+          <p class="text-sm text-gray-600">誕生瞬間に東の地平線が指していた星座。システムの「原点」であり、自分自身を指す最重要アドレス。</p>
+        </div>
+        <hr class="border-gray-100">
+        <div>
+          <div class="font-bold text-sky-800">ナクシャトラ (Nakshatra)</div>
+          <p class="text-sm text-gray-600">月の軌道を27分割した区分。13.3度単位の高解像度なインデックス。心理的な属性データの格納場所。</p>
+        </div>
+        <hr class="border-gray-100">
+        <div>
+          <div class="font-bold text-sky-800">アヤナムシャ (Ayanamsa)</div>
+          <p class="text-sm text-gray-600">歳差運動によるズレの補正値。トロピカル（季節）からサイデリアル（恒星）への変換オフセット。</p>
+        </div>
+        <hr class="border-gray-100">
+        <div>
+          <div class="font-bold text-sky-800">ダシャー (Dasha)</div>
+          <p class="text-sm text-gray-600">支配惑星が入れ替わるタイムライン。どの時期にどの惑星のコードが実行されるかを示すスケジューラ。</p>
+        </div>
+        <hr class="border-gray-100">
+        <div>
+          <div class="font-bold text-sky-800">ヴァルガ (Varga)</div>
+          <p class="text-sm text-gray-600">黄道をn分割して作成する派生図。特定の領域（仕事、結婚等）をドリルダウンして分析する手法。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="related" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="compass" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">次に学ぶと良いもの</h2>
+          <p class="text-gray-500">この知識の先にあるトピック</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="flex items-start gap-3 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">アーユルヴェーダ</div>
+            <div class="text-sm text-gray-600 mt-1">天体の性質を用いた、生体システムの保守・最適化（体質診断）。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-sky-50 rounded-xl border border-sky-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-sky-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">ヴァーストゥ</div>
+            <div class="text-sm text-gray-600 mt-1">天体エネルギーを空間設計（UXデザイン）に適用する思想。</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200">
+          <i data-lucide="arrow-right-circle" class="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <div class="font-bold text-gray-800">Jagannatha Hora</div>
+            <div class="text-sm text-gray-600 mt-1">MIT卒エンジニアが開発した、デバッガとして使える計算ソフト。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="references" class="section-card">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+          <i data-lucide="book-open" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-800">参考文献・公式資料</h2>
+          <p class="text-gray-500">さらに詳しく知りたい場合はこちら</p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <a href="http://www.vedicastrologer.org/jh/" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">Jagannatha Hora (Software)</div>
+            <div class="text-xs text-gray-500">エンジニアに最適な高機能計算ソフト。</div>
+          </div>
+        </a>
+        <a href="https://en.wikipedia.org/wiki/Hindu_astrology" target="_blank" rel="noopener" class="ref-link">
+          <i data-lucide="external-link" class="w-4 h-4 flex-shrink-0"></i>
+          <div>
+            <div class="font-medium">Hindu astrology (Wikipedia)</div>
+            <div class="text-xs text-gray-500">歴史と天文学的定義。</div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <button class="pdf-btn" onclick="window.print()">
+    <i data-lucide="download" class="w-4 h-4"></i>
+    PDFで保存
+  </button>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

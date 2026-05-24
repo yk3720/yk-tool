@@ -6,13 +6,15 @@
 
 ## 図モダリティ（YK 横断）
 
+**方式選択の SSOT:** [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot) · 実装手順は [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md)（**`creating-mermaid-yk` は使わない**）
+
 本アプリは **表 JSON → Mermaid DSL → ブラウザ描画**。レイアウトは **Mermaid エンジン**が担当（React Flow 版の Level/行座標とは異なる見え方になる — 比較の目的）。
 
 | やりたいこと | 選ぶもの | SSOT |
 |--------------|----------|------|
 | 表 · CSV · Mermaid プレビュー（**比較**） | **本アプリ** | 本 README · `lib/flowchart/toMermaid.ts` |
-| 表 · PNG/SVG（**React Flow レイアウト**） | **flowchart-web-reactflow** | [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md) |
-| テキスト版管理 · `.mmd` | **Mermaid DSL** | [`MERMAID_RULES.md`](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md) §1.5 |
+| 表 · PNG/SVG（**React Flow レイアウト**） | **flowchart-web-reactflow** | [`README` §図モダリティ](c:/yk-tool/flowchart-web-reactflow/README.md#図モダリティyk-横断) · [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md) |
+| テキスト版管理 · `.mmd` | **Mermaid DSL** | [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot) |
 
 **正本:** Excel / ブラウザ内の **8列表**（ADR-010）  
 **下書き:** `localStorage` キー `flowchart-web:draft-v1`（reactflow 版と互換）

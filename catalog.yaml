@@ -15,13 +15,23 @@ tools:
     changelog: CHANGELOG.md
     notes: 図解管理 UI 含む。講座 ADS リポとは切り離し済み
 
-  - id: flowchart-web
-    name: Flowchart Web
-    path: flowchart-web/
+  - id: flowchart-web-reactflow
+    name: Flowchart Web (React Flow)
+    path: flowchart-web-reactflow/
     kind: next-app
     status: experimental
     version_ref: package.json
     changelog: CHANGELOG.md
+    notes: 旧 id flowchart-web。比較版 flowchart-web-mermaid と ADR-010 二系統
+
+  - id: flowchart-web-mermaid
+    name: Flowchart Web (Mermaid)
+    path: flowchart-web-mermaid/
+    kind: next-app
+    status: experimental
+    version_ref: package.json
+    changelog: CHANGELOG.md
+    notes: ADR-010 比較用 · 表 → Mermaid プレビュー · ポート 3001
 
   - id: playwright-test
     name: Playwright E2E
@@ -30,7 +40,7 @@ tools:
     status: experimental
     version_ref: package.json
     changelog: CHANGELOG.md
-    notes: ui-kit / flowchart-web 向け E2E
+    notes: ui-kit / flowchart-web-reactflow 向け E2E
 
   - id: commit-report-tool
     name: Commit Report Tool

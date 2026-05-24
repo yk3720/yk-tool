@@ -8,7 +8,7 @@ YK ワークスペースの **生成物・アプリ** 用リポジトリ。
 | `apps/` | 図解以外の小さなアプリ・ツール（例: `commit-report-tool`） |
 | `catalog.yaml` | ツール台帳（パス · status · 雛形） |
 | `workspace-ui-kit/` | Next.js ワークスペース（図解管理 UI 含む） |
-| `flowchart-web/` | フローチャート Web |
+| `flowchart-web-reactflow/` | フローチャート Web（React Flow） |
 | `playwright-test/` | E2E テスト |
 
 ## 関連リポジトリ

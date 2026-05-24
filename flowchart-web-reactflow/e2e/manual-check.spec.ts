@@ -17,13 +17,34 @@ function headerRegenerate(page: import("@playwright/test").Page) {
   return page.locator("header").getByRole("button", { name: "再生成" });
 }
 
+/** Phase 3: モジュール選択後にサンプル読込・再生成 */
+async function openModuleWithPreview(
+  page: import("@playwright/test").Page,
+) {
+  await page.getByRole("button", { name: "供給動作" }).click();
+  const nodeCount = await page.locator(".react-flow__node").count();
+  if (nodeCount === 0) {
+    await page.locator("header select").first().selectOption("basic");
+    await headerRegenerate(page).click();
+    await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
+  }
+}
+
 test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Flowchart Web" })).toBeVisible();
+    await openModuleWithPreview(page);
     await expect(page.locator(".react-flow__node")).not.toHaveCount(0, {
       timeout: 15_000,
     });
+  });
+
+  test("Phase 3: 3ペイン（ナビ・表・プレビュー）", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "モジュール" })).toBeVisible();
+    await expect(page.getByText("装置:")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
   });
 
   test("AC-8: 1画面で表とプレビュー", async ({ page }) => {
@@ -100,7 +121,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(page.getByText(/生成完了/)).toBeVisible();
 
     const downloadPromise = page.waitForEvent("download", { timeout: 15_000 });
-    await page.getByRole("button", { name: "画像を保存" }).click();
+    await page.getByRole("button", { name: "PNG" }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.png$/i);
   });
@@ -139,7 +160,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await textCell.blur();
     await expect(page.getByText("プレビューは古い")).toBeVisible();
 
-    const pngBtn = page.getByRole("button", { name: "画像を保存" });
+    const pngBtn = page.getByRole("button", { name: "PNG" });
     await expect(pngBtn).toBeDisabled();
   });
 

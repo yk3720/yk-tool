@@ -1,5 +1,5 @@
-import { FlowchartEditor } from "@/components/flowchart/FlowchartEditor";
+import { FlowchartWorkspace } from "@/components/flowchart/FlowchartWorkspace";
 
 export default function HomePage() {
-  return <FlowchartEditor />;
+  return <FlowchartWorkspace />;
 }

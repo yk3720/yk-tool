@@ -14,3 +14,4 @@
 - ADR-008: P0 UX（stale PNG ブロック、タブ同期、エラー時プレビュー維持）
 - ADR-009: 調査項目一括（CSV・下書き・雛形・テーマ・SVG・列ヘルプ等）
 - ADR-010: 二系統比較（React Flow / Mermaid）、`flowchart-web-reactflow` リネーム
+- ADR-011: Phase 3 — 3 ペイン（ユニット→モジュールナビ｜表｜図）、モジュール単位の退避・stale

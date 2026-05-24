@@ -1,7 +1,15 @@
 "use client";
 
 import type { Edge, Node } from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import sampleBasic from "@/fixtures/sample-basic.json";
 import sampleSimpleYes from "@/fixtures/sample-simple-yes.json";
 import templateLinear from "@/fixtures/template-linear.json";
@@ -42,28 +50,145 @@ const SAMPLES: Record<string, FlowchartDocument> = {
 };
 
 type InputMode = "table" | "json";
+type PaneView = "table" | "canvas";
 
-export function FlowchartEditor() {
-  const [doc, setDoc] = useState<FlowchartDocument>(SAMPLES.basic);
-  const [jsonText, setJsonText] = useState(() =>
-    serializeDocument(SAMPLES.basic),
+export type FlowchartEditorSnapshot = {
+  jsonText: string;
+  committedJson: string;
+  nodes: Node<FlowNodeData>[];
+  edges: Edge[];
+  themeId: ThemeId;
+  layoutPreset: LayoutPresetId;
+};
+
+export type FlowchartEditorHandle = {
+  getSnapshot: () => FlowchartEditorSnapshot;
+};
+
+export type FlowchartEditorProps = {
+  deviceName?: string;
+  moduleId?: string | null;
+  moduleLabel?: string;
+  initialSnapshot?: FlowchartEditorSnapshot | null;
+  workspaceMode?: boolean;
+  onSnapshotPersist?: () => void;
+};
+
+const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
+const EMPTY_TABLE_MESSAGE =
+  "Excel から取込むか、表を入力してください";
+
+function resolveInitialState(
+  props: FlowchartEditorProps,
+): {
+  doc: FlowchartDocument;
+  jsonText: string;
+  committedJson: string;
+  nodes: Node<FlowNodeData>[];
+  edges: Edge[];
+  themeId: ThemeId;
+  layoutPreset: LayoutPresetId;
+} {
+  const snap = props.initialSnapshot;
+  if (snap) {
+    const { doc: parsed } = parseFlowchartDocument(snap.jsonText);
+    return {
+      doc: parsed ?? (SAMPLES.templateStarter as FlowchartDocument),
+      jsonText: snap.jsonText,
+      committedJson: snap.committedJson,
+      nodes: snap.nodes,
+      edges: snap.edges,
+      themeId: snap.themeId,
+      layoutPreset: snap.layoutPreset,
+    };
+  }
+  if (props.workspaceMode && props.moduleId) {
+    const starter = SAMPLES.templateStarter as FlowchartDocument;
+    const text = serializeDocument(starter);
+    return {
+      doc: starter,
+      jsonText: text,
+      committedJson: "",
+      nodes: [],
+      edges: [],
+      themeId: resolveThemeId(starter.themeId),
+      layoutPreset: layoutPresetFromConfig(starter.layout),
+    };
+  }
+  const basic = SAMPLES.basic as FlowchartDocument;
+  const text = serializeDocument(basic);
+  return {
+    doc: basic,
+    jsonText: text,
+    committedJson: text,
+    nodes: [],
+    edges: [],
+    themeId: resolveThemeId(basic.themeId),
+    layoutPreset: layoutPresetFromConfig(basic.layout),
+  };
+}
+
+export const FlowchartEditor = forwardRef<
+  FlowchartEditorHandle,
+  FlowchartEditorProps
+>(function FlowchartEditor(props, ref) {
+  const {
+    deviceName,
+    moduleId = null,
+    moduleLabel,
+    initialSnapshot,
+    workspaceMode = false,
+    onSnapshotPersist,
+  } = props;
+
+  const initial = useMemo(
+    () => resolveInitialState(props),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- key remount per module
+    [moduleId, initialSnapshot],
   );
-  const [committedJson, setCommittedJson] = useState(jsonText);
+
+  const [doc, setDoc] = useState<FlowchartDocument>(initial.doc);
+  const [jsonText, setJsonText] = useState(initial.jsonText);
+  const [committedJson, setCommittedJson] = useState(initial.committedJson);
   const [inputMode, setInputMode] = useState<InputMode>("table");
+  const [paneView, setPaneView] = useState<PaneView>("table");
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [genErrors, setGenErrors] = useState<string[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [nodes, setNodes] = useState<Node<FlowNodeData>[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
-  const [status, setStatus] = useState("準備完了");
-  const [themeId, setThemeId] = useState<ThemeId>("standard");
-  const [layoutPreset, setLayoutPreset] = useState<LayoutPresetId>("medium");
+  const [nodes, setNodes] = useState<Node<FlowNodeData>[]>(initial.nodes);
+  const [edges, setEdges] = useState<Edge[]>(initial.edges);
+  const [status, setStatus] = useState(
+    workspaceMode && moduleId && !initialSnapshot
+      ? "表を入力するかサンプルを読み込んでください"
+      : "準備完了",
+  );
+  const [themeId, setThemeId] = useState<ThemeId>(initial.themeId);
+  const [layoutPreset, setLayoutPreset] = useState<LayoutPresetId>(
+    initial.layoutPreset,
+  );
   const canvasRef = useRef<FlowCanvasHandle>(null);
   const tableEditorRef = useRef<FlowTableEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const headerRegenerateRef = useRef<HTMLButtonElement>(null);
 
   const isStale = jsonText !== committedJson;
+  const moduleSelected = !workspaceMode || moduleId !== null;
+  const hasPreview = nodes.length > 0;
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getSnapshot: () => ({
+        jsonText,
+        committedJson,
+        nodes,
+        edges,
+        themeId,
+        layoutPreset,
+      }),
+    }),
+    [jsonText, committedJson, nodes, edges, themeId, layoutPreset],
+  );
 
   const errorRows = useMemo(
     () => errorRowIndices([...parseErrors, ...genErrors], doc.table),
@@ -118,12 +243,19 @@ export function FlowchartEditor() {
       setStatus(
         `生成完了 — ノード ${result.placed.length} / エッジ ${result.edges.length}`,
       );
+      onSnapshotPersist?.();
       return true;
     },
-    [refreshWarnings, themeId],
+    [refreshWarnings, themeId, onSnapshotPersist],
   );
 
   useEffect(() => {
+    if (workspaceMode) {
+      if (moduleId && initialSnapshot) {
+        refreshWarnings(initial.doc.table);
+      }
+      return;
+    }
     const draft = loadDraft();
     if (draft) {
       const { doc: parsed, errors } = parseFlowchartDocument(draft);
@@ -139,12 +271,13 @@ export function FlowchartEditor() {
       }
     }
     runGenerate(serializeDocument(SAMPLES.basic));
-  }, [runGenerate, refreshWarnings]);
+  }, [runGenerate, refreshWarnings, workspaceMode, moduleId, initialSnapshot, initial.doc.table]);
 
   useEffect(() => {
+    if (workspaceMode) return;
     const t = window.setTimeout(() => saveDraft(jsonText), 800);
     return () => window.clearTimeout(t);
-  }, [jsonText]);
+  }, [jsonText, workspaceMode]);
 
   const handleRegenerate = () => {
     if (inputMode === "json") {
@@ -323,19 +456,32 @@ export function FlowchartEditor() {
   const allErrors = [...parseErrors, ...genErrors];
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-3">
-        <h1 className="text-lg font-semibold tracking-tight">Flowchart Web</h1>
-        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-          実用版
-        </span>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg font-semibold tracking-tight">Flowchart Web</h1>
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+              実用版
+            </span>
+          </div>
+          {deviceName ? (
+            <p className="text-sm text-slate-600">
+              装置: <span className="font-medium text-slate-800">{deviceName}</span>
+              {moduleLabel ? (
+                <span className="text-slate-500"> · {moduleLabel}</span>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             ref={headerRegenerateRef}
             type="button"
             onClick={handleRegenerate}
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            disabled={!moduleSelected}
+            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             再生成
           </button>
@@ -410,8 +556,13 @@ export function FlowchartEditor() {
           <button
             type="button"
             onClick={handleClearDraft}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50"
-            title="ブラウザに保存した下書きを削除"
+            disabled={workspaceMode}
+            className="rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+            title={
+              workspaceMode
+                ? "モジュール単位の下書きは切替時に自動保存されます"
+                : "ブラウザに保存した下書きを削除"
+            }
           >
             下書き削除
           </button>
@@ -439,7 +590,9 @@ export function FlowchartEditor() {
             </span>
           )}
           <span className="text-slate-600">{status}</span>
-          <span className="ml-2 text-xs text-slate-400">（下書き自動保存）</span>
+          {!workspaceMode ? (
+            <span className="ml-2 text-xs text-slate-400">（下書き自動保存）</span>
+          ) : null}
         </p>
       </header>
 
@@ -483,11 +636,53 @@ export function FlowchartEditor() {
         </div>
       )}
 
+      {workspaceMode ? (
+        <div className="flex border-b border-slate-200 px-4 py-2 lg:hidden">
+          <div
+            className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
+            role="tablist"
+            aria-label="表とプレビュー"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={paneView === "table"}
+              onClick={() => setPaneView("table")}
+              className={`rounded px-3 py-1 font-medium ${
+                paneView === "table"
+                  ? "bg-slate-800 text-white"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              表
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={paneView === "canvas"}
+              onClick={() => setPaneView("canvas")}
+              className={`rounded px-3 py-1 font-medium ${
+                paneView === "canvas"
+                  ? "bg-slate-800 text-white"
+                  : "text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              図
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
-        <section className="flex min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4">
+        <section
+          className={`min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4 ${
+            workspaceMode && paneView === "canvas" ? "hidden lg:flex" : "flex"
+          }`}
+        >
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-medium text-slate-700">表</h2>
-            <div
+            {moduleSelected ? (
+              <div
               className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
               role="tablist"
               aria-label="入力モード"
@@ -519,9 +714,14 @@ export function FlowchartEditor() {
                 JSON
               </button>
             </div>
+            ) : null}
           </div>
 
-          {inputMode === "table" ? (
+          {!moduleSelected ? (
+            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+              {EMPTY_MODULE_MESSAGE}
+            </div>
+          ) : inputMode === "table" ? (
             <>
               <CsvPastePanel onApply={handleCsvApply} />
               <FlowTableEditor
@@ -542,14 +742,24 @@ export function FlowchartEditor() {
           )}
         </section>
 
-        <section className="flex min-h-[320px] flex-col gap-2 p-4">
+        <section
+          className={`min-h-[320px] flex-col gap-2 p-4 ${
+            workspaceMode && paneView === "table" ? "hidden lg:flex" : "flex"
+          }`}
+        >
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
-            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-              閲覧専用（表を編集 → 再生成）
-            </span>
+            {moduleSelected ? (
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                閲覧専用（表を編集 → 再生成）
+              </span>
+            ) : null}
           </div>
-          {nodes.length > 0 ? (
+          {!moduleSelected ? (
+            <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
+              {EMPTY_MODULE_MESSAGE}
+            </div>
+          ) : hasPreview ? (
             <div
               className={`relative min-h-[420px] flex-1 ${
                 isStale ? "rounded-lg ring-2 ring-amber-400 ring-offset-1" : ""
@@ -579,11 +789,13 @@ export function FlowchartEditor() {
             </div>
           ) : (
             <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
-              再生成するとフローチャートが表示されます
+              {EMPTY_TABLE_MESSAGE}
             </div>
           )}
         </section>
       </main>
     </div>
   );
-}
+});
+
+FlowchartEditor.displayName = "FlowchartEditor";

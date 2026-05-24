@@ -14,7 +14,7 @@ alwaysApply: false
 1. `c:/yk-skill/rule/RULE_INDEX.md` — 索引（迷ったら最初）
 2. `c:/yk-skill/rule/20_web_workspace/WORKSPACE_RULES.md` — キット横断
 3. **ドメイン** — パスに `diagram-manager` が含まれるとき: `20_web_workspace/DIAGRAM_MANAGER_WORKSPACE_RULES.md`
-4. **スタック** — `30_web_stack/NEXTJS_RULES.md` · `SHADCN_UI_RULES.md` · `TAILWINDCSS_RULES.md`（**`GAS_REPORT_DESIGN` は読まない** — ui-kit は shadcn トークンが SSOT）
+4. **スタック** — `30_web_stack/REACT_RULES.md` · `NEXTJS_RULES.md` §5 · `SHADCN_UI_RULES.md` · `TAILWINDCSS_RULES.md`（**`GAS_REPORT_DESIGN` は読まない** — ui-kit は shadcn トークンが SSOT）
 5. **UI 変更** — 同梱スキル `designing-workspace-ui`（`CLAUDE.md` 参照）
 
 - 企画メモ: `yk-memo`（参考のみ · Governance 段階 7）

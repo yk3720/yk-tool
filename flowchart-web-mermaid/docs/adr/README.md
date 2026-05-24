@@ -2,7 +2,7 @@
 
 企画フォルダの `意思決定記録(ADR).md` と同期。
 
-正本: `yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/意思決定記録(ADR).md`
+正本: `yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/04_decisions/意思決定記録(ADR).md`
 
 - ADR-001: MVP 入力は JSON/fixture のみ
 - ADR-002: バリデーションエラー時は生成停止

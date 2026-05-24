@@ -2,7 +2,7 @@
 
 表データからフローチャートを自動生成する Web アプリ（**React Flow 描画** · `yk-tool` リポジトリ内）。
 
-**旧ディレクトリ名:** `flowchart-web`（2026-05-23 リネーム · [ADR-010](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/意思決定記録(ADR).md)）
+**旧ディレクトリ名:** `flowchart-web`（2026-05-23 リネーム · [ADR-010](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/04_decisions/意思決定記録(ADR).md)）
 
 ## 図モダリティ（YK 横断）
 

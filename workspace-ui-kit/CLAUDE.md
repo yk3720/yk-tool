@@ -45,7 +45,9 @@ IMPORTANT: 以下を守ること。
 
 ## 外部ルール（yk-skill/rule）
 
-複数ワークスペースを載せるときの共通規範は **`c:/yk-skill/rule/20_web_workspace/WORKSPACE_RULES.md`**。図解管理（`/diagram-manager`）は続けて **`20_web_workspace/DIAGRAM_MANAGER_WORKSPACE_RULES.md`**。索引は **`c:/yk-skill/rule/RULE_INDEX.md`**（常に最初）。
+複数ワークスペースを載せるときの共通規範は **`c:/yk-skill/rule/20_web_workspace/WORKSPACE_RULES.md`**。索引は **`c:/yk-skill/rule/RULE_INDEX.md`**（常に最初）。
+
+**図解管理**は本リポから分離済み → **`c:/yk-tool/diagram-manager-web/`**（ルールは **`DIAGRAM_MANAGER_WORKSPACE_RULES.md`**）。`/diagram-manager` は移行案内のみ。
 
 **Cursor:** `app/` · `components/` · `lib/` 内の TS/TSX 編集時は [`.cursor/rules/workspace-dev-entry.mdc`](.cursor/rules/workspace-dev-entry.mdc) が自動適用される（`5.Python` の `python-dev-entry.mdc` と同型）。
 

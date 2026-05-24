@@ -7,7 +7,8 @@ YK ワークスペースの **生成物・アプリ** 用リポジトリ。
 | `publish/` | 図解 HTML の物理正本（SSOT） |
 | `apps/` | 図解以外の小さなアプリ・ツール（例: `commit-report-tool`） |
 | `catalog.yaml` | ツール台帳（パス · status · 雛形） |
-| `workspace-ui-kit/` | Next.js ワークスペース（図解管理 UI 含む） |
+| `diagram-manager-web/` | 図解管理ワークスペース（surge 図解の目次・検索） |
+| `workspace-ui-kit/` | Next.js ワークスペースひな形（採用管理サンプル） |
 | `flowchart-web-reactflow/` | フローチャート Web（React Flow） |
 | `playwright-test/` | E2E テスト |
 

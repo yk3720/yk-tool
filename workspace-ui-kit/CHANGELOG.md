@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 図解管理ドメインを `diagram-manager-web/` へ切り出し（`/diagram-manager` は移行案内ページのみ）
+
 ### Added
 
 - `CHANGELOG.md` 雛形（yk-tool モノレポ台帳運用 · 2026-05-23）

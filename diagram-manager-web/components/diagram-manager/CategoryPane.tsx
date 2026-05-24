@@ -19,7 +19,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Pane1Toggle } from "@/components/workspace/Pane1Toggle";
+import { Pane1Toggle } from "@/components/diagram-manager/Pane1Toggle";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_ICONS: Record<CategoryId, React.ReactNode> = {

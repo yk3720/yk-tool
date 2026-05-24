@@ -1,0 +1,20 @@
+---
+description: diagram-manager-web 編集時の yk-skill ルール入口
+globs:
+  - app/**
+  - components/**
+  - lib/**
+  - data/**
+---
+
+# diagram-manager-web — エージェント入口
+
+`app/` · `components/` · `lib/` · `data/` 内の TS/TSX を編集するとき:
+
+1. `c:/yk-skill/rule/RULE_INDEX.md`
+2. `c:/yk-skill/rule/20_web_workspace/WORKSPACE_RULES.md`
+3. `c:/yk-skill/rule/20_web_workspace/DIAGRAM_MANAGER_WORKSPACE_RULES.md`
+4. `30_web_stack/NEXTJS_RULES.md` · `SHADCN_UI_RULES.md` · `TAILWINDCSS_RULES.md`
+5. Vercel deploy 方針: `VERCEL_RULES.md` · `creating-vercel-yk`
+
+企画: `yk-memo/00.ai-driven-school/第四回月次課題_自分専用のワークスペース/`

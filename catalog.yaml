@@ -3,9 +3,18 @@
 # バージョン詳細は各ツールの package.json / CHANGELOG.md を正とする（CHANGELOG 雛形 2026-05-23 追加済）
 
 version: 1
-updated: "2026-05-23"
+updated: "2026-05-24"
 
 tools:
+  - id: diagram-manager-web
+    name: Diagram Manager Web
+    path: diagram-manager-web/
+    kind: next-app
+    status: experimental
+    version_ref: package.json
+    changelog: CHANGELOG.md
+    notes: surge 図解の目次・検索 UI。Vercel Root Directory は diagram-manager-web
+
   - id: workspace-ui-kit
     name: Workspace UI Kit
     path: workspace-ui-kit/
@@ -13,7 +22,7 @@ tools:
     status: forked
     version_ref: package.json
     changelog: CHANGELOG.md
-    notes: 図解管理 UI 含む。講座 ADS リポとは切り離し済み
+    notes: 採用管理サンプルひな形。図解管理は diagram-manager-web へ分離（2026-05-24）
 
   - id: flowchart-web-reactflow
     name: Flowchart Web (React Flow)

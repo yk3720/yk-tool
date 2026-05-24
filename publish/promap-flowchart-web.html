@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="フローチャート Web アプリ — 社内周知（ProposalMap）">
+  <meta property="og:description" content="表から業務フロー図を自動生成する Web アプリの取り組みを、社内向けにご説明する資料です。">
+  <meta property="og:type" content="article">
+  <title>フローチャート Web アプリ — 社内周知（ProposalMap）</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF', surface: '#F8FAFC', hover: '#F1F5F9', border: '#E2E8F0',
+              accent: '#3B82F6', 'accent-light': '#2563EB', text: '#1E293B',
+              muted: '#64748B', dim: '#94A3B8', positive: '#10B981', negative: '#EF4444', warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print { .no-print { display: none !important; } body { border-top: none !important; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button type="button" onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i> PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+
+    <header class="mb-10">
+      <p class="text-xs font-medium text-ads-accent mb-2">ProposalMap · 社内周知</p>
+      <h1 class="text-2xl md:text-3xl font-bold text-ads-text tracking-tight">フローチャート Web アプリ</h1>
+      <p class="mt-3 text-ads-muted leading-relaxed">業務の手順を表で整理し、ブラウザ上でフローチャートに自動変換して確認・保存・画像出力できる Web アプリを開発しています。</p>
+      <p class="mt-2 text-xs text-ads-dim">対象読者：社内の非IT部門の方　｜　更新：2026年5月</p>
+    </header>
+
+    <div class="rounded-xl border border-ads-accent/30 bg-ads-accent/5 px-4 py-3 mb-8 flex gap-3">
+      <i data-lucide="info" class="w-5 h-5 text-ads-accent shrink-0 mt-0.5"></i>
+      <p class="text-sm text-ads-text leading-relaxed">
+        本資料は、現在検討・開発中の取り組みを関係者に共有するための<strong>周知用</strong>説明です。決裁・予算のご依頼を含みません。
+      </p>
+    </div>
+
+    <section id="summary" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="clipboard-list" class="w-5 h-5 text-ads-accent"></i> 3分で把握
+      </h2>
+      <ul class="space-y-2 text-sm bg-ads-surface rounded-xl p-5 border border-ads-border">
+        <li><span class="font-medium text-ads-text">何を：</span>表形式の業務データから、フローチャートを自動生成する Web アプリです。</li>
+        <li><span class="font-medium text-ads-text">なぜ：</span>図形を1つずつ手で並べる負担を減らし、手順の見える化をブラウザだけで行いたいためです。</li>
+        <li><span class="font-medium text-ads-text">どうする：</span>表を入力・読み込みすると、処理の流れが矢印付きの図として表示されます。</li>
+        <li><span class="font-medium text-ads-text">範囲：</span>基本機能（MVP）は実装済みです。表の画面編集などは順次拡張予定です。</li>
+        <li><span class="font-medium text-ads-text">お願い：</span>内容をご覧いただき、ご意見・ご感想があればお知らせください。</li>
+      </ul>
+    </section>
+
+    <section id="background" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-ads-accent"></i> 背景と課題
+      </h2>
+      <p class="text-sm leading-relaxed mb-4">業務フローや作業手順をフローチャートで示したい場面は多い一方、次のような負担があります。</p>
+      <ul class="list-disc pl-5 text-sm space-y-2 text-ads-muted">
+        <li>図形を1つずつ手で配置・整列するのに時間がかかる</li>
+        <li>表やリストで整理した内容を、図に移すときに形がぶれやすい</li>
+        <li>特定の PC ソフトや Excel に依存せず、ブラウザだけで完結させたい</li>
+      </ul>
+    </section>
+
+    <section id="purpose" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="target" class="w-5 h-5 text-ads-accent"></i> 目的とゴール
+      </h2>
+      <p class="text-sm leading-relaxed">表（または同等のデータ）から一貫したレイアウトのフローチャートを自動生成し、ブラウザで確認・保存・画像として資料に貼れる状態を目指しています。初期の利用は業務・学習用途を想定しています。</p>
+    </section>
+
+    <section id="solution" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="workflow" class="w-5 h-5 text-ads-accent"></i> 作ろうとしているもの
+      </h2>
+      <p class="text-sm leading-relaxed mb-6">利用の流れは次のとおりです。専門用語は補足のみ記載します。</p>
+      <div class="flex flex-col md:flex-row items-stretch gap-2 md:gap-0 text-sm my-6">
+        <div class="flex-1 rounded-lg border border-ads-border bg-ads-surface p-4 text-center">表で手順・分岐を記述する</div>
+        <div class="hidden md:flex items-center px-2 text-ads-dim"><i data-lucide="arrow-right" class="w-4 h-4"></i></div>
+        <div class="flex md:hidden justify-center text-ads-dim py-1"><i data-lucide="arrow-down" class="w-4 h-4"></i></div>
+        <div class="flex-1 rounded-lg border border-ads-border bg-ads-surface p-4 text-center">図の形・矢印を自動で整える</div>
+        <div class="hidden md:flex items-center px-2 text-ads-dim"><i data-lucide="arrow-right" class="w-4 h-4"></i></div>
+        <div class="flex md:hidden justify-center text-ads-dim py-1"><i data-lucide="arrow-down" class="w-4 h-4"></i></div>
+        <div class="flex-1 rounded-lg border border-ads-accent/40 bg-ads-accent/5 p-4 text-center font-medium text-ads-text">ブラウザで確認・データ保存・PNG出力</div>
+      </div>
+      <p class="text-sm text-ads-muted">図には、開始・終了、処理、判断（Yes/No）、入出力など、一般的なフローチャートの記号に対応する形を表示します。判断の分岐には Yes / No のラベルを付けます。</p>
+    </section>
+
+    <section id="scope" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="list-checks" class="w-5 h-5 text-ads-accent"></i> できること／今回しないこと
+      </h2>
+      <div class="overflow-x-auto rounded-xl border border-ads-border">
+        <table class="w-full text-sm">
+          <thead class="bg-ads-surface">
+            <tr>
+              <th class="text-left p-3 font-semibold text-ads-text w-1/2">できること（MVP 完了分を含む）</th>
+              <th class="text-left p-3 font-semibold text-ads-text w-1/2">今回しないこと</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ads-border">
+            <tr>
+              <td class="p-3 align-top">表データからフローチャートを自動表示する</td>
+              <td class="p-3 align-top text-ads-muted">Excel へ図形を直接描画する <span class="text-xs">（理由：スコープ外）</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 align-top">JSON 形式で図の元データを保存・読み込みする</td>
+              <td class="p-3 align-top text-ads-muted">ログイン・クラウド上の共同データベース <span class="text-xs">（理由：初版は個人利用想定）</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 align-top">PNG 画像としてダウンロードする</td>
+              <td class="p-3 align-top text-ads-muted">Figma のような自由描画キャンバス <span class="text-xs">（理由：自動生成に特化）</span></td>
+            </tr>
+            <tr>
+              <td class="p-3 align-top">1 画面で入力とプレビューを完結する</td>
+              <td class="p-3 align-top text-ads-muted">既存デスクトップ版の完全置き換えの約束 <span class="text-xs">（理由：別プロダクト）</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="status" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="calendar" class="w-5 h-5 text-ads-accent"></i> 進め方・現状・次の一手
+      </h2>
+      <p class="text-sm leading-relaxed mb-4"><strong class="text-ads-text">現状：</strong>第1段階（MVP）の受け入れ条件は満たしており、サンプルデータからの表示・JSON 保存・PNG 出力が利用できます。表の画面編集や CSV 貼り付けなど、実用面の機能を追加しています。</p>
+      <p class="text-sm leading-relaxed mb-4"><strong class="text-ads-text">次の一手：</strong>使いやすさの改善（テーマ、エラー表示の分かりやすさなど）を段階的に進めます。</p>
+      <div class="rounded-lg border border-ads-warning/40 bg-amber-50/80 p-4 text-sm">
+        <p class="font-medium text-ads-text mb-2 flex items-center gap-2"><i data-lucide="shield-alert" class="w-4 h-4 text-ads-warning"></i> 留意点（最大3件）</p>
+        <ul class="list-disc pl-5 space-y-1 text-ads-muted">
+          <li>データは主にご利用の端末上で扱う想定です（クラウド同期は初版に含みません）。</li>
+          <li>公開 URL で共有する場合は、社内ルールに沿った取り扱いをお願いします。</li>
+          <li>図の見た目は自動レイアウトのため、手作業の細かい位置調整には向きません。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="terms" class="mb-12">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="book-open" class="w-5 h-5 text-ads-accent"></i> 用語
+      </h2>
+      <dl class="grid gap-3 text-sm">
+        <div class="rounded-lg border border-ads-border p-3">
+          <dt class="font-semibold text-ads-text">フローチャート</dt>
+          <dd class="mt-1 text-ads-muted">業務の流れや判断の分岐を、矢印と記号で示した図です。</dd>
+        </div>
+        <div class="rounded-lg border border-ads-border p-3">
+          <dt class="font-semibold text-ads-text">自動レイアウト</dt>
+          <dd class="mt-1 text-ads-muted">表の内容に応じて、図形の位置を自動で決める機能です。手でドラッグして並べる必要はありません。</dd>
+        </div>
+        <div class="rounded-lg border border-ads-border p-3">
+          <dt class="font-semibold text-ads-text">JSON（ジェイソン）</dt>
+          <dd class="mt-1 text-ads-muted">図の元になるデータを保存するための、テキスト形式のファイルです。再読み込みで同じ図を復元できます。</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="closing" class="mb-8">
+      <h2 class="text-lg font-bold text-ads-text mb-4 flex items-center gap-2">
+        <i data-lucide="message-circle" class="w-5 h-5 text-ads-accent"></i> お願い
+      </h2>
+      <p class="text-sm leading-relaxed bg-ads-surface rounded-xl p-5 border border-ads-border">
+        本取り組みは、<strong class="text-ads-text">「こんなものを作ろうとしています」</strong>という共有が目的です。内容をご覧いただき、使いどころや懸念点などご意見があればお知らせください。
+      </p>
+    </section>
+
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-10 pt-6 border-t border-ads-border/30">
+    <p class="text-xs text-ads-dim text-center">ProposalMap（社内提案図解・周知用）· AI-Driven School</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

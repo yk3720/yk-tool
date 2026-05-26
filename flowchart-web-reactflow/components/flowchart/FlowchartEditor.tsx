@@ -168,6 +168,11 @@ export const FlowchartEditor = forwardRef<
   const [layoutPreset, setLayoutPreset] = useState<LayoutPresetId>(
     initial.layoutPreset,
   );
+  /** Workspace: show table/preview when a fixture is loaded without a module. */
+  const [samplePreviewActive, setSamplePreviewActive] = useState(false);
+  const [activeSampleKey, setActiveSampleKey] = useState<
+    keyof typeof SAMPLES | ""
+  >(workspaceMode ? "" : "basic");
   const canvasRef = useRef<FlowCanvasHandle>(null);
   const tableEditorRef = useRef<FlowTableEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -175,6 +180,8 @@ export const FlowchartEditor = forwardRef<
 
   const isStale = jsonText !== committedJson;
   const moduleSelected = !workspaceMode || moduleId !== null;
+  const showEditorPanes =
+    moduleSelected || (workspaceMode && samplePreviewActive);
   const hasPreview = nodes.length > 0;
 
   useImperativeHandle(
@@ -298,6 +305,10 @@ export const FlowchartEditor = forwardRef<
   };
 
   const handleLoadSample = (key: keyof typeof SAMPLES) => {
+    setActiveSampleKey(key);
+    if (workspaceMode && !moduleId) {
+      setSamplePreviewActive(true);
+    }
     loadDocument(SAMPLES[key]);
   };
 
@@ -482,18 +493,29 @@ export const FlowchartEditor = forwardRef<
             ref={headerRegenerateRef}
             type="button"
             onClick={handleRegenerate}
-            disabled={!moduleSelected}
+            disabled={!showEditorPanes}
             className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             再生成
           </button>
           <select
             className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-            defaultValue="basic"
-            onChange={(e) =>
-              handleLoadSample(e.target.value as keyof typeof SAMPLES)
+            value={
+              activeSampleKey ||
+              (workspaceMode && !moduleId ? "_pick" : "basic")
             }
+            onChange={(e) => {
+              const key = e.target.value as keyof typeof SAMPLES | "_pick";
+              if (key === "_pick") return;
+              handleLoadSample(key);
+            }}
+            aria-label="サンプル表を読み込む"
           >
+            {workspaceMode && !moduleId ? (
+              <option value="_pick" disabled>
+                サンプルを選択…
+              </option>
+            ) : null}
             <option value="basic">サンプル: 基本判断</option>
             <option value="simpleYes">サンプル: ループあり</option>
             <option value="templateStarter">雛形: はじめから</option>
@@ -684,7 +706,7 @@ export const FlowchartEditor = forwardRef<
         >
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-medium text-slate-700">表</h2>
-            {moduleSelected ? (
+            {showEditorPanes ? (
               <div
               className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
               role="tablist"
@@ -720,9 +742,12 @@ export const FlowchartEditor = forwardRef<
             ) : null}
           </div>
 
-          {!moduleSelected ? (
-            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
-              {EMPTY_MODULE_MESSAGE}
+          {!showEditorPanes ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+              <p>{EMPTY_MODULE_MESSAGE}</p>
+              <p className="text-xs text-slate-400">
+                または上の「サンプルを選択」から表と図を表示できます
+              </p>
             </div>
           ) : inputMode === "table" ? (
             <>
@@ -752,15 +777,20 @@ export const FlowchartEditor = forwardRef<
         >
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
-            {moduleSelected ? (
+            {showEditorPanes ? (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                閲覧専用（表を編集 → 再生成）
+                {moduleSelected
+                  ? "閲覧専用（表を編集 → 再生成）"
+                  : "サンプル表示（左でモジュールを選ぶと保存できます）"}
               </span>
             ) : null}
           </div>
-          {!moduleSelected ? (
-            <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
-              {EMPTY_MODULE_MESSAGE}
+          {!showEditorPanes ? (
+            <div className="flex min-h-[420px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
+              <p>{EMPTY_MODULE_MESSAGE}</p>
+              <p className="text-xs text-slate-400">
+                または上の「サンプルを選択」から表と図を表示できます
+              </p>
             </div>
           ) : hasPreview ? (
             <div

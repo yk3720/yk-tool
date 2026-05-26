@@ -17,6 +17,30 @@ function headerRegenerate(page: import("@playwright/test").Page) {
   return page.locator("header").getByRole("button", { name: "再生成" });
 }
 
+function sampleSelect(page: import("@playwright/test").Page) {
+  return page.getByRole("combobox", { name: "サンプル表を読み込む" });
+}
+
+const EMPTY_MODULE_MSG = "モジュールを選択してください";
+
+test.describe("サンプル表示（モジュール未選択）", () => {
+  test("M002 を選ぶと表とプレビューが表示される", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: "Flowchart Web" })).toBeVisible();
+
+    await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(2);
+    await sampleSelect(page).selectOption("m002NineCol");
+
+    await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);
+    await expect(page.getByText("サンプル表示（左でモジュールを選ぶと保存できます）")).toBeVisible();
+    await expect(page.locator("tbody tr")).not.toHaveCount(0);
+    await expect(page.locator(".react-flow__node")).toHaveCount(14, {
+      timeout: 15_000,
+    });
+  });
+});
+
 /** Phase 3: モジュール選択後にサンプル読込・再生成 */
 async function openModuleWithPreview(
   page: import("@playwright/test").Page,

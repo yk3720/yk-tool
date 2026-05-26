@@ -76,3 +76,23 @@ describe("generateFlowchart (golden: sample-basic)", () => {
     expect(result.errors.some((e) => e.includes("99"))).toBe(true);
   });
 });
+
+describe("generateFlowchart (ADR-012 tier-based layout)", () => {
+  it("places tier=3 parallel nodes at the same y", () => {
+    const doc = loadFixture("sample-m002-9col.json");
+    const result = generateFlowchart(doc.table, doc.layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const n3 = result.placed.find((p) => p.id === "3");
+    const n4 = result.placed.find((p) => p.id === "4");
+    const n5 = result.placed.find((p) => p.id === "5");
+    expect(n3 && n4 && n5).toBeTruthy();
+    if (!n3 || !n4 || !n5) return;
+
+    expect(n3.y).toBe(n4.y);
+    expect(n4.y).toBe(n5.y);
+    expect(n3.x).toBeLessThan(n4.x);
+    expect(n4.x).toBeLessThan(n5.x);
+  });
+});

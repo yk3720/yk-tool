@@ -26,17 +26,43 @@ export function layoutGrid(
   const rights: number[] = [];
   const bottoms: number[] = [];
 
-  let currentTop = config.baseTop;
-  let lastRi = -1;
+  // ADR-012: 9 列（段 + 列）対応
+  // - 9 列では n.tier（段）が Y の正本になる（同じ段 = 同じ高さ）
+  // - 8 列以下は従来どおり rowIndex（表行）を段の代わりに使う
+  type TierBucket = {
+    tier: number;
+    nodes: FlowNode[];
+    height: number;
+  };
+  const tierMap = new Map<number, TierBucket>();
+  for (const ri of rowMap.keys()) {
+    for (const n of rowMap.get(ri) ?? []) {
+      const tier = n.tier ?? ri;
+      const bucket = tierMap.get(tier) ?? {
+        tier,
+        nodes: [],
+        height: 0,
+      };
+      bucket.nodes.push(n);
+      bucket.height = Math.max(bucket.height, rowHeights[ri] ?? config.heightMin);
+      tierMap.set(tier, bucket);
+    }
+  }
 
-  for (const ri of [...rowMap.keys()].sort((a, b) => a - b)) {
-    if (lastRi !== -1) {
-      currentTop += (rowHeights[lastRi] ?? config.heightMin) + config.gapV;
+  let currentTop = config.baseTop;
+  let lastTier: number | null = null;
+
+  for (const tier of [...tierMap.keys()].sort((a, b) => a - b)) {
+    const bucket = tierMap.get(tier);
+    if (!bucket) continue;
+    if (lastTier !== null) {
+      const prev = tierMap.get(lastTier);
+      currentTop += (prev?.height ?? config.heightMin) + config.gapV;
     }
 
-    for (const n of rowMap.get(ri) ?? []) {
+    for (const n of bucket.nodes.sort((a, b) => a.level - b.level || a.id.localeCompare(b.id))) {
       const leftPos = config.baseLeft + n.level * (config.width + config.gapH);
-      const rowH = rowHeights[ri] ?? config.heightMin;
+      const rowH = bucket.height || config.heightMin;
       const isDiamond = isDecisionType(n.type);
       const shpH = isDiamond ? rowH * 1.3 : rowH;
       const vOff = isDiamond ? (shpH - rowH) / 2 : 0;
@@ -56,7 +82,7 @@ export function layoutGrid(
       rights.push(leftPos + config.width);
       bottoms.push(top + shpH);
     }
-    lastRi = ri;
+    lastTier = tier;
   }
 
   const bounds: Bounds =

@@ -95,4 +95,21 @@ describe("generateFlowchart (ADR-012 tier-based layout)", () => {
     expect(n3.x).toBeLessThan(n4.x);
     expect(n4.x).toBeLessThan(n5.x);
   });
+
+  it("routes merge edges (3/4/5 -> 6) via bus-like elbow", () => {
+    const doc = loadFixture("sample-m002-9col.json");
+    const result = generateFlowchart(doc.table, doc.layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const into6 = result.edges.filter(
+      (e) =>
+        e.direction === "down" &&
+        e.targetId === "6" &&
+        ["3", "4", "5"].includes(e.sourceId),
+    );
+    // Regression guard for ADR-012 / M002 fixture.
+    expect(into6).toHaveLength(3);
+    expect(into6.every((e) => e.route === "elbow")).toBe(true);
+  });
 });

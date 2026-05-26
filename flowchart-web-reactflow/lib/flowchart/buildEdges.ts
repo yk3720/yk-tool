@@ -18,6 +18,16 @@ export function buildEdges(
   const edges: FlowEdge[] = [];
   let edgeIndex = 0;
 
+  // Merge/bus heuristic (ADR-012 / M002):
+  // When multiple "down" edges converge to one target, prefer side-entry from left/right
+  // so SmoothStep produces a readable horizontal-ish "bus" before entering the target.
+  const inboundDownCount = new Map<string, number>();
+  for (const n of nodes) {
+    for (const did of n.destsDown) {
+      inboundDownCount.set(did, (inboundDownCount.get(did) ?? 0) + 1);
+    }
+  }
+
   for (const n of nodes) {
     const source = placedById.get(n.id);
     if (!source) continue;
@@ -33,12 +43,19 @@ export function buildEdges(
 
         const isLoop = tNode.rowIndex < n.rowIndex;
         const levelDiff = tNode.level - n.level;
+        const isMerge = direction === "down" && (inboundDownCount.get(did) ?? 0) > 1;
 
         let sourceSide: ConnectorSite = "bottom";
         let targetSide: ConnectorSite = "top";
         let route: "straight" | "elbow" = "straight";
 
         if (direction === "down") {
+          if (isMerge && !isLoop) {
+            route = "elbow";
+            targetSide = "top";
+            if (levelDiff > 0) sourceSide = "right";
+            else if (levelDiff < 0) sourceSide = "left";
+          }
           if (levelDiff !== 0 || isLoop) {
             route = "elbow";
             if (levelDiff < 0) targetSide = "left";
@@ -65,7 +82,8 @@ export function buildEdges(
         if (
           direction === "down" &&
           Math.abs(source.x - target.x) < 5 &&
-          !isLoop
+          !isLoop &&
+          !isMerge
         ) {
           route = "straight";
         }

@@ -27,7 +27,10 @@ export type FlowNode = {
   fullText: string;
   destsDown: string[];
   destsRight: string[];
+  /** 横位置（8列=Level · 9列=列） */
   level: number;
+  /** 9列: 段（layoutGrid 段ベース対応時に Y の正本） */
+  tier?: number;
   rowIndex: number;
 };
 
@@ -61,6 +64,8 @@ export type FlowEdge = {
 
 export type FlowchartDocument = {
   version: 1;
+  /** 例: table-9col-v1-draft（ADR-012） */
+  schema?: string;
   title?: string;
   table: FlowTableRow[];
   layout: LayoutConfig;

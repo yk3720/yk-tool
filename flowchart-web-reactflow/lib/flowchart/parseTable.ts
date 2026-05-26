@@ -35,7 +35,20 @@ export function parseTable(table: FlowTableRow[]): ParseResult {
     let destsRight: string[];
     let level: number;
 
-    if (colCount >= 8) {
+    let tier: number | undefined;
+
+    if (colCount >= 9) {
+      txts = [];
+      for (let j = 6; j < Math.min(9, row.length); j++) {
+        if (row[j] !== null && row[j] !== undefined && row[j] !== "") {
+          txts.push(String(row[j]));
+        }
+      }
+      destsDown = splitDests(row[2]);
+      destsRight = splitDests(row[3]);
+      tier = parseLevel(row[4]);
+      level = parseLevel(row[5]);
+    } else if (colCount >= 8) {
       txts = [];
       for (let j = 5; j < Math.min(8, row.length); j++) {
         if (row[j] !== null && row[j] !== undefined && row[j] !== "") {
@@ -73,6 +86,7 @@ export function parseTable(table: FlowTableRow[]): ParseResult {
       destsDown,
       destsRight,
       level,
+      ...(tier !== undefined ? { tier } : {}),
       rowIndex: i,
     };
     nodes.push(node);

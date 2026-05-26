@@ -16,7 +16,10 @@ function cellValue(raw: string, colIndex: number, colCount: number): string | nu
     const n = Number(raw);
     return Number.isFinite(n) ? n : raw;
   }
-  if (colCount >= 8 && colIndex === 4) {
+  const isNumericLayoutCol =
+    (colCount >= 9 && (colIndex === 4 || colIndex === 5)) ||
+    (colCount >= 8 && colCount < 9 && colIndex === 4);
+  if (isNumericLayoutCol) {
     if (raw === "") return 0;
     const n = Number(raw);
     return Number.isFinite(n) ? Math.trunc(n) : 0;

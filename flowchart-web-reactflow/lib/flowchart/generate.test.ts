@@ -20,6 +20,17 @@ describe("parseTable", () => {
     expect(decision?.destsDown).toEqual(["40"]);
     expect(decision?.destsRight).toEqual(["50"]);
   });
+
+  it("parses sample-m002-9col with tier and column (ADR-012)", () => {
+    const doc = loadFixture("sample-m002-9col.json");
+    const { nodes } = parseTable(doc.table);
+    expect(nodes).toHaveLength(14);
+    const parallel = nodes.filter((n) => ["3", "4", "5"].includes(n.id));
+    expect(parallel.map((n) => n.tier)).toEqual([3, 3, 3]);
+    expect(parallel.map((n) => n.level)).toEqual([0, 1, 2]);
+    const merge = nodes.find((n) => n.id === "6");
+    expect(merge?.destsDown).toEqual(["7"]);
+  });
 });
 
 describe("generateFlowchart (golden: sample-basic)", () => {

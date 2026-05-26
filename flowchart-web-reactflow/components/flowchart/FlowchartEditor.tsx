@@ -14,6 +14,7 @@ import sampleBasic from "@/fixtures/sample-basic.json";
 import sampleSimpleYes from "@/fixtures/sample-simple-yes.json";
 import templateLinear from "@/fixtures/template-linear.json";
 import templateStarter from "@/fixtures/template-starter.json";
+import sampleM002NineCol from "@/fixtures/sample-m002-9col.json";
 import {
   downloadJson,
   parseFlowchartDocument,
@@ -47,6 +48,7 @@ const SAMPLES: Record<string, FlowchartDocument> = {
   simpleYes: sampleSimpleYes as FlowchartDocument,
   templateStarter: templateStarter as FlowchartDocument,
   templateLinear: templateLinear as FlowchartDocument,
+  m002NineCol: sampleM002NineCol as FlowchartDocument,
 };
 
 type InputMode = "table" | "json";
@@ -496,6 +498,7 @@ export const FlowchartEditor = forwardRef<
             <option value="simpleYes">サンプル: ループあり</option>
             <option value="templateStarter">雛形: はじめから</option>
             <option value="templateLinear">雛形: 直線</option>
+            <option value="m002NineCol">サンプル: M002（9列·段+列）</option>
           </select>
           <select
             value={themeId}

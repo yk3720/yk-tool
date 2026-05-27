@@ -67,6 +67,14 @@ npm run test:e2e # Playwright
 | `components/flowchart/` | UI（client） |
 | `docs/adr/` | ADR（yk-memo と同期） |
 
+## DB-1（ADR-013 · Supabase）
+
+- [x] Supabase Auth（Google / Microsoft）
+- [x] `profiles` 許可リスト · editor / viewer
+- [x] `flow_documents` クラウド保存（Server Actions）
+- [x] オフライン閲覧キャッシュ（IndexedDB · 開いたフロー + ピン）
+- セットアップ: [docs/SUPABASE_SETUP.md](./docs/SUPABASE_SETUP.md)
+
 ## 実用版（2026-05-20）
 
 - [x] 表 UI・CSV 貼り付け・列ヘルプ

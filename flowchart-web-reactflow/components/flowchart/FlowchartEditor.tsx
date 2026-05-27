@@ -73,7 +73,10 @@ export type FlowchartEditorProps = {
   moduleLabel?: string;
   initialSnapshot?: FlowchartEditorSnapshot | null;
   workspaceMode?: boolean;
+  /** 閲覧者: 表編集・JSON・取込・再生成を不可（ADR-013） */
+  readOnly?: boolean;
   onSnapshotPersist?: () => void;
+  pinOffline?: { pinned: boolean; onToggle: () => void };
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
@@ -140,7 +143,9 @@ export const FlowchartEditor = forwardRef<
     moduleLabel,
     initialSnapshot,
     workspaceMode = false,
+    readOnly = false,
     onSnapshotPersist,
+    pinOffline,
   } = props;
 
   const initial = useMemo(
@@ -289,6 +294,10 @@ export const FlowchartEditor = forwardRef<
   }, [jsonText, workspaceMode]);
 
   const handleRegenerate = () => {
+    if (readOnly) {
+      setStatus("閲覧者は再生成できません");
+      return;
+    }
     if (inputMode === "json") {
       const { doc: parsed, errors } = parseFlowchartDocument(jsonText);
       if (parsed && errors.length === 0) setDoc(parsed);
@@ -313,6 +322,7 @@ export const FlowchartEditor = forwardRef<
   };
 
   const handleTableChange = (table: FlowchartDocument["table"]) => {
+    if (readOnly) return;
     const next: FlowchartDocument = {
       ...doc,
       table,
@@ -324,6 +334,7 @@ export const FlowchartEditor = forwardRef<
   };
 
   const handleCsvApply = (table: FlowchartDocument["table"]) => {
+    if (readOnly) return;
     handleTableChange(table);
     setStatus("CSV を表に反映しました — 「再生成」でプレビューを更新");
   };
@@ -367,6 +378,10 @@ export const FlowchartEditor = forwardRef<
   }, [jsonText, refreshWarnings]);
 
   const handleSaveJson = () => {
+    if (readOnly) {
+      setStatus("閲覧者は JSON のダウンロードはできません");
+      return;
+    }
     const { doc: parsed, errors } = parseFlowchartDocument(jsonText);
     if (errors.length > 0) {
       setParseErrors(errors);
@@ -378,6 +393,7 @@ export const FlowchartEditor = forwardRef<
   };
 
   const handleImportFile = (file: File) => {
+    if (readOnly) return;
     const reader = new FileReader();
     reader.onload = () => {
       const text = String(reader.result ?? "");
@@ -462,6 +478,7 @@ export const FlowchartEditor = forwardRef<
   };
 
   const switchToJson = () => {
+    if (readOnly) return;
     setInputMode("json");
   };
 
@@ -493,13 +510,14 @@ export const FlowchartEditor = forwardRef<
             ref={headerRegenerateRef}
             type="button"
             onClick={handleRegenerate}
-            disabled={!showEditorPanes}
+            disabled={!showEditorPanes || readOnly}
             className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             再生成
           </button>
           <select
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={readOnly}
             value={
               activeSampleKey ||
               (workspaceMode && !moduleId ? "_pick" : "basic")
@@ -525,7 +543,8 @@ export const FlowchartEditor = forwardRef<
           <select
             value={themeId}
             onChange={(e) => applyTheme(e.target.value as ThemeId)}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={readOnly}
+            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
             title="テーマ"
           >
             {Object.values(FLOW_THEMES).map((t) => (
@@ -539,7 +558,8 @@ export const FlowchartEditor = forwardRef<
             onChange={(e) =>
               applyLayoutPreset(e.target.value as LayoutPresetId)
             }
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={readOnly}
+            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
             title="サイズ"
           >
             {Object.entries(LAYOUT_PRESETS).map(([id, p]) => (
@@ -548,20 +568,24 @@ export const FlowchartEditor = forwardRef<
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={handleSaveJson}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-          >
-            表を保存
-          </button>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-          >
-            表を読込
-          </button>
+          {!readOnly ? (
+            <>
+              <button
+                type="button"
+                onClick={handleSaveJson}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                表を保存
+              </button>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+              >
+                表を読込
+              </button>
+            </>
+          ) : null}
           <button
             type="button"
             onClick={() => void handleExportPng()}
@@ -578,6 +602,20 @@ export const FlowchartEditor = forwardRef<
           >
             SVG
           </button>
+          {pinOffline ? (
+            <button
+              type="button"
+              onClick={pinOffline.onToggle}
+              className={`rounded-md border px-3 py-1.5 text-sm ${
+                pinOffline.pinned
+                  ? "border-amber-400 bg-amber-50 text-amber-900"
+                  : "border-slate-300 hover:bg-slate-50"
+              }`}
+              title="オフライン閲覧用に端末へ保存"
+            >
+              {pinOffline.pinned ? "オフライン保存済" : "オフライン用に保存"}
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={handleClearDraft}
@@ -725,19 +763,21 @@ export const FlowchartEditor = forwardRef<
               >
                 表 UI
               </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={inputMode === "json"}
-                onClick={switchToJson}
-                className={`rounded px-2.5 py-1 font-medium ${
-                  inputMode === "json"
-                    ? "bg-slate-800 text-white"
-                    : "text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                JSON
-              </button>
+              {!readOnly ? (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={inputMode === "json"}
+                  onClick={switchToJson}
+                  className={`rounded px-2.5 py-1 font-medium ${
+                    inputMode === "json"
+                      ? "bg-slate-800 text-white"
+                      : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  JSON
+                </button>
+              ) : null}
             </div>
             ) : null}
           </div>
@@ -749,20 +789,22 @@ export const FlowchartEditor = forwardRef<
                 または上の「サンプルを選択」から表と図を表示できます
               </p>
             </div>
-          ) : inputMode === "table" ? (
+          ) : inputMode === "table" || readOnly ? (
             <>
-              <CsvPastePanel onApply={handleCsvApply} />
+              {!readOnly ? <CsvPastePanel onApply={handleCsvApply} /> : null}
               <FlowTableEditor
                 ref={tableEditorRef}
                 table={doc.table}
                 onChange={handleTableChange}
                 errorRowIndices={errorRows}
+                readOnly={readOnly}
               />
             </>
           ) : (
             <textarea
               value={jsonText}
               onChange={(e) => setJsonText(e.target.value)}
+              readOnly={readOnly}
               spellCheck={false}
               className="min-h-[400px] flex-1 resize-y rounded-md border border-slate-300 p-3 font-mono text-xs leading-relaxed text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               aria-label="フローチャート表 JSON"
@@ -779,9 +821,11 @@ export const FlowchartEditor = forwardRef<
             <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
             {showEditorPanes ? (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                {moduleSelected
-                  ? "閲覧専用（表を編集 → 再生成）"
-                  : "サンプル表示（左でモジュールを選ぶと保存できます）"}
+                {readOnly
+                  ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
+                  : moduleSelected
+                    ? "閲覧専用（表を編集 → 再生成）"
+                    : "サンプル表示（左でモジュールを選ぶと保存できます）"}
               </span>
             ) : null}
           </div>

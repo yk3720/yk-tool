@@ -25,6 +25,7 @@ type Props = {
   table: FlowTableRow[];
   onChange: (table: FlowTableRow[]) => void;
   errorRowIndices?: Set<number>;
+  readOnly?: boolean;
 };
 
 function cellToString(value: unknown): string {
@@ -60,7 +61,7 @@ function headerHelp(header: string, colCount: number): string | undefined {
 }
 
 export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
-  function FlowTableEditor({ table, onChange, errorRowIndices }, ref) {
+  function FlowTableEditor({ table, onChange, errorRowIndices, readOnly }, ref) {
     const colCount = getColumnCount(table);
     const headers = getHeaders(colCount);
     const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
@@ -124,13 +125,15 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
         </details>
 
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={addRow}
-            className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium hover:bg-slate-50"
-          >
-            行を追加
-          </button>
+          {!readOnly ? (
+            <button
+              type="button"
+              onClick={addRow}
+              className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium hover:bg-slate-50"
+            >
+              行を追加
+            </button>
+          ) : null}
           <span className="text-xs text-slate-500">
             {table.length} 行 · {colCount} 列
           </span>
@@ -194,7 +197,8 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                             onChange={(e) =>
                               updateCell(rowIndex, colIndex, e.target.value)
                             }
-                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-blue-500"
+                            disabled={readOnly}
+                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 disabled:cursor-default disabled:opacity-90"
                             aria-label={`行${rowIndex + 1} 図形種別`}
                           >
                             {SHAPE_TYPE_OPTIONS.map((opt) => (
@@ -210,22 +214,25 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                             onChange={(e) =>
                               updateCell(rowIndex, colIndex, e.target.value)
                             }
-                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 font-mono text-xs focus:bg-white focus:ring-1 focus:ring-blue-500"
+                            readOnly={readOnly}
+                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 font-mono text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 read-only:cursor-default read-only:opacity-90"
                             aria-label={`行${rowIndex + 1} ${h}`}
                           />
                         )}
                       </td>
                     ))}
                     <td className="border-b border-slate-100 px-1 py-0.5 text-center">
-                      <button
-                        type="button"
-                        onClick={() => deleteRow(rowIndex)}
-                        disabled={table.length <= 1}
-                        className="rounded px-1 py-0.5 text-xs text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
-                        title="行を削除"
-                      >
-                        削除
-                      </button>
+                      {!readOnly ? (
+                        <button
+                          type="button"
+                          onClick={() => deleteRow(rowIndex)}
+                          disabled={table.length <= 1}
+                          className="rounded px-1 py-0.5 text-xs text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          title="行を削除"
+                        >
+                          削除
+                        </button>
+                      ) : null}
                     </td>
                   </tr>
                 );

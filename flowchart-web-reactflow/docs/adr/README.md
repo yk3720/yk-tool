@@ -15,3 +15,5 @@
 - ADR-009: 調査項目一括（CSV・下書き・雛形・テーマ・SVG・列ヘルプ等）
 - ADR-010: 二系統比較（React Flow / Mermaid）、`flowchart-web-reactflow` リネーム
 - ADR-011: Phase 3 — 3 ペイン（ユニット→モジュールナビ｜表｜図）、モジュール単位の退避・stale
+- ADR-012: 9 列モデル（段 + 列）— ドラフト
+- ADR-013: 永続化（Supabase）· 認証 · Vercel 公開 — DB-1（3 ペインより先、オフライン閲覧のみ）— **実装着手 2026-05-27**

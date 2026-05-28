@@ -21,11 +21,14 @@ create index if not exists flow_documents_updated_at_idx
 alter table public.profiles enable row level security;
 alter table public.flow_documents enable row level security;
 
--- profiles: 自分の行のみ参照
+-- profiles: 自分の行のみ参照（初回ログイン時は user_id が NULL のためメール照合も許可）
 create policy "profiles_select_own"
   on public.profiles for select
   to authenticated
-  using ((select auth.uid()) = user_id);
+  using (
+    lower(email) = lower(auth.jwt() ->> 'email')
+    OR (select auth.uid()) = user_id
+  );
 
 -- 初回ログイン時に user_id を紐づけ（メール一致のみ）
 create policy "profiles_update_link_self"

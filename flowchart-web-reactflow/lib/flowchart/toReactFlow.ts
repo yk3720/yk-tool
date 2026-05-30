@@ -1,5 +1,5 @@
 import { MarkerType, type Edge, type Node } from "@xyflow/react";
-import { FLOW_THEMES, resolveThemeId, type ThemeId } from "./themes";
+import { FLOW_EDGE_LABEL, FLOW_EDGE_STROKE } from "./flowColors";
 import type { FlowEdge, PlacedNode, ShapeKind } from "./types";
 
 export type FlowNodeData = {
@@ -17,9 +17,7 @@ export function shapeKindToNodeType(_kind: ShapeKind): string {
 export function toReactFlow(
   placed: PlacedNode[],
   edges: FlowEdge[],
-  themeId?: ThemeId | string,
 ): { nodes: Node<FlowNodeData>[]; edges: Edge[] } {
-  const theme = FLOW_THEMES[resolveThemeId(themeId)];
   const nodes: Node<FlowNodeData>[] = placed.map((p) => ({
     id: p.id,
     type: NODE_TYPE,
@@ -45,16 +43,16 @@ export function toReactFlow(
     type: "labeled",
     data: { route: e.route },
     label: e.label,
-    style: { stroke: theme.edgeStroke, strokeWidth: 2.25 },
+    style: { stroke: FLOW_EDGE_STROKE, strokeWidth: 2.25 },
     labelStyle: {
-      fill: theme.edgeLabel,
+      fill: FLOW_EDGE_LABEL,
       fontWeight: 700,
       fontSize: 11,
     },
     labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9 },
     markerEnd: {
       type: MarkerType.ArrowClosed,
-      color: theme.edgeStroke,
+      color: FLOW_EDGE_STROKE,
       width: 16,
       height: 16,
     },

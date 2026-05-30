@@ -69,7 +69,6 @@ export type FlowchartDocument = {
   title?: string;
   table: FlowTableRow[];
   layout: LayoutConfig;
-  themeId?: string;
   createdAt: string;
 };
 

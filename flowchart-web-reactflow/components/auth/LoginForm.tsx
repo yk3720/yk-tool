@@ -10,8 +10,11 @@ type Props = {
 };
 
 export function LoginForm({ nextPath, authError }: Props) {
-  const [loading, setLoading] = useState<"google" | "azure" | "email" | null>(null);
+  const [loading, setLoading] = useState<"google" | "azure" | "email" | "password" | null>(
+    null,
+  );
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(
     authError ? "ログインに失敗しました。もう一度お試しください。" : null,
@@ -33,6 +36,28 @@ export function LoginForm({ nextPath, authError }: Props) {
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
+      setLoading(null);
+    }
+  };
+
+  const signInWithPassword = async () => {
+    if (!email.trim() || !password) return;
+    setLoading("password");
+    setError(null);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signInError) {
+        setError(signInError.message);
+      } else {
+        window.location.assign(nextPath);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
       setLoading(null);
     }
   };
@@ -106,10 +131,33 @@ export function LoginForm({ nextPath, authError }: Props) {
               placeholder="メールアドレス"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") void signInWithEmail(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void signInWithPassword();
+              }}
               disabled={loading !== null}
+              autoComplete="email"
               className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 disabled:opacity-50"
             />
+            <input
+              type="password"
+              placeholder="パスワード"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void signInWithPassword();
+              }}
+              disabled={loading !== null}
+              autoComplete="current-password"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 disabled:opacity-50"
+            />
+            <button
+              type="button"
+              disabled={loading !== null || !email.trim() || !password}
+              onClick={() => void signInWithPassword()}
+              className="rounded-md bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            >
+              {loading === "password" ? "ログイン中…" : "パスワードでログイン"}
+            </button>
             <button
               type="button"
               disabled={loading !== null || !email.trim()}

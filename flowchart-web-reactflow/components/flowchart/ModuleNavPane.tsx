@@ -6,11 +6,14 @@ import type { Device, FlowModule, FlowUnit } from "@/lib/flowchart/moduleHierarc
 import { cn } from "@/lib/utils";
 
 type ModuleNavPaneProps = {
+  devices: readonly Device[];
+  selectedDeviceId: string;
   device: Device;
   selectedModuleId: string | null;
   expandedUnitIds: ReadonlySet<string>;
   collapsed: boolean;
   onToggleCollapsed: () => void;
+  onSelectDevice: (deviceId: string) => void;
   onToggleUnit: (unitId: string) => void;
   onSelectModule: (moduleId: string) => void;
 };
@@ -86,11 +89,14 @@ function UnitSection({
 }
 
 export function ModuleNavPane({
+  devices,
+  selectedDeviceId,
   device,
   selectedModuleId,
   expandedUnitIds,
   collapsed,
   onToggleCollapsed,
+  onSelectDevice,
   onToggleUnit,
   onSelectModule,
 }: ModuleNavPaneProps) {
@@ -113,7 +119,7 @@ export function ModuleNavPane({
   return (
     <aside className="flex w-full shrink-0 flex-col border-r border-slate-200 bg-slate-50 lg:w-[min(20%,240px)] lg:min-w-[180px]">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
-        <h2 className="truncate text-sm font-semibold text-slate-800">モジュール</h2>
+        <h2 className="truncate text-sm font-semibold text-slate-800">フロー</h2>
         <button
           type="button"
           onClick={onToggleCollapsed}
@@ -124,7 +130,29 @@ export function ModuleNavPane({
           <PanelLeftClose className="size-4" />
         </button>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-2" aria-label="ユニットとモジュール">
+
+      <div className="border-b border-slate-200 px-3 py-2">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-slate-500">装置</span>
+          <select
+            value={selectedDeviceId}
+            onChange={(e) => onSelectDevice(e.target.value)}
+            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800"
+            aria-label="装置を選択"
+          >
+            {devices.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <nav
+        className="flex flex-1 flex-col gap-1 overflow-y-auto p-2"
+        aria-label="ユニットと動作"
+      >
         {device.units.map((unit) => (
           <UnitSection
             key={unit.id}

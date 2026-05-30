@@ -65,14 +65,6 @@
   clip-path: polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%);
 }
 
-[data-flow-theme="safety"] .flow-shape-body {
-  border-color: #15803d !important;
-}
-
-[data-flow-theme="warning"] .flow-shape-body {
-  border-color: #b45309 !important;
-}
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

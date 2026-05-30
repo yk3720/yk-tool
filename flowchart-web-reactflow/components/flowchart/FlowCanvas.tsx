@@ -18,7 +18,6 @@ import {
   useMemo,
 } from "react";
 import type { FlowNodeData } from "@/lib/flowchart/toReactFlow";
-import { resolveThemeId, type ThemeId } from "@/lib/flowchart/themes";
 import { flowEdgeTypes, flowNodeTypes } from "./flowTypes";
 
 export type FlowCanvasHandle = {
@@ -29,11 +28,10 @@ export type FlowCanvasHandle = {
 type FlowCanvasProps = {
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
-  themeId?: ThemeId | string;
 };
 
 function FlowCanvasInner(
-  { nodes, edges, themeId }: FlowCanvasProps,
+  { nodes, edges }: FlowCanvasProps,
   ref: React.Ref<FlowCanvasHandle>,
 ) {
   const { fitView } = useReactFlow();
@@ -69,7 +67,6 @@ function FlowCanvasInner(
   return (
     <div
       data-flowchart-export-root
-      data-flow-theme={resolveThemeId(themeId)}
       className="h-full min-h-[420px] w-full rounded-lg border border-slate-200 bg-slate-50"
     >
       <ReactFlow

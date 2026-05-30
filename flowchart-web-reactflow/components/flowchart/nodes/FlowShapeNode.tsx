@@ -19,7 +19,7 @@ function ShapeBody({ data }: { data: FlowNodeData }) {
   ));
 
   const base =
-    "flow-shape-body flex h-full w-full items-center justify-center border border-slate-500 bg-white px-2 py-1 text-center text-[11px] font-medium text-slate-800";
+    "flow-shape-body flex h-full w-full flex-col items-center justify-center gap-0.5 border border-slate-500 bg-white px-2 py-1 text-center text-[11px] font-medium leading-snug text-slate-800";
 
   switch (data.shapeKind) {
     case "diamond":

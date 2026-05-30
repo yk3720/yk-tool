@@ -22,20 +22,16 @@ import {
 } from "@/lib/flowchart/document";
 import { clearDraft, loadDraft, saveDraft } from "@/lib/flowchart/draftStorage";
 import { generateFlowchart } from "@/lib/flowchart/generate";
-import {
-  LAYOUT_PRESETS,
-  layoutPresetFromConfig,
-  type LayoutPresetId,
-} from "@/lib/flowchart/layoutPresets";
-import { FLOW_THEMES, resolveThemeId, type ThemeId } from "@/lib/flowchart/themes";
 import { toReactFlow, type FlowNodeData } from "@/lib/flowchart/toReactFlow";
-import type { FlowchartDocument, LayoutConfig } from "@/lib/flowchart/types";
+import type { FlowchartDocument } from "@/lib/flowchart/types";
 import {
   errorRowIndices,
   validateTableWarnings,
+  WARNING_BANNER_HINT,
 } from "@/lib/flowchart/validationMeta";
 import { captureFlowPng } from "./exportPng";
 import { captureFlowSvg } from "./exportSvg";
+import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
 import { CsvPastePanel } from "./CsvPastePanel";
 import {
@@ -51,7 +47,16 @@ const SAMPLES: Record<string, FlowchartDocument> = {
   m002NineCol: sampleM002NineCol as FlowchartDocument,
 };
 
-type InputMode = "table" | "json";
+const SAMPLE_OPTIONS = [
+  { key: "basic", label: "サンプル: 基本判断" },
+  { key: "simpleYes", label: "サンプル: ループあり" },
+  { key: "templateStarter", label: "雛形: はじめから" },
+  { key: "templateLinear", label: "雛形: 直線" },
+  { key: "m002NineCol", label: "サンプル: M002（9列·段+列）" },
+] as const;
+
+type SampleKey = (typeof SAMPLE_OPTIONS)[number]["key"];
+
 type PaneView = "table" | "canvas";
 
 export type FlowchartEditorSnapshot = {
@@ -59,8 +64,6 @@ export type FlowchartEditorSnapshot = {
   committedJson: string;
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
-  themeId: ThemeId;
-  layoutPreset: LayoutPresetId;
 };
 
 export type FlowchartEditorHandle = {
@@ -68,12 +71,12 @@ export type FlowchartEditorHandle = {
 };
 
 export type FlowchartEditorProps = {
-  deviceName?: string;
+  /** 選択中フローの文脈（例: 供給ユニット · 供給動作） */
+  contextLabel?: string;
   moduleId?: string | null;
-  moduleLabel?: string;
   initialSnapshot?: FlowchartEditorSnapshot | null;
   workspaceMode?: boolean;
-  /** 閲覧者: 表編集・JSON・取込・再生成を不可（ADR-013） */
+  /** 閲覧者: 表編集・取込・再生成を不可（ADR-013） */
   readOnly?: boolean;
   onSnapshotPersist?: () => void;
   pinOffline?: { pinned: boolean; onToggle: () => void };
@@ -83,16 +86,12 @@ const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
 const EMPTY_TABLE_MESSAGE =
   "Excel から取込むか、表を入力してください";
 
-function resolveInitialState(
-  props: FlowchartEditorProps,
-): {
+function resolveInitialState(props: FlowchartEditorProps): {
   doc: FlowchartDocument;
   jsonText: string;
   committedJson: string;
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
-  themeId: ThemeId;
-  layoutPreset: LayoutPresetId;
 } {
   const snap = props.initialSnapshot;
   if (snap) {
@@ -103,8 +102,6 @@ function resolveInitialState(
       committedJson: snap.committedJson,
       nodes: snap.nodes,
       edges: snap.edges,
-      themeId: snap.themeId,
-      layoutPreset: snap.layoutPreset,
     };
   }
   if (props.workspaceMode && props.moduleId) {
@@ -116,8 +113,6 @@ function resolveInitialState(
       committedJson: "",
       nodes: [],
       edges: [],
-      themeId: resolveThemeId(starter.themeId),
-      layoutPreset: layoutPresetFromConfig(starter.layout),
     };
   }
   const basic = SAMPLES.basic as FlowchartDocument;
@@ -128,8 +123,6 @@ function resolveInitialState(
     committedJson: text,
     nodes: [],
     edges: [],
-    themeId: resolveThemeId(basic.themeId),
-    layoutPreset: layoutPresetFromConfig(basic.layout),
   };
 }
 
@@ -138,9 +131,8 @@ export const FlowchartEditor = forwardRef<
   FlowchartEditorProps
 >(function FlowchartEditor(props, ref) {
   const {
-    deviceName,
+    contextLabel,
     moduleId = null,
-    moduleLabel,
     initialSnapshot,
     workspaceMode = false,
     readOnly = false,
@@ -157,7 +149,6 @@ export const FlowchartEditor = forwardRef<
   const [doc, setDoc] = useState<FlowchartDocument>(initial.doc);
   const [jsonText, setJsonText] = useState(initial.jsonText);
   const [committedJson, setCommittedJson] = useState(initial.committedJson);
-  const [inputMode, setInputMode] = useState<InputMode>("table");
   const [paneView, setPaneView] = useState<PaneView>("table");
   const [parseErrors, setParseErrors] = useState<string[]>([]);
   const [genErrors, setGenErrors] = useState<string[]>([]);
@@ -169,15 +160,7 @@ export const FlowchartEditor = forwardRef<
       ? "表を入力するかサンプルを読み込んでください"
       : "準備完了",
   );
-  const [themeId, setThemeId] = useState<ThemeId>(initial.themeId);
-  const [layoutPreset, setLayoutPreset] = useState<LayoutPresetId>(
-    initial.layoutPreset,
-  );
-  /** Workspace: show table/preview when a fixture is loaded without a module. */
   const [samplePreviewActive, setSamplePreviewActive] = useState(false);
-  const [activeSampleKey, setActiveSampleKey] = useState<
-    keyof typeof SAMPLES | ""
-  >(workspaceMode ? "" : "basic");
   const canvasRef = useRef<FlowCanvasHandle>(null);
   const tableEditorRef = useRef<FlowTableEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -197,11 +180,9 @@ export const FlowchartEditor = forwardRef<
         committedJson,
         nodes,
         edges,
-        themeId,
-        layoutPreset,
       }),
     }),
-    [jsonText, committedJson, nodes, edges, themeId, layoutPreset],
+    [jsonText, committedJson, nodes, edges],
   );
 
   const errorRows = useMemo(
@@ -212,8 +193,6 @@ export const FlowchartEditor = forwardRef<
   const syncJsonFromDoc = useCallback((nextDoc: FlowchartDocument) => {
     setDoc(nextDoc);
     setJsonText(serializeDocument(nextDoc));
-    if (nextDoc.themeId) setThemeId(resolveThemeId(nextDoc.themeId));
-    setLayoutPreset(layoutPresetFromConfig(nextDoc.layout));
   }, []);
 
   const refreshWarnings = useCallback((table: FlowchartDocument["table"]) => {
@@ -226,7 +205,7 @@ export const FlowchartEditor = forwardRef<
       if (docErrors.length > 0) {
         setParseErrors(docErrors);
         setGenErrors([]);
-        setStatus("JSON の形式エラー");
+        setStatus("保存データの形式エラー");
         return false;
       }
       if (!parsed) return false;
@@ -234,7 +213,6 @@ export const FlowchartEditor = forwardRef<
       setParseErrors([]);
       setDoc(parsed);
       refreshWarnings(parsed.table);
-      if (parsed.themeId) setThemeId(resolveThemeId(parsed.themeId));
 
       const result = generateFlowchart(parsed.table, parsed.layout);
       if (!result.ok) {
@@ -246,11 +224,7 @@ export const FlowchartEditor = forwardRef<
       }
 
       setGenErrors([]);
-      const rf = toReactFlow(
-        result.placed,
-        result.edges,
-        parsed.themeId ?? themeId,
-      );
+      const rf = toReactFlow(result.placed, result.edges);
       setNodes(rf.nodes);
       setEdges(rf.edges);
       setCommittedJson(text);
@@ -260,7 +234,7 @@ export const FlowchartEditor = forwardRef<
       onSnapshotPersist?.();
       return true;
     },
-    [refreshWarnings, themeId, onSnapshotPersist],
+    [refreshWarnings, onSnapshotPersist],
   );
 
   useEffect(() => {
@@ -276,8 +250,6 @@ export const FlowchartEditor = forwardRef<
       if (parsed && errors.length === 0) {
         setJsonText(draft);
         setDoc(parsed);
-        if (parsed.themeId) setThemeId(resolveThemeId(parsed.themeId));
-        setLayoutPreset(layoutPresetFromConfig(parsed.layout));
         refreshWarnings(parsed.table);
         runGenerate(draft);
         setStatus("下書きを復元しました");
@@ -298,10 +270,6 @@ export const FlowchartEditor = forwardRef<
       setStatus("閲覧者は再生成できません");
       return;
     }
-    if (inputMode === "json") {
-      const { doc: parsed, errors } = parseFlowchartDocument(jsonText);
-      if (parsed && errors.length === 0) setDoc(parsed);
-    }
     refreshWarnings(doc.table);
     runGenerate(jsonText);
   };
@@ -313,8 +281,7 @@ export const FlowchartEditor = forwardRef<
     runGenerate(text);
   };
 
-  const handleLoadSample = (key: keyof typeof SAMPLES) => {
-    setActiveSampleKey(key);
+  const handleLoadSample = (key: SampleKey) => {
     if (workspaceMode && !moduleId) {
       setSamplePreviewActive(true);
     }
@@ -326,7 +293,6 @@ export const FlowchartEditor = forwardRef<
     const next: FlowchartDocument = {
       ...doc,
       table,
-      themeId,
       createdAt: new Date().toISOString(),
     };
     syncJsonFromDoc(next);
@@ -339,53 +305,15 @@ export const FlowchartEditor = forwardRef<
     setStatus("CSV を表に反映しました — 「再生成」でプレビューを更新");
   };
 
-  const applyTheme = (id: ThemeId) => {
-    setThemeId(id);
-    const next = { ...doc, themeId: id };
-    syncJsonFromDoc(next);
-    if (!isStale && nodes.length > 0) {
-      const result = generateFlowchart(next.table, next.layout);
-      if (result.ok) {
-        const rf = toReactFlow(result.placed, result.edges, id);
-        setNodes(rf.nodes);
-        setEdges(rf.edges);
-      }
-    }
-  };
-
-  const applyLayoutPreset = (preset: LayoutPresetId) => {
-    setLayoutPreset(preset);
-    const layout: LayoutConfig = {
-      ...doc.layout,
-      ...LAYOUT_PRESETS[preset].layout,
-    };
-    const next = { ...doc, layout };
-    syncJsonFromDoc(next);
-    setStatus(`レイアウト: ${LAYOUT_PRESETS[preset].label} — 再生成してください`);
-  };
-
-  const commitDocFromJsonText = useCallback((): boolean => {
-    const { doc: parsed, errors } = parseFlowchartDocument(jsonText);
-    if (errors.length > 0) {
-      setParseErrors(errors);
-      return false;
-    }
-    if (!parsed) return false;
-    setParseErrors([]);
-    setDoc(parsed);
-    refreshWarnings(parsed.table);
-    return true;
-  }, [jsonText, refreshWarnings]);
-
   const handleSaveJson = () => {
     if (readOnly) {
-      setStatus("閲覧者は JSON のダウンロードはできません");
+      setStatus("閲覧者は表のダウンロードはできません");
       return;
     }
     const { doc: parsed, errors } = parseFlowchartDocument(jsonText);
     if (errors.length > 0) {
       setParseErrors(errors);
-      setStatus("保存できません — JSON の形式を直してください");
+      setStatus("保存できません — 表データの形式を直してください");
       return;
     }
     if (parsed) downloadJson(parsed);
@@ -415,7 +343,7 @@ export const FlowchartEditor = forwardRef<
 
   const handleExportPng = async () => {
     if (isStale) {
-      setStatus("PNG: 表または JSON を変更しました。先に「再生成」してください");
+      setStatus("PNG: 表を変更しました。先に「再生成」してください");
       return;
     }
     if (nodes.length === 0) {
@@ -467,19 +395,8 @@ export const FlowchartEditor = forwardRef<
     const rows = errorRowIndices([err], doc.table);
     const first = [...rows][0];
     if (first !== undefined) {
-      setInputMode("table");
       setTimeout(() => tableEditorRef.current?.scrollToRow(first), 50);
     }
-  };
-
-  const switchToTable = () => {
-    commitDocFromJsonText();
-    setInputMode("table");
-  };
-
-  const switchToJson = () => {
-    if (readOnly) return;
-    setInputMode("json");
   };
 
   const canExport = !isStale && nodes.length > 0;
@@ -487,87 +404,58 @@ export const FlowchartEditor = forwardRef<
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-      <header className="flex flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-3">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold tracking-tight">Flowchart Web</h1>
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-              実用版
-            </span>
+      <header className="border-b border-slate-200 px-4 py-3">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg font-semibold tracking-tight">
+                Flowchart Web
+              </h1>
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                実用版
+              </span>
+            </div>
+            {contextLabel ? (
+              <p className="text-sm text-slate-600">
+                <span className="font-medium text-slate-800">{contextLabel}</span>
+              </p>
+            ) : null}
           </div>
-          {deviceName ? (
-            <p className="text-sm text-slate-600">
-              装置: <span className="font-medium text-slate-800">{deviceName}</span>
-              {moduleLabel ? (
-                <span className="text-slate-500"> · {moduleLabel}</span>
-              ) : null}
-            </p>
-          ) : null}
+
+          <p
+            className="max-w-md text-right text-sm lg:max-w-xl"
+            role="status"
+            aria-live="polite"
+          >
+            {isStale && (
+              <span className="mr-2 font-medium text-amber-600">
+                プレビューは古い —
+              </span>
+            )}
+            <span className="text-slate-600">{status}</span>
+            {!workspaceMode ? (
+              <span className="ml-2 text-xs text-slate-400">
+                （下書き自動保存）
+              </span>
+            ) : null}
+          </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <button
             ref={headerRegenerateRef}
             type="button"
             onClick={handleRegenerate}
             disabled={!showEditorPanes || readOnly}
-            className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className={`rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 ${
+              isStale && showEditorPanes && !readOnly
+                ? "ring-2 ring-amber-400 ring-offset-1"
+                : ""
+            }`}
           >
             再生成
           </button>
-          <select
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={readOnly}
-            value={
-              activeSampleKey ||
-              (workspaceMode && !moduleId ? "_pick" : "basic")
-            }
-            onChange={(e) => {
-              const key = e.target.value as keyof typeof SAMPLES | "_pick";
-              if (key === "_pick") return;
-              handleLoadSample(key);
-            }}
-            aria-label="サンプル表を読み込む"
-          >
-            {workspaceMode && !moduleId ? (
-              <option value="_pick" disabled>
-                サンプルを選択…
-              </option>
-            ) : null}
-            <option value="basic">サンプル: 基本判断</option>
-            <option value="simpleYes">サンプル: ループあり</option>
-            <option value="templateStarter">雛形: はじめから</option>
-            <option value="templateLinear">雛形: 直線</option>
-            <option value="m002NineCol">サンプル: M002（9列·段+列）</option>
-          </select>
-          <select
-            value={themeId}
-            onChange={(e) => applyTheme(e.target.value as ThemeId)}
-            disabled={readOnly}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            title="テーマ"
-          >
-            {Object.values(FLOW_THEMES).map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={layoutPreset}
-            onChange={(e) =>
-              applyLayoutPreset(e.target.value as LayoutPresetId)
-            }
-            disabled={readOnly}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-            title="サイズ"
-          >
-            {Object.entries(LAYOUT_PRESETS).map(([id, p]) => (
-              <option key={id} value={id}>
-                サイズ:{p.label}
-              </option>
-            ))}
-          </select>
+
           {!readOnly ? (
             <>
               <button
@@ -586,49 +474,25 @@ export const FlowchartEditor = forwardRef<
               </button>
             </>
           ) : null}
-          <button
-            type="button"
-            onClick={() => void handleExportPng()}
-            disabled={!canExport}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            PNG
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleExportSvg()}
-            disabled={!canExport}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            SVG
-          </button>
-          {pinOffline ? (
-            <button
-              type="button"
-              onClick={pinOffline.onToggle}
-              className={`rounded-md border px-3 py-1.5 text-sm ${
-                pinOffline.pinned
-                  ? "border-amber-400 bg-amber-50 text-amber-900"
-                  : "border-slate-300 hover:bg-slate-50"
-              }`}
-              title="オフライン閲覧用に端末へ保存"
-            >
-              {pinOffline.pinned ? "オフライン保存済" : "オフライン用に保存"}
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={handleClearDraft}
-            disabled={workspaceMode}
-            className="rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-            title={
+
+          <EditorMoreMenu
+            readOnly={readOnly}
+            workspaceMode={workspaceMode}
+            canExport={canExport}
+            clearDraftDisabled={workspaceMode}
+            clearDraftTitle={
               workspaceMode
                 ? "モジュール単位の下書きは切替時に自動保存されます"
                 : "ブラウザに保存した下書きを削除"
             }
-          >
-            下書き削除
-          </button>
+            pinOffline={pinOffline}
+            samples={[...SAMPLE_OPTIONS]}
+            onLoadSample={(key) => handleLoadSample(key as SampleKey)}
+            onExportPng={() => void handleExportPng()}
+            onExportSvg={() => void handleExportSvg()}
+            onClearDraft={handleClearDraft}
+          />
+
           <input
             ref={fileInputRef}
             type="file"
@@ -641,22 +505,6 @@ export const FlowchartEditor = forwardRef<
             }}
           />
         </div>
-
-        <p
-          className="ml-auto w-full text-sm lg:w-auto"
-          role="status"
-          aria-live="polite"
-        >
-          {isStale && (
-            <span className="mr-2 font-medium text-amber-600">
-              プレビューは古い —
-            </span>
-          )}
-          <span className="text-slate-600">{status}</span>
-          {!workspaceMode ? (
-            <span className="ml-2 text-xs text-slate-400">（下書き自動保存）</span>
-          ) : null}
-        </p>
       </header>
 
       {allErrors.length > 0 && (
@@ -683,7 +531,8 @@ export const FlowchartEditor = forwardRef<
       {warnings.length > 0 && allErrors.length === 0 && (
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
           <p className="font-medium">確認（警告）</p>
-          <ul className="list-inside list-disc">
+          <p className="mt-0.5 text-xs text-amber-800">{WARNING_BANNER_HINT}</p>
+          <ul className="mt-1 list-inside list-disc">
             {warnings.map((w) => (
               <li key={w}>
                 <button
@@ -742,45 +591,7 @@ export const FlowchartEditor = forwardRef<
             workspaceMode && paneView === "canvas" ? "hidden lg:flex" : "flex"
           }`}
         >
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-medium text-slate-700">表</h2>
-            {showEditorPanes ? (
-              <div
-              className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
-              role="tablist"
-              aria-label="入力モード"
-            >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={inputMode === "table"}
-                onClick={switchToTable}
-                className={`rounded px-2.5 py-1 font-medium ${
-                  inputMode === "table"
-                    ? "bg-slate-800 text-white"
-                    : "text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                表 UI
-              </button>
-              {!readOnly ? (
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={inputMode === "json"}
-                  onClick={switchToJson}
-                  className={`rounded px-2.5 py-1 font-medium ${
-                    inputMode === "json"
-                      ? "bg-slate-800 text-white"
-                      : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  JSON
-                </button>
-              ) : null}
-            </div>
-            ) : null}
-          </div>
+          <h2 className="text-sm font-medium text-slate-700">表</h2>
 
           {!showEditorPanes ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
@@ -789,7 +600,7 @@ export const FlowchartEditor = forwardRef<
                 または上の「サンプルを選択」から表と図を表示できます
               </p>
             </div>
-          ) : inputMode === "table" || readOnly ? (
+          ) : (
             <>
               {!readOnly ? <CsvPastePanel onApply={handleCsvApply} /> : null}
               <FlowTableEditor
@@ -800,15 +611,6 @@ export const FlowchartEditor = forwardRef<
                 readOnly={readOnly}
               />
             </>
-          ) : (
-            <textarea
-              value={jsonText}
-              onChange={(e) => setJsonText(e.target.value)}
-              readOnly={readOnly}
-              spellCheck={false}
-              className="min-h-[400px] flex-1 resize-y rounded-md border border-slate-300 p-3 font-mono text-xs leading-relaxed text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              aria-label="フローチャート表 JSON"
-            />
           )}
         </section>
 
@@ -846,7 +648,6 @@ export const FlowchartEditor = forwardRef<
                 canvasRef={canvasRef}
                 nodes={nodes}
                 edges={edges}
-                themeId={themeId}
               />
               {isStale && (
                 <div className="pointer-events-none absolute inset-0 flex items-start justify-center rounded-lg bg-amber-50/70 p-4">

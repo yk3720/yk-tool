@@ -30,13 +30,19 @@ export function errorRowIndices(
   return rows;
 }
 
+/** 警告バナー上部の説明（生成は継続する旨） */
+export const WARNING_BANNER_HINT =
+  "図はこのまま生成されます。行をクリックすると表の該当箇所へ移動します。";
+
 /** エラーに加え警告（生成は可能なもの） */
 export function validateTableWarnings(table: FlowTableRow[]): string[] {
   const warnings: string[] = [];
   const { nodes } = parseTable(table);
 
   if (nodes.length === 0) {
-    warnings.push("有効なノードがありません（ID 列を確認してください）");
+    warnings.push(
+      "ID 列が空です — 各行の ID に番号（10, 20…）を入れてください",
+    );
     return warnings;
   }
 
@@ -44,12 +50,12 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
     if (n.type === "判断") {
       if (n.destsDown.length === 0 && n.destsRight.length === 0) {
         warnings.push(
-          `ID ${n.id}（判断）: 下または右の接続先がありません`,
+          `ID ${n.id}（判断）: 接続先(下) か 接続先(右) を入れてください — Yes/No の分岐用です`,
         );
       }
       if (n.destsDown.length > 1) {
         warnings.push(
-          `ID ${n.id}（判断）: 下方向の接続先は 1 件が望ましいです`,
+          `ID ${n.id}（判断）: 接続先(下) は1件にしてください — 複数あると図が分かりにくいです（Yes は下・No は右が一般的です）`,
         );
       }
     }
@@ -61,7 +67,7 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
     const k = posKey(n);
     if (seen.has(k)) {
       warnings.push(
-        `ID ${n.id} と ID ${seen.get(k)}: 同じ行・Level で重なります`,
+        `ID ${n.id} と ID ${seen.get(k)}: 同じ行・Level のため図上で重なります — Level または行をずらしてください`,
       );
     } else {
       seen.set(k, n.id);

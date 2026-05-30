@@ -1,16 +1,15 @@
-import type { FlowchartDocument, FlowTableRow, LayoutConfig } from "./types";
+import type { FlowchartDocument, FlowTableRow } from "./types";
 import { DEFAULT_LAYOUT } from "./types";
 
 export function createDocument(
   table: FlowTableRow[],
-  partial?: Partial<Omit<FlowchartDocument, "version" | "table" | "createdAt">>,
+  partial?: Partial<Omit<FlowchartDocument, "version" | "table" | "layout" | "createdAt">>,
 ): FlowchartDocument {
   return {
     version: 1,
     title: partial?.title ?? "無題のフロー",
     table,
-    layout: { ...DEFAULT_LAYOUT, ...partial?.layout },
-    themeId: partial?.themeId,
+    layout: { ...DEFAULT_LAYOUT },
     createdAt: new Date().toISOString(),
   };
 }
@@ -41,19 +40,11 @@ export function parseFlowchartDocument(
     return { doc: null, errors };
   }
 
-  const layout = {
-    ...DEFAULT_LAYOUT,
-    ...(typeof obj.layout === "object" && obj.layout !== null
-      ? (obj.layout as LayoutConfig)
-      : {}),
-  };
-
   const doc: FlowchartDocument = {
     version: 1,
     title: typeof obj.title === "string" ? obj.title : undefined,
     table: obj.table as FlowTableRow[],
-    layout,
-    themeId: typeof obj.themeId === "string" ? obj.themeId : undefined,
+    layout: { ...DEFAULT_LAYOUT },
     createdAt:
       typeof obj.createdAt === "string"
         ? obj.createdAt
@@ -64,7 +55,14 @@ export function parseFlowchartDocument(
 }
 
 export function serializeDocument(doc: FlowchartDocument): string {
-  return JSON.stringify(doc, null, 2);
+  const payload = {
+    version: doc.version,
+    title: doc.title,
+    table: doc.table,
+    layout: { ...DEFAULT_LAYOUT },
+    createdAt: doc.createdAt,
+  };
+  return JSON.stringify(payload, null, 2);
 }
 
 export function downloadJson(doc: FlowchartDocument, filename?: string) {

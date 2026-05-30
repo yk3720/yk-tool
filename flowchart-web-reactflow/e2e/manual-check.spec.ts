@@ -2,11 +2,6 @@ import { expect, test } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
 
-const FIXTURE_BASIC = path.join(
-  process.cwd(),
-  "fixtures",
-  "sample-basic.json",
-);
 const FIXTURE_SIMPLE_YES = path.join(
   process.cwd(),
   "fixtures",
@@ -17,8 +12,16 @@ function headerRegenerate(page: import("@playwright/test").Page) {
   return page.locator("header").getByRole("button", { name: "再生成" });
 }
 
-function sampleSelect(page: import("@playwright/test").Page) {
-  return page.getByRole("combobox", { name: "サンプル表を読み込む" });
+async function openMoreMenu(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "その他" }).click();
+}
+
+async function loadSampleFromMenu(
+  page: import("@playwright/test").Page,
+  label: string,
+) {
+  await openMoreMenu(page);
+  await page.getByRole("menuitem", { name: label }).click();
 }
 
 const EMPTY_MODULE_MSG = "モジュールを選択してください";
@@ -29,7 +32,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
     await expect(page.getByRole("heading", { name: "Flowchart Web" })).toBeVisible();
 
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(2);
-    await sampleSelect(page).selectOption("m002NineCol");
+    await loadSampleFromMenu(page, "サンプル: M002（9列·段+列）");
 
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);
@@ -48,10 +51,14 @@ async function openModuleWithPreview(
   await page.getByRole("button", { name: "供給動作" }).click();
   const nodeCount = await page.locator(".react-flow__node").count();
   if (nodeCount === 0) {
-    await page.locator("header select").first().selectOption("basic");
+    await loadSampleFromMenu(page, "サンプル: 基本判断");
     await headerRegenerate(page).click();
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
   }
+}
+
+async function addTableRow(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "行を追加" }).click();
 }
 
 test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
@@ -65,10 +72,18 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   });
 
   test("Phase 3: 3ペイン（ナビ・表・プレビュー）", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "モジュール" })).toBeVisible();
-    await expect(page.getByText("装置:")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "フロー" })).toBeVisible();
+    await expect(page.getByRole("combobox", { name: "装置を選択" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
+  });
+
+  test("Phase 3: 装置切替でナビのユニットが変わる", async ({ page }) => {
+    await page.getByRole("combobox", { name: "装置を選択" }).selectOption("press-02");
+    await expect(page.getByText("供給ユニット")).toBeVisible();
+    await expect(page.getByRole("button", { name: "供給動作" })).toBeVisible();
+    await page.getByRole("combobox", { name: "装置を選択" }).selectOption("press-01");
+    await page.getByRole("button", { name: "供給動作" }).click();
   });
 
   test("AC-8: 1画面で表とプレビュー", async ({ page }) => {
@@ -78,16 +93,18 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   });
 
   test("AC-2: 5種ノードの形状が区別できる", async ({ page }) => {
-    await page.getByRole("tab", { name: "JSON" }).click();
-    const textarea = page.getByLabel("フローチャート表 JSON");
-    const doc = JSON.parse(await textarea.inputValue()) as {
-      table: unknown[][];
-    };
-    doc.table.push(
-      [60, "入出力", "", "", 0, "入出力サンプル", "", ""],
-      [70, "手動入力", "", "", 0, "手動入力サンプル", "", ""],
-    );
-    await textarea.fill(JSON.stringify(doc, null, 2));
+    await addTableRow(page);
+    const row6 = page.locator("tbody tr").nth(5);
+    await row6.locator("input").nth(0).fill("60");
+    await row6.locator("select").selectOption("入出力");
+    await row6.locator("input").nth(4).fill("入出力サンプル");
+
+    await addTableRow(page);
+    const row7 = page.locator("tbody tr").nth(6);
+    await row7.locator("input").nth(0).fill("70");
+    await row7.locator("select").selectOption("手動入力");
+    await row7.locator("input").nth(4).fill("手動入力サンプル");
+
     await headerRegenerate(page).click();
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 10_000 });
 
@@ -145,7 +162,8 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(page.getByText(/生成完了/)).toBeVisible();
 
     const downloadPromise = page.waitForEvent("download", { timeout: 15_000 });
-    await page.getByRole("button", { name: "PNG" }).click();
+    await openMoreMenu(page);
+    await page.getByRole("menuitem", { name: "PNG" }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.png$/i);
   });
@@ -156,20 +174,9 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     const nodesBefore = await page.locator(".react-flow__node").count();
     expect(nodesBefore).toBeGreaterThan(0);
 
-    await page.getByRole("tab", { name: "JSON" }).click();
-    const textarea = page.getByLabel("フローチャート表 JSON");
-    const text = await textarea.inputValue();
-    const broken = text.replace(/"99999"/g, '"99999"').replace(
-      /"50"/,
-      '"99999"',
-    );
-    if (broken === text) {
-      const patched = JSON.parse(text) as { table: unknown[][] };
-      patched.table[4][3] = "99999";
-      await textarea.fill(JSON.stringify(patched, null, 2));
-    } else {
-      await textarea.fill(broken);
-    }
+    const brokenRow = page.locator("tbody tr").nth(4);
+    await brokenRow.locator("input").nth(2).fill("99999");
+    await brokenRow.locator("input").nth(2).blur();
 
     await headerRegenerate(page).click();
     await expect(
@@ -184,25 +191,17 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await textCell.blur();
     await expect(page.getByText("プレビューは古い")).toBeVisible();
 
-    const pngBtn = page.getByRole("button", { name: "PNG" });
-    await expect(pngBtn).toBeDisabled();
+    await openMoreMenu(page);
+    await expect(page.getByRole("menuitem", { name: "PNG" })).toBeDisabled();
   });
 
-  test("B-2: JSON 編集後に表 UI で同期", async ({ page }) => {
-    await page.getByRole("tab", { name: "JSON" }).click();
-    const textarea = page.getByLabel("フローチャート表 JSON");
-    const doc = JSON.parse(await textarea.inputValue()) as {
-      table: unknown[][];
-    };
-    doc.table[1][5] = "同期テストラベル";
-    await textarea.fill(JSON.stringify(doc, null, 2));
-
-    await page.getByRole("tab", { name: "表 UI" }).click();
-    await expect(
-      page.locator("tbody input").filter({ hasText: "同期テストラベル" }),
-    ).toHaveCount(0);
-    const row2Text = page.locator("tbody tr").nth(1).locator("input");
-    await expect(row2Text.nth(4)).toHaveValue("同期テストラベル");
+  test("B-2: 表編集が再生成後にプレビューへ反映", async ({ page }) => {
+    const textCell = page.locator("tbody tr").nth(1).locator("input").nth(4);
+    await textCell.fill("同期テストラベル");
+    await textCell.blur();
+    await headerRegenerate(page).click();
+    await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("同期テストラベル")).toBeVisible();
   });
 
   test("B-4: 閲覧専用ラベル", async ({ page }) => {

@@ -21,6 +21,12 @@ describe("parseTable", () => {
     expect(decision?.destsRight).toEqual(["50"]);
   });
 
+  it("joins Text1–Text3 into fullText with newlines", () => {
+    const table = [[10, "処理", "20", "", 0, "主", "副", "補足"]];
+    const { nodes } = parseTable(table);
+    expect(nodes[0]?.fullText).toBe("主\n副\n補足");
+  });
+
   it("parses sample-m002-9col with tier and column (ADR-012)", () => {
     const doc = loadFixture("sample-m002-9col.json");
     const { nodes } = parseTable(doc.table);
@@ -63,6 +69,20 @@ describe("generateFlowchart (golden: sample-basic)", () => {
 
     expect(result.bounds.right).toBeGreaterThan(result.bounds.left);
     expect(result.bounds.bottom).toBeGreaterThan(result.bounds.top);
+  });
+
+  it("tallens nodes when Text1–Text3 span multiple lines", () => {
+    const doc = loadFixture("sample-simple-yes.json");
+    const layout = { ...doc.layout, heightMin: 30 };
+    const result = generateFlowchart(doc.table, layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const n50 = result.placed.find((p) => p.id === "50");
+    const n20 = result.placed.find((p) => p.id === "20");
+    expect(n50?.fullText).toBe("数分追加で煮込む\n再試行");
+    expect(n50?.height).toBeGreaterThan(n20?.height ?? 0);
+    expect(n50?.height).toBe(36);
   });
 
   it("stops on missing connection target", () => {

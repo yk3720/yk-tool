@@ -10,8 +10,10 @@ import {
 } from "@/lib/flowchart/moduleDraftLoader";
 import type { ModuleSnapshot } from "@/lib/flowchart/moduleDraftRepository";
 import {
-  DEMO_DEVICE,
+  DEMO_DEVICES,
+  findDevice,
   findModule,
+  moduleDraftKey,
 } from "@/lib/flowchart/moduleHierarchy";
 import {
   getOfflineModuleCache,
@@ -30,11 +32,19 @@ type Props = {
   authDisabled?: boolean;
 };
 
+function expandedUnitsForDevice(deviceId: string): Set<string> {
+  const device = findDevice(DEMO_DEVICES, deviceId);
+  return new Set(device?.units.map((u) => u.id) ?? []);
+}
+
 export function FlowchartWorkspace({ role, email, authDisabled }: Props) {
   const editorRef = useRef<FlowchartEditorHandle>(null);
+  const [selectedDeviceId, setSelectedDeviceId] = useState(
+    DEMO_DEVICES[0]?.id ?? "",
+  );
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
-  const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(
-    () => new Set(DEMO_DEVICE.units.map((u) => u.id)),
+  const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(() =>
+    expandedUnitsForDevice(DEMO_DEVICES[0]?.id ?? ""),
   );
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [initialSnapshot, setInitialSnapshot] =
@@ -49,13 +59,16 @@ export function FlowchartWorkspace({ role, email, authDisabled }: Props) {
   const isOffline =
     typeof navigator !== "undefined" && !navigator.onLine;
 
+  const device =
+    findDevice(DEMO_DEVICES, selectedDeviceId) ?? DEMO_DEVICES[0];
+
   const persistCurrentModule = useCallback(() => {
-    if (!selectedModuleId || !editorRef.current) return;
+    if (!selectedModuleId || !editorRef.current || !device) return;
     const snapshot = editorRef.current.getSnapshot();
-    void persistModuleDraft(selectedModuleId, snapshot, {
+    void persistModuleDraft(selectedDeviceId, selectedModuleId, snapshot, {
       saveToCloud: isEditor,
     });
-  }, [selectedModuleId, isEditor]);
+  }, [selectedModuleId, selectedDeviceId, device, isEditor]);
 
   const handleToggleUnit = useCallback((unitId: string) => {
     setExpandedUnitIds((prev) => {
@@ -66,47 +79,72 @@ export function FlowchartWorkspace({ role, email, authDisabled }: Props) {
     });
   }, []);
 
-  const loadModule = useCallback(async (moduleId: string) => {
-    setLoadingModule(true);
-    try {
-      const result = await loadModuleDraft(moduleId);
-      setInitialSnapshot(result.snapshot);
-      setLoadSource(result.source);
-      setOfflineCachedAt(result.offlineCachedAt ?? null);
-      const cache = await getOfflineModuleCache(moduleId);
-      setPinned(cache?.pinned ?? false);
-      setLoadKey((k) => k + 1);
-    } finally {
-      setLoadingModule(false);
-    }
-  }, []);
+  const loadModule = useCallback(
+    async (deviceId: string, moduleId: string) => {
+      setLoadingModule(true);
+      try {
+        const result = await loadModuleDraft(deviceId, moduleId);
+        setInitialSnapshot(result.snapshot);
+        setLoadSource(result.source);
+        setOfflineCachedAt(result.offlineCachedAt ?? null);
+        const storageKey = moduleDraftKey(deviceId, moduleId);
+        const cache = await getOfflineModuleCache(storageKey);
+        setPinned(cache?.pinned ?? false);
+        setLoadKey((k) => k + 1);
+      } finally {
+        setLoadingModule(false);
+      }
+    },
+    [],
+  );
 
   const handleSelectModule = useCallback(
     (moduleId: string) => {
       persistCurrentModule();
       setSelectedModuleId(moduleId);
-      const found = findModule(DEMO_DEVICE, moduleId);
+      const found = findModule(device, moduleId);
       if (found) {
         setExpandedUnitIds((prev) => new Set(prev).add(found.unit.id));
       }
-      void loadModule(moduleId);
+      void loadModule(selectedDeviceId, moduleId);
     },
-    [persistCurrentModule, loadModule],
+    [persistCurrentModule, loadModule, device, selectedDeviceId],
+  );
+
+  const handleSelectDevice = useCallback(
+    (deviceId: string) => {
+      if (deviceId === selectedDeviceId) return;
+      persistCurrentModule();
+      setSelectedDeviceId(deviceId);
+      setSelectedModuleId(null);
+      setInitialSnapshot(null);
+      setLoadSource("");
+      setOfflineCachedAt(null);
+      setPinned(false);
+      setExpandedUnitIds(expandedUnitsForDevice(deviceId));
+      setLoadKey((k) => k + 1);
+    },
+    [persistCurrentModule, selectedDeviceId],
   );
 
   const handleTogglePin = useCallback(async () => {
     if (!selectedModuleId) return;
+    const storageKey = moduleDraftKey(selectedDeviceId, selectedModuleId);
     const next = !pinned;
-    await setOfflineModulePinned(selectedModuleId, next);
+    await setOfflineModulePinned(storageKey, next);
     setPinned(next);
     if (editorRef.current) {
-      await putOfflineFromEditor(selectedModuleId, editorRef, next);
+      await putOfflineFromEditor(storageKey, editorRef, next);
     }
-  }, [selectedModuleId, pinned]);
+  }, [selectedModuleId, selectedDeviceId, pinned]);
 
   const moduleInfo = selectedModuleId
-    ? findModule(DEMO_DEVICE, selectedModuleId)
+    ? findModule(device, selectedModuleId)
     : null;
+
+  const contextLabel = moduleInfo
+    ? `${moduleInfo.unit.label} · ${moduleInfo.module.label}`
+    : undefined;
 
   let statusBanner = "";
   if (loadingModule) {
@@ -137,24 +175,26 @@ export function FlowchartWorkspace({ role, email, authDisabled }: Props) {
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <ModuleNavPane
-          device={DEMO_DEVICE}
+          devices={DEMO_DEVICES}
+          selectedDeviceId={selectedDeviceId}
+          device={device}
           selectedModuleId={selectedModuleId}
           expandedUnitIds={expandedUnitIds}
           collapsed={navCollapsed}
           onToggleCollapsed={() => setNavCollapsed((v) => !v)}
+          onSelectDevice={handleSelectDevice}
           onToggleUnit={handleToggleUnit}
           onSelectModule={handleSelectModule}
         />
         <FlowchartEditor
           key={
             selectedModuleId
-              ? `${selectedModuleId}-${loadKey}`
-              : "__none__"
+              ? `${selectedDeviceId}:${selectedModuleId}-${loadKey}`
+              : `${selectedDeviceId}:__none__`
           }
           ref={editorRef}
-          deviceName={DEMO_DEVICE.name}
+          contextLabel={contextLabel}
           moduleId={selectedModuleId}
-          moduleLabel={moduleInfo?.module.label}
           initialSnapshot={initialSnapshot}
           workspaceMode
           readOnly={!isEditor}
@@ -179,7 +219,7 @@ function formatCachedAt(iso: string): string {
 }
 
 async function putOfflineFromEditor(
-  moduleId: string,
+  storageKey: string,
   editorRef: React.RefObject<FlowchartEditorHandle | null>,
   pinned: boolean,
 ) {
@@ -187,7 +227,7 @@ async function putOfflineFromEditor(
   const { putOfflineModuleCache } = await import(
     "@/lib/flowchart/offlineFlowCache"
   );
-  await putOfflineModuleCache(moduleId, editorRef.current.getSnapshot(), {
+  await putOfflineModuleCache(storageKey, editorRef.current.getSnapshot(), {
     pinned,
   });
 }

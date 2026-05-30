@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI が自動でコードを書く時代 — Cursor Agents Window とは</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @media print {
+      #toc, #pdf-btn, nav { display: none !important; }
+      section { break-inside: avoid; }
+    }
+    .term-box {
+      border-left: 3px solid #10b981;
+      background: #f0fdf4;
+      padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0 0.375rem 0.375rem 0;
+      font-size: 0.875rem;
+    }
+    .analogy-card {
+      background: linear-gradient(135deg, #fefce8 0%, #f0fdf4 100%);
+      border: 1px solid #bbf7d0;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+    }
+    #toc {
+      position: fixed;
+      top: 1.5rem;
+      left: 1rem;
+      width: 200px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 0.75rem;
+      z-index: 50;
+    }
+    @media (max-width: 1280px) { #toc { display: none; } }
+    .misconception-card {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.75rem 0;
+    }
+    .flow-num {
+      min-width: 2rem;
+      height: 2rem;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .concept-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    .concept-header {
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .concept-body {
+      padding: 0.75rem 1rem;
+      background: white;
+      font-size: 0.875rem;
+    }
+    .price-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+<!-- 目次 -->
+<nav id="toc">
+  <p class="font-bold text-gray-700 mb-2 text-xs uppercase tracking-wide">目次</p>
+  <ul class="space-y-1 text-gray-600">
+    <li><a href="#summary" class="hover:text-emerald-600">ひとことで言えば</a></li>
+    <li><a href="#why" class="hover:text-emerald-600">なぜ注目されているのか</a></li>
+    <li><a href="#core3" class="hover:text-emerald-600">まず理解する3つ</a></li>
+    <li><a href="#concepts" class="hover:text-emerald-600">主要概念・しくみ</a></li>
+    <li><a href="#misconceptions" class="hover:text-emerald-600">よくある誤解</a></li>
+    <li><a href="#pricing" class="hover:text-emerald-600">料金プラン</a></li>
+    <li><a href="#glossary" class="hover:text-emerald-600">知っておきたい言葉</a></li>
+    <li><a href="#next" class="hover:text-emerald-600">もっと知りたい人へ</a></li>
+    <li><a href="#refs" class="hover:text-emerald-600">参考文献</a></li>
+  </ul>
+</nav>
+
+<!-- ヘッダー -->
+<header class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white py-14 px-6 text-center">
+  <div class="flex justify-center mb-4">
+    <i data-lucide="bot" class="w-14 h-14 text-emerald-200"></i>
+  </div>
+  <h1 class="text-3xl md:text-4xl font-black mb-3 leading-tight">AI が自動でコードを書く時代</h1>
+  <p class="text-lg text-emerald-200 font-medium mb-2">Cursor Agents Window とは何か</p>
+  <p class="text-sm text-emerald-300 max-w-xl mx-auto">「プログラミングがよくわからなくても大丈夫」な入門図解</p>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-10 space-y-16">
+
+  <!-- Section 1: ひとことで言えば -->
+  <section id="summary">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="zap" class="w-6 h-6"></i>ひとことで言えば
+    </h2>
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-lg font-semibold text-emerald-900 leading-relaxed">
+      Cursor Agents Window とは、<strong>複数の AI アシスタントに同時に仕事を頼んで、その進み具合を一画面で見渡せる「指揮センター」</strong>のようなものです。
+    </div>
+    <p class="mt-4 text-gray-700 leading-relaxed">
+      Cursor（カーソル）はプログラマーが使う AI つきコードエディタです。2026年4月に大きなバージョンアップがあり、「Agents Window（エージェントウィンドウ）」と呼ばれる新しい画面が登場しました。この画面を使うと、AI に複数の作業を同時に任せながら、それぞれの進捗をまとめて確認できるようになりました。
+    </p>
+    <div class="term-box mt-3">
+      <strong>エージェント（Agent）</strong>: ここでは「AI が自律的に動いて作業を進める存在」のことです。人間が細かく指示しなくても、ゴールを伝えるだけで自分でファイルを調べ、変更し、結果を返してくれます。
+    </div>
+  </section>
+
+  <!-- Section 2: なぜ注目されているのか -->
+  <section id="why">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="trending-up" class="w-6 h-6"></i>なぜ今、注目されているのか
+    </h2>
+    <p class="text-gray-700 leading-relaxed mb-4">
+      プログラマーの仕事は、ここ数年で大きく変わりつつあります。以前は「自分でコードを1行ずつ書く」のが当たり前でしたが、AI が進化したことで「AI に書いてもらい、人間はレビューする」という流れが定着し始めました。
+    </p>
+
+    <div class="space-y-3">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div>
+          <p class="font-semibold">「AI チャット」から「AI エージェント」へ</p>
+          <p class="text-sm text-gray-600 mt-1">従来の ChatGPT のような AI は「質問して答えを返してもらう」ものでした。しかし最新のエージェント型 AI は「ゴールを伝えると、自分でファイルを読み書きしながら課題を解決する」ところまで動きます。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div>
+          <p class="font-semibold">1人で複数の AI アシスタントを動かせる時代に</p>
+          <p class="text-sm text-gray-600 mt-1">Agents Window では、複数の AI アシスタントを同時に起動して、それぞれ別の仕事をさせることができます。「テスト担当」「ドキュメント担当」「バグ修正担当」のように役割を分けて、並行して動かすようなイメージです。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div>
+          <p class="font-semibold">「プログラマーが手を動かす時代」から「AI を監督する時代」へ</p>
+          <p class="text-sm text-gray-600 mt-1">Cursor 3 のリリース発表では「ファイルを編集する人からエージェントを指揮する人へ」という表現が使われました。プログラマーの役割が、職人から監督・ディレクターへと変化しつつあります。</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-gray-700 leading-relaxed mt-4">
+      Agents Window はこの変化を実現するための画面として、2026年4月2日（日本時間）にリリースされました。
+    </p>
+  </section>
+
+  <!-- Section 3: まず理解する3つ -->
+  <section id="core3">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="layers" class="w-6 h-6"></i>まず理解する3つ
+    </h2>
+    <p class="text-sm text-gray-500 mb-5">この3つがわかれば、会話に参加できるレベルになります。</p>
+
+    <div class="space-y-4">
+      <div class="concept-box">
+        <div class="concept-header flex items-center gap-2">
+          <i data-lucide="users" class="w-4 h-4"></i> 1. 複数の AI に同時に仕事を頼める
+        </div>
+        <div class="concept-body text-gray-700">
+          <p>「テストを書いて」「バグを直して」「ドキュメントを更新して」——これをひとりの AI に順番にやらせると時間がかかります。Agents Window では、これを<strong>別々の AI アシスタントに同時に頼む</strong>ことができます。4人分の仕事を30分で終わらせることも可能です。</p>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-header flex items-center gap-2">
+          <i data-lucide="cloud" class="w-4 h-4"></i> 2. パソコンを閉じても AI が働き続ける
+        </div>
+        <div class="concept-body text-gray-700">
+          <p>「クラウドエージェント」と呼ばれる機能を使うと、大きな仕事をインターネット上のサーバーで動かすことができます。<strong>パソコンの電源を切っても作業は続いており</strong>、数時間後にパソコンを開くと結果が出来上がっています。夜のうちに仕事を任せて、朝に確認するイメージです。</p>
+        </div>
+      </div>
+
+      <div class="concept-box">
+        <div class="concept-header flex items-center gap-2">
+          <i data-lucide="git-branch" class="w-4 h-4"></i> 3. 各 AI に専用の「作業部屋」を与える
+        </div>
+        <div class="concept-body text-gray-700">
+          <p>複数の AI が同じファイルを同時に書き換えると、変更がぶつかってしまいます。Agents Window では「ワークツリー」という仕組みを使い、<strong>各 AI に独立した作業部屋（ファイルのコピー）を与える</strong>ことができます。お互いの作業を邪魔せず、失敗したら部屋ごと捨てられます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: 主要概念・しくみ -->
+  <section id="concepts">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="map" class="w-6 h-6"></i>主要概念・しくみ
+    </h2>
+
+    <!-- 全体像の図 -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+      <p class="text-xs text-gray-500 mb-4 uppercase tracking-wide font-semibold">Agents Window 全体イメージ</p>
+      <div class="flex flex-col items-center gap-2">
+        <div class="bg-emerald-600 text-white rounded-xl px-8 py-3 font-bold text-sm text-center w-full max-w-sm">
+          あなた（指揮官）
+        </div>
+        <div class="flex gap-2 text-gray-400 text-xs items-center">
+          <div class="border-l-2 border-emerald-400 h-4"></div>
+          <span>Agents Window（指揮センター）</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 w-full">
+          <div class="bg-green-100 border border-green-300 rounded-lg p-2 text-center text-xs">
+            <i data-lucide="monitor" class="w-4 h-4 mx-auto mb-1 text-green-700"></i>
+            AI 担当者A<br><span class="text-gray-500">（ローカル）</span>
+          </div>
+          <div class="bg-sky-100 border border-sky-300 rounded-lg p-2 text-center text-xs">
+            <i data-lucide="cloud" class="w-4 h-4 mx-auto mb-1 text-sky-700"></i>
+            AI 担当者B<br><span class="text-gray-500">（クラウド）</span>
+          </div>
+          <div class="bg-purple-100 border border-purple-300 rounded-lg p-2 text-center text-xs">
+            <i data-lucide="git-branch" class="w-4 h-4 mx-auto mb-1 text-purple-700"></i>
+            AI 担当者C<br><span class="text-gray-500">（独立部屋）</span>
+          </div>
+          <div class="bg-amber-100 border border-amber-300 rounded-lg p-2 text-center text-xs">
+            <i data-lucide="server" class="w-4 h-4 mx-auto mb-1 text-amber-700"></i>
+            AI 担当者D<br><span class="text-gray-500">（リモート）</span>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">それぞれが別のタスクを同時に進行</p>
+      </div>
+    </div>
+
+    <!-- たとえ話 1 -->
+    <h3 class="font-bold text-gray-800 mt-6 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 1: 「複数のアシスタントへの同時依頼」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        大きな引っ越しを考えてください。1人で全部やるより、「梱包係」「掃除係」「手続き係」に分けてお願いした方が早く終わります。Agents Window はこれと同じで、<strong>「テスト担当 AI」「バグ修正 AI」「ドキュメント AI」に別々の仕事を同時に頼む</strong>ことができます。人間の指揮官（あなた）は進捗を確認しながら、必要に応じて指示を変えるだけです。
+      </p>
+    </div>
+
+    <!-- たとえ話 2 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 2: 「部屋ごとに分かれた作業場（ワークツリー）」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        料理教室で同じレシピを複数の生徒が同時に作るとき、同じまな板を取り合うと混乱します。「ワークツリー」はそれぞれの生徒に<strong>専用のまな板と食材を用意する</strong>ようなものです。失敗した生徒の食材はそのまま捨てられ、成功した生徒の料理だけが最終的な食卓に並びます。
+      </p>
+    </div>
+
+    <!-- たとえ話 3 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 3: 「工場の夜間シフト（クラウドエージェント）」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        工場では昼間に作業員が働き、夜はロボットが無人で生産を続けます。クラウドエージェントはこの「夜間ロボット」に相当します。<strong>パソコンを閉じてもインターネット上のサーバーで AI が働き続け</strong>、翌朝には完成品（コードの変更）が出来上がっています。大きな仕事ほど夜間に任せると効率的です。
+      </p>
+    </div>
+
+    <!-- たとえ話 4 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 4: 「設計図のチェック（プランモード）」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        リフォーム工事では、職人が工事を始める前に<strong>設計図を施主に見せて確認してもらう</strong>ことが普通です。「プランモード」はこれと同じで、AI が実際に作業を始める前に「こういう手順で進めますが、よいですか？」と計画書を出してきます。方向性が違ったら、この段階で修正できるので、後から「こんなつもりじゃなかった」が防げます。
+      </p>
+    </div>
+
+    <!-- 使い方の流れ -->
+    <h3 class="font-bold text-gray-800 mt-7 mb-3">Agents Window の基本的な使い方の流れ</h3>
+    <div class="bg-white border border-gray-200 rounded-xl p-5">
+      <div class="space-y-3">
+        <div class="flow-step">
+          <div class="flow-num text-xs">開</div>
+          <div>
+            <p class="font-semibold text-sm">Ctrl+Shift+P → 「Open Agents Window」</p>
+            <p class="text-xs text-gray-500 mt-0.5">Mac は Cmd+Shift+P。コマンドパレットという画面から開きます。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num text-xs">計</div>
+          <div>
+            <p class="font-semibold text-sm">複雑なタスクは「プランモード」で計画を確認</p>
+            <p class="text-xs text-gray-500 mt-0.5">入力欄で「Shift+Tab」（Shift を押しながら Tab キー）を押すとモード切り替え。AI が設計書を出したら読んで「OK」か修正を伝える。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num text-xs">頼</div>
+          <div>
+            <p class="font-semibold text-sm">ゴールを日本語で伝えて任せる</p>
+            <p class="text-xs text-gray-500 mt-0.5">「ログイン機能を追加して」のようにゴールだけ伝えれば、AI が自分でファイルを読んで作業します。</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num text-xs">確</div>
+          <div>
+            <p class="font-semibold text-sm">変更内容（差分）を確認して承認 or 却下</p>
+            <p class="text-xs text-gray-500 mt-0.5">AI が変更したのはどこか？がわかりやすく表示されます。問題なければ承認してコードに反映。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: よくある誤解 -->
+  <section id="misconceptions">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="help-circle" class="w-6 h-6"></i>よくある誤解・思い込み
+    </h2>
+
+    <div class="misconception-card">
+      <div class="flex items-start gap-3">
+        <div class="bg-orange-200 rounded-full p-1 flex-shrink-0 mt-0.5">
+          <i data-lucide="x" class="w-3 h-3 text-orange-700"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-sm">「AI が完全に自律して何でもやってくれる」</p>
+          <p class="text-sm text-gray-700 mt-1">実際には、AI はジュニアエンジニア（経験の浅い担当者）のようなものです。具体的でスコープの決まった仕事（テストを書く・ドキュメントを更新するなど）は得意ですが、あいまいな要件や複雑な設計判断はまだ人間のチェックが必要です。「全部お任せ」ではなく「任せて確認する」が現実的な使い方です。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="misconception-card">
+      <div class="flex items-start gap-3">
+        <div class="bg-orange-200 rounded-full p-1 flex-shrink-0 mt-0.5">
+          <i data-lucide="x" class="w-3 h-3 text-orange-700"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-sm">「Agents Window はエンジニアにしか関係ない話だ」</p>
+          <p class="text-sm text-gray-700 mt-1">確かに実際に操作するのは主にエンジニアです。しかし「AI に仕事を並列で頼める」「PC を閉じても作業が続く」という仕組みを知ることは、<strong>プロジェクトの依頼・コスト見積もり・スケジュール感の共有</strong>において非エンジニアにも大いに役立ちます。道具の存在を知らずにいると、「なぜエンジニアがこんなに早く仕上げられるのか」も「なぜコストがかかるのか」も見えなくなります。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="misconception-card">
+      <div class="flex items-start gap-3">
+        <div class="bg-orange-200 rounded-full p-1 flex-shrink-0 mt-0.5">
+          <i data-lucide="x" class="w-3 h-3 text-orange-700"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-sm">「Agents Window が使えると ChatGPT は要らなくなる」</p>
+          <p class="text-sm text-gray-700 mt-1">Agents Window はあくまで「コーディング作業」に特化したツールです。ChatGPT のような汎用 AI とは目的が異なり、「コードのファイルを操作して実際の変更を行う」という点が最大の違いです。両者は補完関係にあります。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="misconception-card">
+      <div class="flex items-start gap-3">
+        <div class="bg-orange-200 rounded-full p-1 flex-shrink-0 mt-0.5">
+          <i data-lucide="x" class="w-3 h-3 text-orange-700"></i>
+        </div>
+        <div>
+          <p class="font-semibold text-sm">「AI に任せれば多いほどよい」</p>
+          <p class="text-sm text-gray-700 mt-1">並列で動かすエージェントが多いほどコストがかかります。また、確認が増えすぎると逆に管理が大変になります。「何を AI に任せ、何は自分でやるか」を選ぶ判断眼こそが、これからの時代に求められるスキルです。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: 料金プラン -->
+  <section id="pricing">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="credit-card" class="w-6 h-6"></i>料金プラン
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">2026年5月時点。年払いで20%お得になります。$1 ≈ 155円（参考値）。</p>
+
+    <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <div class="price-row px-4 bg-gray-50">
+        <div class="w-32 font-bold text-xs text-gray-500 uppercase">プラン</div>
+        <div class="w-28 font-bold text-xs text-gray-500 uppercase">月額</div>
+        <div class="flex-1 font-bold text-xs text-gray-500 uppercase">こんな人向け</div>
+      </div>
+      <div class="price-row px-4">
+        <div class="w-32 font-semibold text-sm">Hobby<br><span class="text-xs text-gray-400 font-normal">（無料）</span></div>
+        <div class="w-28 text-sm">$0（無料）<br><span class="text-xs text-gray-400">補完・エージェント利用に制限あり</span></div>
+        <div class="flex-1 text-xs text-gray-600">試しに使ってみたい人</div>
+      </div>
+      <div class="price-row px-4 bg-emerald-50">
+        <div class="w-32 font-semibold text-sm text-emerald-800">Pro ★人気</div>
+        <div class="w-28 text-sm font-bold text-emerald-700">$20<br><span class="text-xs font-normal text-emerald-600">（約3,100円/月）</span></div>
+        <div class="flex-1 text-xs text-gray-600">毎日使う個人開発者・エンジニア</div>
+      </div>
+      <div class="price-row px-4">
+        <div class="w-32 font-semibold text-sm">Pro+</div>
+        <div class="w-28 text-sm">$60<br><span class="text-xs text-gray-400">（約9,300円/月）</span></div>
+        <div class="flex-1 text-xs text-gray-600">AI 使用量が多いヘビーユーザー</div>
+      </div>
+      <div class="price-row px-4">
+        <div class="w-32 font-semibold text-sm">Ultra</div>
+        <div class="w-28 text-sm">$200<br><span class="text-xs text-gray-400">（約31,000円/月）</span></div>
+        <div class="flex-1 text-xs text-gray-600">AI をフル活用する専門開発者</div>
+      </div>
+      <div class="price-row px-4 border-0">
+        <div class="w-32 font-semibold text-sm">Teams<br><span class="text-xs text-gray-400 font-normal">（企業向け）</span></div>
+        <div class="w-28 text-sm">$40/人<br><span class="text-xs text-gray-400">（約6,200円/人/月）</span></div>
+        <div class="flex-1 text-xs text-gray-600">チーム管理・セキュリティが必要な組織</div>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-600 mt-4 leading-relaxed">
+      ほとんどの個人開発者は <strong>Pro（月約3,100円）</strong> で十分です。月に$20分のクレジット（AI に仕事を頼むための予算）が含まれており、使い切ったら追加課金という仕組みです。<strong>無料プランはエージェントの利用回数と AI の補完機能に上限</strong>があり、Agents Window の主要機能はフル活用できません。管理ダッシュボードで支出上限を設定しておくと予期せぬ過課金を防げます。
+    </p>
+  </section>
+
+  <!-- Section 7: 知っておきたい言葉 -->
+  <section id="glossary">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="book-open" class="w-6 h-6"></i>知っておきたい言葉
+    </h2>
+    <dl class="space-y-4">
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Cursor（カーソル）</dt>
+        <dd class="text-sm text-gray-700 mt-1">AI 機能を組み込んだコードエディタ。Visual Studio Code（VS Code）をベースに作られており、AI がコードの提案・生成・修正を行ってくれる。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">エージェント（Agent）</dt>
+        <dd class="text-sm text-gray-700 mt-1">ゴールを伝えると自律的に動いて仕事を進める AI のこと。ファイルを読んで書き換えたり、エラーを修正したりと、単なる「回答する AI」より能動的に動く。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">クラウドエージェント / バックグラウンドエージェント</dt>
+        <dd class="text-sm text-gray-700 mt-1">インターネット上のサーバーで動くエージェント。パソコンを閉じても動き続け、数時間後に結果を返してくれる。「夜間シフト」のように長時間の作業に向いている。→ エージェントと対比。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">ワークツリー（Worktree）</dt>
+        <dd class="text-sm text-gray-700 mt-1">各エージェントに割り当てる「専用の作業部屋（ファイルのコピー）」。別のエージェントと作業がぶつかるのを防ぐ。失敗しても部屋ごと捨てられる。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">差分（Diff）</dt>
+        <dd class="text-sm text-gray-700 mt-1">AI が変更した箇所だけをわかりやすく表示したもの。「ここを追加した」「ここを削除した」が色分けで見える。全文を読まなくても変更点の確認ができる。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">プランモード（Plan Mode）</dt>
+        <dd class="text-sm text-gray-700 mt-1">AI が実際に作業を始める前に計画書を出してくれるモード。方向性を確認してから作業に入るため、「やり直し」が減る。複雑な依頼をするときに有効。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">デザインモード（Design Mode）</dt>
+        <dd class="text-sm text-gray-700 mt-1">ウェブサイトやアプリの画面（見た目の部分）を見ながら「このボタン」「この文字」と直接指定して AI に修正を頼めるモード。言葉だけで場所を説明しなくてよいので直感的に使える。
+        <br><span class="text-xs text-gray-500 mt-1 block">※「フロントエンド」= 利用者が目にする画面側のこと。ボタン・色・レイアウトなどの見た目部分。これに対し「バックエンド」はデータ処理など裏側の仕組みを指す。</span></dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">PR（Pull Request：プルリクエスト）</dt>
+        <dd class="text-sm text-gray-700 mt-1">コードの変更を本番環境に反映する前に、チームメンバーにレビューを依頼する仕組み。Agents Window ではこの管理画面も内蔵されており、AI が作った変更をそのまま PR として提出できる。</dd>
+      </div>
+      <div>
+        <dt class="font-bold text-gray-900">バイブコーディング（Vibe Coding）</dt>
+        <dd class="text-sm text-gray-700 mt-1">「雰囲気でコードを書く」という造語。AI に「なんとなくこんな感じ」とゴールだけ伝えて、細かい実装は AI に任せるスタイルのこと。Agents Window はこのスタイルをより洗練させたもの。</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Section 8: もっと知りたい人へ -->
+  <section id="next">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>もっと知りたい人へ
+    </h2>
+    <div class="grid md:grid-cols-2 gap-3">
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="bot" class="w-5 h-5 text-emerald-600"></i>
+          <p class="font-semibold text-sm">AI エージェント全般の進化</p>
+        </div>
+        <p class="text-xs text-gray-600">OpenAI・Anthropic・Google など各社が開発するエージェント型 AI の最新動向。コーディング以外の仕事への応用も急拡大中。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="github" class="w-5 h-5 text-emerald-600"></i>
+          <p class="font-semibold text-sm">GitHub との連携</p>
+        </div>
+        <p class="text-xs text-gray-600">コードの変更履歴管理サービス「GitHub」と Cursor の連携。PR の自動作成・レビューの自動化など、チーム開発での活用方法。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="message-circle" class="w-5 h-5 text-emerald-600"></i>
+          <p class="font-semibold text-sm">Slack / Linear との連携</p>
+        </div>
+        <p class="text-xs text-gray-600">チャットツール（Slack）やタスク管理ツール（Linear）から Cloud Agent を操作できる機能。「スマホから AI に仕事を頼む」体験が実現しつつある。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="cpu" class="w-5 h-5 text-emerald-600"></i>
+          <p class="font-semibold text-sm">ソフトウェア開発の未来</p>
+        </div>
+        <p class="text-xs text-gray-600">AI がコードのほとんどを書くようになった場合、エンジニアの仕事はどう変わるか。「設計・レビュー・判断」に特化する時代の働き方。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 9: 参考文献 -->
+  <section id="refs">
+    <h2 class="text-2xl font-black text-emerald-700 mb-4 flex items-center gap-2">
+      <i data-lucide="link" class="w-6 h-6"></i>参考文献・URL
+    </h2>
+    <ul class="space-y-3 text-sm">
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://cursor.com/docs/agent/agents-window" target="_blank" class="text-emerald-700 hover:underline font-medium">Agents Window | Cursor 公式ドキュメント（英語）</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://nannyakore.com/ja/blog/cursor-agents-window/" target="_blank" class="text-emerald-700 hover:underline">Cursor Agents Window とは？ | nannyakore.com（日本語）</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://chotto.news/how-to-use-the-cursormultitask-function-how-to-start-parallel-processing-immediately-in-agents-window/" target="_blank" class="text-emerald-700 hover:underline">Cursor /multitask 機能の使い方 | CHOTTO NEWS（日本語）</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://www.datacamp.com/blog/cursor-3" target="_blank" class="text-emerald-700 hover:underline">What Is Cursor 3? Agents, Worktrees, and What's New | DataCamp</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://byteiota.com/cursor-3-agents-window-ai-coding-tutorial-2026/" target="_blank" class="text-emerald-700 hover:underline">Cursor 3 Agents Window AI Coding Tutorial 2026 | byteiota</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://www.nocode.mba/articles/cursor-pricing" target="_blank" class="text-emerald-700 hover:underline">Cursor Pricing 2026: All 6 Plans Compared | nocode.mba</a>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- PDF ボタン -->
+<button id="pdf-btn" onclick="window.print()"
+  class="fixed bottom-6 right-6 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold z-50 transition-colors">
+  <i data-lucide="download" class="w-4 h-4"></i> PDF で保存
+</button>
+
+<footer class="text-center text-xs text-gray-400 py-8">
+  CuriosityMap — Cursor Agents Window ｜ 2026年5月28日
+</footer>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

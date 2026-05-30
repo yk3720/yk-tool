@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursor Agents Window — エージェント中心開発の実践ガイド</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    @media print {
+      #toc, #pdf-btn, nav { display: none !important; }
+      section { break-inside: avoid; }
+    }
+    .term-box {
+      border-left: 3px solid #6366f1;
+      background: #f5f3ff;
+      padding: 0.5rem 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0 0.375rem 0.375rem 0;
+      font-size: 0.875rem;
+    }
+    .analogy-card {
+      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+      border: 1px solid #bfdbfe;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+    }
+    #toc {
+      position: fixed;
+      top: 1.5rem;
+      left: 1rem;
+      width: 200px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-size: 0.75rem;
+      z-index: 50;
+    }
+    @media (max-width: 1280px) { #toc { display: none; } }
+    .section-badge {
+      display: inline-block;
+      background: #6366f1;
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 9999px;
+      margin-right: 0.4rem;
+      vertical-align: middle;
+    }
+    .pitfall-card {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin: 0.75rem 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 0.75rem 0;
+    }
+    .flow-num {
+      min-width: 2rem;
+      height: 2rem;
+      background: #6366f1;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .arch-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+    .arch-header {
+      background: #6366f1;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .arch-body {
+      padding: 0.75rem 1rem;
+      background: white;
+    }
+    .price-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .price-header {
+      padding: 0.625rem 1rem;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+    .price-body {
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      background: white;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+<!-- 目次（デスクトップ固定） -->
+<nav id="toc">
+  <p class="font-bold text-gray-700 mb-2 text-xs uppercase tracking-wide">目次</p>
+  <ul class="space-y-1 text-gray-600">
+    <li><a href="#summary" class="hover:text-indigo-600">ひとことで言えば</a></li>
+    <li><a href="#why" class="hover:text-indigo-600">なぜ生まれたのか</a></li>
+    <li><a href="#core3" class="hover:text-indigo-600">まず理解する3つ</a></li>
+    <li><a href="#concepts" class="hover:text-indigo-600">主要概念・アーキテクチャ</a></li>
+    <li><a href="#pitfalls" class="hover:text-indigo-600">落とし穴</a></li>
+    <li><a href="#pricing" class="hover:text-indigo-600">料金プラン</a></li>
+    <li><a href="#glossary" class="hover:text-indigo-600">専門用語集</a></li>
+    <li><a href="#next" class="hover:text-indigo-600">次に学ぶと良いもの</a></li>
+    <li><a href="#refs" class="hover:text-indigo-600">参考文献</a></li>
+  </ul>
+</nav>
+
+<!-- ヘッダー -->
+<header class="bg-gradient-to-br from-indigo-700 to-violet-700 text-white py-14 px-6 text-center">
+  <div class="flex justify-center mb-4">
+    <i data-lucide="layout-dashboard" class="w-14 h-14 text-indigo-200"></i>
+  </div>
+  <h1 class="text-3xl md:text-4xl font-black mb-3 leading-tight">Cursor Agents Window</h1>
+  <p class="text-lg text-indigo-200 font-medium mb-2">エージェント中心開発の実践ガイド</p>
+  <p class="text-sm text-indigo-300 max-w-xl mx-auto">対象: 実務経験のある理系エンジニア ｜ Cursor 3（2026年4月2日）リリース機能</p>
+</header>
+
+<main class="max-w-3xl mx-auto px-4 py-10 space-y-16">
+
+  <!-- Section 1: ひとことで言えば -->
+  <section id="summary">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="zap" class="w-6 h-6"></i>ひとことで言えば
+    </h2>
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 text-lg font-semibold text-indigo-900 leading-relaxed">
+      Agents Window は、複数の AI エージェントをローカル・クラウド・リモート SSH・Git worktree をまたいで並列管理するための<strong>エージェント専用コントロールプレーン</strong>である。
+    </div>
+    <p class="mt-4 text-gray-700 leading-relaxed">
+      Cursor 3 以前は「エディタにチャットを添えた」設計だった。Cursor 3 ではその関係が逆転し、<strong>エージェントが主役・エディタが補助</strong>という構成になった。Agents Window は、この転換を実現する新インタフェースである。Composer パネルは廃止され、すべてのエージェントセッションがこのウィンドウに集約されている。
+    </p>
+    <div class="term-box mt-3">
+      <strong>Composer（コンポーザー）</strong>: Cursor 3 以前のチャット入力パネル。Cursor 3 で Agents Window に置き換えられた。
+    </div>
+    <div class="term-box">
+      <strong>コントロールプレーン（Control Plane）</strong>: 分散システムの運用管理を担う層。AWS の ECS/EKS コントロールプレーンと同じ発想で、エージェントの起動・停止・監視・リダイレクトを一元管理する。
+    </div>
+  </section>
+
+  <!-- Section 2: なぜ生まれたのか -->
+  <section id="why">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="history" class="w-6 h-6"></i>なぜ生まれたのか
+    </h2>
+    <p class="text-gray-700 leading-relaxed mb-4">
+      Cursor 2 時代のエージェントは、エディタのサイドパネルで1タスクずつ動く設計だった。この設計には構造的な制約が3つあった。
+    </p>
+    <div class="space-y-3">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div>
+          <p class="font-semibold">1タスク1エージェントの逐次実行</p>
+          <p class="text-sm text-gray-600 mt-1">長い実装タスクは終わるまで待つしかなかった。並列に別のタスクを走らせる手段がなく、エージェントを有効活用できていなかった。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div>
+          <p class="font-semibold">ファイル競合によるマージコンフリクト</p>
+          <p class="text-sm text-gray-600 mt-1">複数のチャットセッションが同じファイルを書き換えると、変更が衝突する。共有のワーキングツリー上で複数の変更を並行させることは本質的に危険だった。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div>
+          <p class="font-semibold">PC に縛られた実行ライフサイクル</p>
+          <p class="text-sm text-gray-600 mt-1">エディタを閉じるとセッションが終了する。数時間かかる大規模リファクタを「ながら作業」させる手段がなかった。</p>
+        </div>
+      </div>
+    </div>
+    <p class="text-gray-700 leading-relaxed mt-4">
+      Agents Window はこれら3問題を<strong>並列実行・worktree 隔離・クラウド実行</strong>で解決する目的で設計された。リリースは 2026年4月2日（Cursor 3.0）。Enterprise 向けには2週間のロールアウト期間が設けられ、その後すべてのプランで利用可能になった。
+    </p>
+    <div class="term-box mt-3">
+      <strong>Git worktree（ワークツリー）</strong>: 同一リポジトリを複数のディレクトリに同時チェックアウトする Git の機能（<code>git worktree add</code>）。ブランチごとに独立した作業ディレクトリを持てる。
+    </div>
+  </section>
+
+  <!-- Section 3: まず理解する3つ -->
+  <section id="core3">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="layers" class="w-6 h-6"></i>まず理解する3つ
+    </h2>
+    <p class="text-sm text-gray-500 mb-5">これだけ理解すれば Agents Window の本質が把握できる。</p>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="arch-box">
+        <div class="arch-header flex items-center gap-2">
+          <i data-lucide="monitor" class="w-4 h-4"></i> Local vs Cloud Agent
+        </div>
+        <div class="arch-body text-sm text-gray-700">
+          <p><strong>Local</strong>: ファイルシステム・LSP に直接アクセス。5〜15秒でdiff表示。デバッグ・即時確認向き。</p>
+          <p class="mt-2"><strong>Cloud（Background）</strong>: Cursor のインフラで実行。PC電源OFFでも継続。大規模・長時間タスク向き。GitHub 連携が必要。</p>
+        </div>
+      </div>
+      <div class="arch-box">
+        <div class="arch-header flex items-center gap-2">
+          <i data-lucide="git-branch" class="w-4 h-4"></i> Worktrees
+        </div>
+        <div class="arch-body text-sm text-gray-700">
+          <p>各エージェントに独立した Git worktree を与える仕組み。<strong>ファイル競合ゼロで並列実行</strong>できる。</p>
+          <p class="mt-2"><code>/worktree</code> コマンドで起動。不要なら即破棄できる「使い捨てブランチ」として使う。</p>
+        </div>
+      </div>
+      <div class="arch-box">
+        <div class="arch-header flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4"></i> /multitask
+        </div>
+        <div class="arch-body text-sm text-gray-700">
+          <p>1つの大きなゴールを複数の非同期サブエージェントに分解・並列実行するコマンド（Cursor 3.2 / 2026-04-24）。</p>
+          <p class="mt-2">「4モジュール × 4エージェント ＝ 2時間分の作業を30分で完了」という使い方が典型。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: 主要概念・アーキテクチャ -->
+  <section id="concepts">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="cpu" class="w-6 h-6"></i>主要概念・アーキテクチャ
+    </h2>
+
+    <!-- アーキテクチャ図 -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-6">
+      <p class="text-xs text-gray-500 mb-3 uppercase tracking-wide font-semibold">Agents Window 全体構成</p>
+      <div class="overflow-x-auto">
+        <div class="flex flex-col gap-2 min-w-[480px]">
+          <!-- 上段: Agents Window -->
+          <div class="bg-indigo-600 text-white rounded-lg px-4 py-2 text-center font-bold text-sm">
+            Agents Window（コントロールプレーン）
+          </div>
+          <div class="flex justify-center">
+            <div class="border-l-2 border-indigo-400 h-4"></div>
+          </div>
+          <!-- 中段: サイドバー -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="bg-indigo-100 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="sidebar" class="w-4 h-4 mx-auto mb-1 text-indigo-600"></i>
+              Agent<br>サイドバー
+            </div>
+            <div class="bg-indigo-100 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="columns" class="w-4 h-4 mx-auto mb-1 text-indigo-600"></i>
+              Tiled<br>Layout
+            </div>
+            <div class="bg-indigo-100 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="git-pull-request" class="w-4 h-4 mx-auto mb-1 text-indigo-600"></i>
+              Diffs /<br>PR 管理
+            </div>
+            <div class="bg-indigo-100 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="mouse-pointer-click" class="w-4 h-4 mx-auto mb-1 text-indigo-600"></i>
+              Design<br>Mode
+            </div>
+          </div>
+          <div class="flex justify-center">
+            <div class="border-l-2 border-gray-300 h-4"></div>
+          </div>
+          <!-- 下段: 実行環境 -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="bg-green-100 border border-green-300 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="monitor" class="w-4 h-4 mx-auto mb-1 text-green-700"></i>
+              Local<br>Agent
+            </div>
+            <div class="bg-sky-100 border border-sky-300 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="cloud" class="w-4 h-4 mx-auto mb-1 text-sky-700"></i>
+              Cloud<br>Agent
+            </div>
+            <div class="bg-orange-100 border border-orange-300 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="server" class="w-4 h-4 mx-auto mb-1 text-orange-700"></i>
+              Remote<br>SSH
+            </div>
+            <div class="bg-purple-100 border border-purple-300 rounded-lg p-2 text-center text-xs">
+              <i data-lucide="git-branch" class="w-4 h-4 mx-auto mb-1 text-purple-700"></i>
+              Git<br>Worktree
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- たとえ話 1 -->
+    <h3 class="font-bold text-gray-800 mt-6 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 1: 「工場の製造ライン管制室」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        工場には複数の製造ライン（エージェント）があり、それぞれ異なる製品（タスク）を並行して生産している。<strong>Agents Window は制御盤（SCADA）</strong>であり、各ラインのステータスを一覧表示し、問題が起きたラインだけ停止・リダイレクトできる。ライン1はリアルタイムで出荷（Local Agent）、ライン2は夜間無人自動生産（Cloud Agent）という使い分けがそのまま Local/Cloud の使い分けに対応する。
+      </p>
+    </div>
+
+    <!-- たとえ話 2 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 2: 「独立した実験室（worktree）」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        研究室で同じ試料（コードベース）を複数の研究者（エージェント）が同時に実験する際、試料を使い回すと互いの変更が混ざる。<strong>worktree はそれぞれの研究者に専用の実験台と試料コピーを割り当てる</strong>仕組みだ。実験が失敗したら実験台ごと廃棄すればよく、元の試料は汚染されない。これが <code>/worktree</code> の本質だ。
+      </p>
+    </div>
+
+    <!-- たとえ話 3 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 3: 「バッチジョブと対話型プロセスの使い分け」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        Linux の cron ジョブ（夜間バッチ）と対話型シェルの違いに対応する。<strong>Cloud Agent は nohup 付きのバッチジョブ</strong>であり、セッション切断後も実行が続く。<strong>Local Agent は対話型シェル</strong>であり、端末に張り付いてリアルタイムで stdout を確認できる。両者を同時に持ち、素早い修正は Local で、長時間タスクは Cloud で、という使い分けが Agents Window 上で可能になる。
+      </p>
+    </div>
+
+    <!-- たとえ話 4 -->
+    <h3 class="font-bold text-gray-800 mt-5 mb-2 flex items-center gap-2">
+      <i data-lucide="lightbulb" class="w-5 h-5 text-amber-500"></i>たとえ話 4: 「設計レビュー vs 実装フェーズ（Plan Mode）」
+    </h3>
+    <div class="analogy-card">
+      <p class="text-gray-700 text-sm leading-relaxed">
+        ウォーターフォールの設計フェーズにあたるのが <strong>Plan Mode（Shift+Tab で切り替え）</strong>だ。エージェントはコードを書く前に Markdown 形式の設計書を出力し、人間がレビューして承認する。実装フェーズに進んでから「方針が違った」と気付くと 40分の時間ロスになる——これを防ぐのが Plan Mode の役割である。
+      </p>
+    </div>
+
+    <!-- Remote SSH の説明 -->
+    <h3 class="font-bold text-gray-800 mt-7 mb-2 flex items-center gap-2">
+      <i data-lucide="server" class="w-5 h-5 text-orange-500"></i>Remote SSH Agent について
+    </h3>
+    <p class="text-sm text-gray-700 leading-relaxed mb-2">
+      アーキテクチャ図に示した「Remote SSH（リモート SSH）」は、自社サーバー・クラウド VM・HPC クラスタなど<strong>ローカルでも Cursor クラウドでもない外部マシン</strong>にエージェントを接続して動かすモードです。
+    </p>
+    <div class="term-box">
+      <strong>SSH（Secure Shell：セキュアシェル）</strong>: ネットワーク越しに別のコンピュータを安全に操作するプロトコル。Remote SSH エージェントは、社内サーバーや GPU クラスタ上のファイルに直接アクセスしながら、コードの生成・実行をローカルと同様に行える。クラウドエージェント（Cursor インフラ）が使えない環境や、特定のハードウェア・データが必要な場合に使う。
+    </div>
+
+    <!-- コマンド一覧 -->
+    <h3 class="font-bold text-gray-800 mt-6 mb-3">主要コマンドと使い所</h3>
+    <div class="overflow-x-auto">
+      <table class="text-sm w-full border-collapse">
+        <thead>
+          <tr class="bg-indigo-50">
+            <th class="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-800">コマンド / 機能</th>
+            <th class="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-800">動作</th>
+            <th class="border border-gray-200 px-3 py-2 text-left font-semibold text-indigo-800">使い所</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2"><code class="bg-gray-100 px-1 rounded">/worktree</code></td>
+            <td class="border border-gray-200 px-3 py-2">独立した Git worktree でエージェントを起動</td>
+            <td class="border border-gray-200 px-3 py-2">実験的変更・並列タスク隔離</td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2"><code class="bg-gray-100 px-1 rounded">/multitask</code></td>
+            <td class="border border-gray-200 px-3 py-2">大きなゴールを非同期サブエージェントに分解</td>
+            <td class="border border-gray-200 px-3 py-2">クロスモジュールのリファクタ・大規模テスト追加</td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2"><code class="bg-gray-100 px-1 rounded">/best-of-n</code></td>
+            <td class="border border-gray-200 px-3 py-2">同一プロンプトを複数モデルで並列実行して比較</td>
+            <td class="border border-gray-200 px-3 py-2">アルゴリズム選定・アーキテクチャ比較</td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2">Plan Mode <span class="text-gray-400 text-xs">（Shift+Tab）</span></td>
+            <td class="border border-gray-200 px-3 py-2">実行前に Markdown 計画書を生成・レビュー</td>
+            <td class="border border-gray-200 px-3 py-2">複雑・多ステップのタスク開始前</td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2">Design Mode</td>
+            <td class="border border-gray-200 px-3 py-2">ブラウザプレビュー上の UI 要素を直接指定</td>
+            <td class="border border-gray-200 px-3 py-2">フロントエンドの UI 修正・CSS デバッグ</td>
+          </tr>
+          <tr class="hover:bg-gray-50">
+            <td class="border border-gray-200 px-3 py-2">Cloud↔Local 移行</td>
+            <td class="border border-gray-200 px-3 py-2">ワンクリックで実行環境を切り替え</td>
+            <td class="border border-gray-200 px-3 py-2">クラウドで生成 → ローカルで細かく修正</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ベストプラクティス -->
+    <h3 class="font-bold text-gray-800 mt-7 mb-3">実践ベストプラクティス</h3>
+    <div class="space-y-3">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div>
+          <p class="font-semibold text-sm">ゴール指向プロンプトを書く</p>
+          <p class="text-sm text-gray-600 mt-1">「42行目を修正して」ではなく「認証フローをトークン自動リフレッシュに変更し既存テストをパスさせよ」と書く。Cursor 3 以降、エージェントは自分でコンテキストを収集するため、手順より目的を渡した方が品質が上がる。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div>
+          <p class="font-semibold text-sm">関連タスクをバッチ並列化する</p>
+          <p class="text-sm text-gray-600 mt-1">「アプリ全体にテストを追加」という1エージェントへの指示ではなく、モジュール単位に4エージェントを立てて並列実行する。並列化が最大の時間乗数になる。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div>
+          <p class="font-semibold text-sm">.cursor/rules を継続更新する</p>
+          <p class="text-sm text-gray-600 mt-1">プロジェクトの規約・パターンをルールファイルに蓄積する。これが出力品質への最も効果的な介入だ。エージェントを「育てる」感覚で更新し続ける。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div>
+          <p class="font-semibold text-sm">diff を全ファイルではなく差分として確認する</p>
+          <p class="text-sm text-gray-600 mt-1">Agents Window の diffs view は変更箇所だけを提示する。レビューはファイル全体ではなく diff に集中する。変更されていない周辺コードは信頼してよい。</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div>
+          <p class="font-semibold text-sm">最大8並列を守り、監視コストを考慮する</p>
+          <p class="text-sm text-gray-600 mt-1">同時起動可能な Background Agent は最大8。Tiled Layout は4〜5ペイン程度が実用限度。タイルが小さすぎると diff が読めなくなり監視が形骸化する。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 5: 落とし穴 -->
+  <section id="pitfalls">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="alert-triangle" class="w-6 h-6"></i>初心者がはまりやすい落とし穴
+    </h2>
+
+    <div class="pitfall-card">
+      <div class="flex items-start gap-2">
+        <i data-lucide="x-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <p class="font-semibold text-sm">エージェントモードに最初から飛びつく</p>
+          <p class="text-sm text-gray-700 mt-1">Cursor 公式は「Tab 補完 → Inline Edit → Agent Mode」の順で習熟を推奨している。レビュー習慣が身についていない段階でエージェントに500行のコードを生成させると、何が変わったか把握できなくなる。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall-card">
+      <div class="flex items-start gap-2">
+        <i data-lucide="x-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <p class="font-semibold text-sm">曖昧な指示でクラウドエージェントを起動する</p>
+          <p class="text-sm text-gray-700 mt-1">Cloud Agent は PC を閉じても動き続けるため、方針が曖昧なまま起動すると数時間後に意図と異なる実装が出来上がる。複雑なタスクは Plan Mode で設計書をレビューしてから Cloud に投げること。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall-card">
+      <div class="flex items-start gap-2">
+        <i data-lucide="x-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <p class="font-semibold text-sm">GitHub 連携なしで Cloud Agent を使おうとする</p>
+          <p class="text-sm text-gray-700 mt-1">Cloud Agent（Background Agent）はリポジトリが GitHub 上にあることを前提とする。プライベートリポジトリや社内 GitLab 環境では直接使えない場合がある。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall-card">
+      <div class="flex items-start gap-2">
+        <i data-lucide="x-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <p class="font-semibold text-sm">会話履歴の同期バグ（既知問題）</p>
+          <p class="text-sm text-gray-700 mt-1">エディタの Agents パネルと Agents Window 間で会話履歴がリアルタイム同期しないことがある。「履歴が消えた」と感じたら <code>Ctrl+Shift+P → Developer: Reload Window</code> を試す。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pitfall-card">
+      <div class="flex items-start gap-2">
+        <i data-lucide="x-circle" class="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <p class="font-semibold text-sm">.cursor/rules を一度作って放置する</p>
+          <p class="text-sm text-gray-700 mt-1">ルールファイルはプロジェクト初期に一度書いて終わりではない。エージェントの出力をレビューするたびに、「ここはルール化できる」という学習を蓄積し続けることで品質が指数的に上がる。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 6: 料金プラン -->
+  <section id="pricing">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="credit-card" class="w-6 h-6"></i>料金プラン
+    </h2>
+    <p class="text-sm text-gray-500 mb-4">2026年5月時点。料金はすべて月額・税別。年払いで20%割引。</p>
+
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div class="price-card">
+        <div class="price-header bg-gray-100 text-gray-700">Hobby（無料）</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-gray-800 mb-2">$0</p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• Tab 補完（制限あり）</li>
+            <li>• エージェントリクエスト（制限あり）</li>
+            <li>• 試用・評価向け</li>
+          </ul>
+        </div>
+      </div>
+      <div class="price-card border-indigo-400">
+        <div class="price-header bg-indigo-600 text-white">Pro ★人気</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-indigo-700 mb-2">$20<span class="text-sm text-gray-500 font-normal">/月</span></p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• Tab 補完（無制限）</li>
+            <li>• $20 のクレジットプール/月</li>
+            <li>• Cloud Agent 利用可</li>
+            <li>• 全フロンティアモデル</li>
+          </ul>
+        </div>
+      </div>
+      <div class="price-card">
+        <div class="price-header bg-violet-600 text-white">Pro+</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-violet-700 mb-2">$60<span class="text-sm text-gray-500 font-normal">/月</span></p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• Pro と同機能</li>
+            <li>• $60 クレジット/月（3倍）</li>
+            <li>• ヘビーユーザー向け</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="price-card">
+        <div class="price-header bg-amber-500 text-white">Ultra</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-amber-700 mb-2">$200<span class="text-sm text-gray-500 font-normal">/月</span></p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• $400 クレジット/月（20倍）</li>
+            <li>• 新機能への優先アクセス</li>
+          </ul>
+        </div>
+      </div>
+      <div class="price-card">
+        <div class="price-header bg-gray-700 text-white">Teams</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-gray-800 mb-2">$40<span class="text-sm text-gray-500 font-normal">/ユーザー/月</span></p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• $20 クレジット/ユーザー/月</li>
+            <li>• 管理ダッシュボード</li>
+            <li>• SAML SSO・集中請求</li>
+            <li>• 共有ルール・コマンド</li>
+          </ul>
+        </div>
+      </div>
+      <div class="price-card">
+        <div class="price-header bg-gray-900 text-white">Enterprise</div>
+        <div class="price-body">
+          <p class="text-2xl font-black text-gray-800 mb-2">要問い合わせ</p>
+          <ul class="space-y-1 text-gray-600">
+            <li>• クレジットプール（チーム共有）</li>
+            <li>• SCIM・優先サポート</li>
+            <li>• 高度なセキュリティ制御</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="term-box mt-4">
+      <strong>Cursor Token Rate</strong>: API 価格に加算される追加レート（$0.25/M トークン）。セマンティック検索・カスタムモデル実行・インフラコストをカバーする。Auto モード以外のすべてのエージェントリクエストに適用される。
+    </div>
+    <p class="text-sm text-gray-500 mt-3">
+      コスト試算の目安: Pro ($20) で月に数十〜数百のエージェントタスクを実行できる。ただしクラウドエージェントで長時間・大規模タスクを多用する場合は過課金に注意し、管理ダッシュボードで支出上限を設定すること。
+    </p>
+  </section>
+
+  <!-- Section 7: 専門用語集 -->
+  <section id="glossary">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="book-open" class="w-6 h-6"></i>専門用語集
+    </h2>
+    <dl class="space-y-4">
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Agents Window（エージェントウィンドウ）</dt>
+        <dd class="text-sm text-gray-700 mt-1">Cursor 3 で導入されたエージェント専用の管理インタフェース。ローカル・クラウド・リモート SSH・worktree の全エージェントを一元管理する。Composer パネルの後継。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Background Agent（バックグラウンドエージェント）/ Cloud Agent</dt>
+        <dd class="text-sm text-gray-700 mt-1">Cursor のクラウドインフラ上で実行されるエージェント。PC 電源 OFF でも継続し、最大8並列まで起動できる。GitHub 連携が前提。→ Local Agent と対比。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Git worktree（ワークツリー）</dt>
+        <dd class="text-sm text-gray-700 mt-1">同一リポジトリを複数のディレクトリに同時チェックアウトする Git 機能。各エージェントに専用のワーキングディレクトリを与えることでファイル競合を防止する。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Composer 2（コンポーザー2）<span class="text-xs font-normal text-gray-500 ml-2">※ Composer パネルとは別物</span></dt>
+        <dd class="text-sm text-gray-700 mt-1">Cursor 独自の AI モデルの名称。Cursor 3 の Agents Window でローカルエージェントが使うデフォルトモデル。コスト効率が高い（入力 $0.5/M トークン）。「Composer パネル（廃止された旧 UI）」とは全く異なる概念で、<strong>名前が似ているが意味は別</strong>。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Tiled Layout（タイルレイアウト）</dt>
+        <dd class="text-sm text-gray-700 mt-1">Cursor 3.1 で追加された、複数エージェントのチャットを画面分割して並べて表示する機能。実用的なペイン数の目安は4〜5。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Design Mode（デザインモード）</dt>
+        <dd class="text-sm text-gray-700 mt-1">Agents Window 内蔵のブラウザプレビュー上で UI 要素を直接選択・注釈できるモード。「このボタンを赤に」のような自然言語指示をドキュメント座標と紐付けてエージェントに渡す。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">Plan Mode（プランモード）</dt>
+        <dd class="text-sm text-gray-700 mt-1">Shift+Tab で切り替わるモード。エージェントはコードを書く前に Markdown 形式の設計書を出力し、人間のレビューと承認を待つ。複雑なタスクの方針ミスを防止する。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">LSP（Language Server Protocol：言語サーバープロトコル）</dt>
+        <dd class="text-sm text-gray-700 mt-1">IDE と言語解析ツールを接続するプロトコル。Local Agent は LSP に直接アクセスし、定義ジャンプ・型チェック・補完情報を活用できる。Cloud Agent は LSP にアクセスできない。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">ACP（Agent Client Protocol：エージェントクライアントプロトコル）</dt>
+        <dd class="text-sm text-gray-700 mt-1">Cursor エージェントと外部 IDE（JetBrains 等）を接続するプロトコル。2026年3月から JetBrains IDE 内で Cursor エージェントを利用できるようになった。</dd>
+      </div>
+      <div class="border-b border-gray-100 pb-3">
+        <dt class="font-bold text-gray-900">MCP（Model Context Protocol：モデルコンテキストプロトコル）</dt>
+        <dd class="text-sm text-gray-700 mt-1">AI モデルに外部ツール（データベース・API・ファイルシステム等）を接続する標準プロトコル。Agents Window のエージェントは MCP 経由で外部サービスを操作できる。</dd>
+      </div>
+      <div>
+        <dt class="font-bold text-gray-900">.cursor/rules（カーソルルール）</dt>
+        <dd class="text-sm text-gray-700 mt-1">プロジェクトルート直下に置く設定ファイル。コーディング規約・命名規則・禁止パターン等を記述し、エージェントがすべてのリクエストで参照する。品質の最大レバー。</dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Section 8: 次に学ぶと良いもの -->
+  <section id="next">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="arrow-right-circle" class="w-6 h-6"></i>次に学ぶと良いもの
+    </h2>
+    <div class="grid md:grid-cols-2 gap-3">
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="git-merge" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">Git worktree の詳細</p>
+        </div>
+        <p class="text-xs text-gray-600"><code>git worktree add / list / remove</code> の操作。worktree 上での rebase・merge 戦略。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="plug" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">MCP（Model Context Protocol）</p>
+        </div>
+        <p class="text-xs text-gray-600">エージェントに外部ツールを接続する標準仕様。Cursor のエージェントが DB・API・Slack と連携する仕組み。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="file-code" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">Cursor Rules (.cursor/rules) 設計</p>
+        </div>
+        <p class="text-xs text-gray-600">ルールファイルの構造・スコープ設定・ファイルパターンマッチング。品質向上への最短経路。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="github" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">GitHub Actions × Cloud Agent 連携</p>
+        </div>
+        <p class="text-xs text-gray-600">PR トリガーで Cloud Agent を自動起動するパターン。CI/CD の一部として AI エージェントを組み込む。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="bot" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">コンテキストエンジニアリング</p>
+        </div>
+        <p class="text-xs text-gray-600">エージェントへのコンテキスト供給設計。@ファイル/@フォルダ参照・ドキュメントインデックスの最適化。</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center gap-2 mb-2">
+          <i data-lucide="settings" class="w-5 h-5 text-indigo-600"></i>
+          <p class="font-semibold text-sm">Cursor SDK による自動化</p>
+        </div>
+        <p class="text-xs text-gray-600">TypeScript / Python SDK を使って CI・スクリプトから Cursor エージェントをプログラムで制御する。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 9: 参考文献 -->
+  <section id="refs">
+    <h2 class="text-2xl font-black text-indigo-700 mb-4 flex items-center gap-2">
+      <i data-lucide="link" class="w-6 h-6"></i>参考文献・URL
+    </h2>
+    <ul class="space-y-3 text-sm">
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://cursor.com/docs/agent/agents-window" target="_blank" class="text-indigo-700 hover:underline font-medium">Agents Window | Cursor Docs（公式ドキュメント）</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://qubittool.com/blog/cursor-3-background-agent-workflow-guide" target="_blank" class="text-indigo-700 hover:underline">Cursor 3 Background Agent Workflow Guide | QubitTool</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://dev.to/exactsolutionofficial/the-cursor-3-features-nobody-is-talking-about-yet-55e" target="_blank" class="text-indigo-700 hover:underline">The Cursor 3 Features Nobody Is Talking About Yet | DEV Community</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://dev.to/thegdsks/cursor-3-ships-parallel-ai-agents-here-is-the-multi-agent-workflow-that-actually-works-2bk8" target="_blank" class="text-indigo-700 hover:underline">Cursor 3 Parallel AI Agent Workflow | DEV Community</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://byteiota.com/cursor-3-agents-window-ai-coding-tutorial-2026/" target="_blank" class="text-indigo-700 hover:underline">Cursor 3 Agents Window AI Coding Tutorial 2026 | byteiota</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://www.nocode.mba/articles/cursor-pricing" target="_blank" class="text-indigo-700 hover:underline">Cursor Pricing 2026: All 6 Plans & Costs Compared | nocode.mba</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://cursor.com/docs/account/teams/pricing" target="_blank" class="text-indigo-700 hover:underline">Team Pricing | Cursor Docs（公式料金詳細）</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://nannyakore.com/ja/blog/cursor-agents-window/" target="_blank" class="text-indigo-700 hover:underline">Cursor Agents Window 日本語解説 | nannyakore.com</a>
+      </li>
+      <li class="flex items-start gap-2">
+        <i data-lucide="external-link" class="w-4 h-4 text-indigo-500 mt-0.5 flex-shrink-0"></i>
+        <a href="https://chotto.news/how-to-use-the-cursormultitask-function-how-to-start-parallel-processing-immediately-in-agents-window/" target="_blank" class="text-indigo-700 hover:underline">Cursor /multitask 機能の使い方 | CHOTTO NEWS（日本語）</a>
+      </li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- PDF ボタン -->
+<button id="pdf-btn" onclick="window.print()"
+  class="fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 text-sm font-semibold z-50 transition-colors">
+  <i data-lucide="download" class="w-4 h-4"></i> PDF で保存
+</button>
+
+<footer class="text-center text-xs text-gray-400 py-8">
+  Techmap — Cursor Agents Window ｜ 2026年5月28日
+</footer>
+
+<script>
+  lucide.createIcons();
+</script>
+</body>
+</html>

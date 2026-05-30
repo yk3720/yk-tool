@@ -14,6 +14,7 @@ export const TOPICS = [
   // CuriosityMap
   { id: "curimap-astrology", categoryId: "curiositymap", label: "占星術" },
   { id: "curimap-ai", categoryId: "curiositymap", label: "AI" },
+  { id: "curimap-cursor", categoryId: "curiositymap", label: "Cursor" },
   // Visual Explainer（公開図解が増えたら topic を追加）
   // ツール
   { id: "tool-dashboard", categoryId: "tool", label: "ダッシュボード" },

@@ -10,7 +10,20 @@
 
 ## 2. マイグレーション
 
-SQL Editor で `supabase/migrations/001_db1_schema.sql` を実行。
+### DB-1
+
+SQL Editor で `supabase/migrations/001_db1_schema.sql` を実行。  
+role 保護: `002_fix_profiles_role_protection.sql` を続けて実行。
+
+### DB-2（003 → 004）
+
+**開発 Supabase のみ。** 手順・検証・トラブルシュート: **[DB2_MIGRATION_RUNBOOK.md](./DB2_MIGRATION_RUNBOOK.md)**
+
+1. `003_db2_schema.sql` — 装置 4 表 + RLS
+2. `004_flow_documents_module_fk.sql` — デモ seed · uuid FK · `admin_delete_equipment()`
+3. `verify_db2.sql` — 適用後チェック
+
+**前提:** DB-1（001+002）適用済み · **アプリ変更は別タスク**（004 後に uuid 化）
 
 ## 3. 許可リスト（profiles）
 

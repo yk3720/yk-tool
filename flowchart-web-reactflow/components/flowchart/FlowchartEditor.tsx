@@ -17,6 +17,7 @@ import templateStarter from "@/fixtures/template-starter.json";
 import sampleM002NineCol from "@/fixtures/sample-m002-9col.json";
 import {
   downloadJson,
+  normalizeFlowchartDocument,
   parseFlowchartDocument,
   serializeDocument,
 } from "@/lib/flowchart/document";
@@ -191,8 +192,9 @@ export const FlowchartEditor = forwardRef<
   );
 
   const syncJsonFromDoc = useCallback((nextDoc: FlowchartDocument) => {
-    setDoc(nextDoc);
-    setJsonText(serializeDocument(nextDoc));
+    const normalized = normalizeFlowchartDocument(nextDoc);
+    setDoc(normalized);
+    setJsonText(serializeDocument(normalized));
   }, []);
 
   const refreshWarnings = useCallback((table: FlowchartDocument["table"]) => {
@@ -211,7 +213,7 @@ export const FlowchartEditor = forwardRef<
       if (!parsed) return false;
 
       setParseErrors([]);
-      setDoc(parsed);
+      setDoc(normalizeFlowchartDocument(parsed));
       refreshWarnings(parsed.table);
 
       const result = generateFlowchart(parsed.table, parsed.layout);
@@ -249,7 +251,7 @@ export const FlowchartEditor = forwardRef<
       const { doc: parsed, errors } = parseFlowchartDocument(draft);
       if (parsed && errors.length === 0) {
         setJsonText(draft);
-        setDoc(parsed);
+        setDoc(normalizeFlowchartDocument(parsed));
         refreshWarnings(parsed.table);
         runGenerate(draft);
         setStatus("下書きを復元しました");
@@ -328,7 +330,7 @@ export const FlowchartEditor = forwardRef<
       setJsonText(text);
       const { doc: parsed } = parseFlowchartDocument(text);
       if (parsed) {
-        setDoc(parsed);
+        setDoc(normalizeFlowchartDocument(parsed));
         refreshWarnings(parsed.table);
       }
       runGenerate(text);
@@ -609,6 +611,7 @@ export const FlowchartEditor = forwardRef<
                 onChange={handleTableChange}
                 errorRowIndices={errorRows}
                 readOnly={readOnly}
+                tableSchema={doc.schema}
               />
             </>
           )}

@@ -55,6 +55,8 @@
 
 .flow-node-diamond {
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  /* clip-path が border を切るため、外形に drop-shadow で黒枠相当を描く */
+  filter: drop-shadow(0 0 0 1.5px #1a1a1a);
 }
 
 .flow-node-parallelogram {

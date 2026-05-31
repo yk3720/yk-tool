@@ -2,13 +2,14 @@
 
 import {
   createEmptyRow,
-  COLUMN_HELP_8,
-  getColumnCount,
+  getColumnHelp,
   getHeaders,
+  getHelpEntries,
+  isNumericTableColumn,
   normalizeRow,
+  resolveColumnCount,
   SHAPE_TYPE_OPTIONS,
   suggestNextId,
-  TABLE_HEADERS_8,
 } from "@/lib/flowchart/tableColumns";
 import type { FlowTableRow } from "@/lib/flowchart/types";
 import {
@@ -26,6 +27,8 @@ type Props = {
   onChange: (table: FlowTableRow[]) => void;
   errorRowIndices?: Set<number>;
   readOnly?: boolean;
+  /** table-9col-v1 等 — 9列ヘッダー判定に使用 */
+  tableSchema?: string;
 };
 
 function cellToString(value: unknown): string {
@@ -38,32 +41,23 @@ function parseCellValue(
   colCount: number,
   raw: string,
 ): string | number {
-  if (colCount >= 8 && colIndex === 0) {
+  if (!isNumericTableColumn(colIndex, colCount)) return raw;
+  if (colIndex === 0) {
     const trimmed = raw.trim();
     if (trimmed === "") return "";
     const n = Number(trimmed);
     return Number.isFinite(n) ? n : trimmed;
   }
-  if (colCount >= 8 && colIndex === 4) {
-    const trimmed = raw.trim();
-    if (trimmed === "") return 0;
-    const n = Number(trimmed);
-    return Number.isFinite(n) ? Math.trunc(n) : 0;
-  }
-  return raw;
-}
-
-function headerHelp(header: string, colCount: number): string | undefined {
-  if (colCount >= 8 && header in COLUMN_HELP_8) {
-    return COLUMN_HELP_8[header as (typeof TABLE_HEADERS_8)[number]];
-  }
-  return undefined;
+  const trimmed = raw.trim();
+  if (trimmed === "") return 0;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? Math.trunc(n) : 0;
 }
 
 export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
-  function FlowTableEditor({ table, onChange, errorRowIndices, readOnly }, ref) {
-    const colCount = getColumnCount(table);
-    const headers = getHeaders(colCount);
+  function FlowTableEditor({ table, onChange, errorRowIndices, readOnly, tableSchema }, ref) {
+    const colCount = resolveColumnCount(table, tableSchema);
+    const headers = getHeaders(colCount, tableSchema);
     const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -111,9 +105,9 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
           </summary>
           {colCount >= 8 ? (
             <ul className="mt-1 list-inside list-disc space-y-0.5">
-              {TABLE_HEADERS_8.map((h) => (
-                <li key={h}>
-                  <strong>{h}</strong> — {COLUMN_HELP_8[h]}
+              {getHelpEntries(colCount, tableSchema).map(({ header, help }) => (
+                <li key={header}>
+                  <strong>{header}</strong> — {help}
                 </li>
               ))}
             </ul>
@@ -150,7 +144,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                   #
                 </th>
                 {headers.map((h) => {
-                  const help = headerHelp(h, colCount);
+                  const help = getColumnHelp(h, colCount);
                   return (
                     <th
                       key={h}

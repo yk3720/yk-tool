@@ -1,5 +1,9 @@
 import type { FlowchartDocument, FlowTableRow } from "./types";
 import { DEFAULT_LAYOUT } from "./types";
+import {
+  ensureNineColumnTable,
+  inferTableLayout,
+} from "./tableColumns";
 
 export function createDocument(
   table: FlowTableRow[],
@@ -42,6 +46,7 @@ export function parseFlowchartDocument(
 
   const doc: FlowchartDocument = {
     version: 1,
+    schema: typeof obj.schema === "string" ? obj.schema : undefined,
     title: typeof obj.title === "string" ? obj.title : undefined,
     table: obj.table as FlowTableRow[],
     layout: { ...DEFAULT_LAYOUT },
@@ -51,16 +56,33 @@ export function parseFlowchartDocument(
         : new Date().toISOString(),
   };
 
-  return { doc, errors: [] };
+  return { doc: normalizeFlowchartDocument(doc), errors: [] };
+}
+
+/** 9列表の列幅·schema を揃える（読込時） */
+export function normalizeFlowchartDocument(
+  doc: FlowchartDocument,
+): FlowchartDocument {
+  const table = ensureNineColumnTable(doc.table, doc.schema);
+  const layout = inferTableLayout(table, doc.schema);
+  const schema =
+    layout === "tier9"
+      ? doc.schema?.includes("9col")
+        ? doc.schema
+        : "table-9col-v1"
+      : doc.schema;
+  return { ...doc, table, ...(schema ? { schema } : {}) };
 }
 
 export function serializeDocument(doc: FlowchartDocument): string {
+  const normalized = normalizeFlowchartDocument(doc);
   const payload = {
-    version: doc.version,
-    title: doc.title,
-    table: doc.table,
+    version: normalized.version,
+    ...(normalized.schema ? { schema: normalized.schema } : {}),
+    title: normalized.title,
+    table: normalized.table,
     layout: { ...DEFAULT_LAYOUT },
-    createdAt: doc.createdAt,
+    createdAt: normalized.createdAt,
   };
   return JSON.stringify(payload, null, 2);
 }

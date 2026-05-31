@@ -1,9 +1,10 @@
 "use client";
 
 import { loadFlowDocument } from "@/lib/flowchart/actions/flowDocuments";
+import type { Device, FlowModule } from "@/lib/flowchart/moduleHierarchy";
 import {
-  resolveModuleDraftKey,
-  moduleDraftKey,
+  moduleStorageKey,
+  resolveModuleDraftKeys,
 } from "@/lib/flowchart/moduleHierarchy";
 import {
   getOfflineModuleCache,
@@ -22,41 +23,40 @@ export type ModuleLoadResult = {
 };
 
 async function loadFromCloud(
-  storageKeys: string[],
+  moduleUuid: string,
   primaryKey: string,
 ): Promise<ModuleLoadResult | null> {
   if (isAuthDisabled() || typeof navigator === "undefined" || !navigator.onLine) {
     return null;
   }
 
-  for (const key of storageKeys) {
-    const cloud = await loadFlowDocument(key);
-    if (cloud.ok) {
-      await putOfflineModuleCache(primaryKey, cloud.snapshot);
-      return { snapshot: cloud.snapshot, source: "cloud" };
-    }
-    if (cloud.error !== "not_found") {
-      const offline = await getOfflineModuleCache(primaryKey);
-      if (offline) {
-        return {
-          snapshot: offline.snapshot,
-          source: "offline",
-          offlineCachedAt: offline.cachedAt,
-        };
-      }
+  const cloud = await loadFlowDocument(moduleUuid);
+  if (cloud.ok) {
+    await putOfflineModuleCache(primaryKey, cloud.snapshot);
+    return { snapshot: cloud.snapshot, source: "cloud" };
+  }
+  if (cloud.error !== "not_found" && cloud.error !== "invalid_module_id") {
+    const offline = await getOfflineModuleCache(primaryKey);
+    if (offline) {
+      return {
+        snapshot: offline.snapshot,
+        source: "offline",
+        offlineCachedAt: offline.cachedAt,
+      };
     }
   }
+
   return null;
 }
 
 export async function loadModuleDraft(
-  deviceId: string,
-  moduleId: string,
+  module: FlowModule,
+  device: Device,
 ): Promise<ModuleLoadResult> {
-  const storageKeys = resolveModuleDraftKey(deviceId, moduleId);
-  const primaryKey = moduleDraftKey(deviceId, moduleId);
+  const storageKeys = resolveModuleDraftKeys(module, device);
+  const primaryKey = moduleStorageKey(module.id);
 
-  const fromCloud = await loadFromCloud(storageKeys, primaryKey);
+  const fromCloud = await loadFromCloud(module.id, primaryKey);
   if (fromCloud) return fromCloud;
 
   for (const key of storageKeys) {
@@ -89,12 +89,12 @@ export async function loadModuleDraft(
 }
 
 export async function persistModuleDraft(
-  deviceId: string,
-  moduleId: string,
+  module: FlowModule,
+  _device: Device,
   snapshot: ModuleSnapshot,
   options: { saveToCloud: boolean },
 ): Promise<void> {
-  const primaryKey = moduleDraftKey(deviceId, moduleId);
+  const primaryKey = moduleStorageKey(module.id);
   moduleDraftRepository.set(primaryKey, snapshot);
   await putOfflineModuleCache(primaryKey, snapshot);
 
@@ -102,6 +102,6 @@ export async function persistModuleDraft(
     const { saveFlowDocument } = await import(
       "@/lib/flowchart/actions/flowDocuments"
     );
-    await saveFlowDocument(primaryKey, snapshot);
+    await saveFlowDocument(module.id, snapshot);
   }
 }

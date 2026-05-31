@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 
-import { FlowchartWorkspace } from "@/components/flowchart/FlowchartWorkspace";
 import { getAuthState } from "@/lib/auth/session";
+import { FlowchartWorkspace } from "@/components/flowchart/FlowchartWorkspace";
+import { fetchDeviceHierarchy } from "@/lib/flowchart/actions/deviceHierarchy";
+import { DEMO_DEVICES } from "@/lib/flowchart/moduleHierarchy";
 
 export default async function HomePage() {
   const state = await getAuthState();
@@ -24,11 +26,20 @@ export default async function HomePage() {
     redirect("/login");
   }
 
+  let devices = DEMO_DEVICES;
+  if (state.kind === "allowed") {
+    const hierarchy = await fetchDeviceHierarchy();
+    if (hierarchy.ok) {
+      devices = hierarchy.devices;
+    }
+  }
+
   return (
     <FlowchartWorkspace
       role={context.role}
       email={context.email}
       authDisabled={state.kind === "disabled"}
+      devices={devices}
     />
   );
 }

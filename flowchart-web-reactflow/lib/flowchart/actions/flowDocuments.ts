@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAuthState } from "@/lib/auth/session";
 import type { ModuleSnapshot } from "@/lib/flowchart/moduleDraftRepository";
 import { moduleSnapshotSchema } from "@/lib/flowchart/moduleSnapshotSchema";
+import { isModuleUuid } from "@/lib/flowchart/moduleUuid";
 import { isAuthDisabled } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+import { requireEditor, requireViewerOrEditor } from "./flowDocumentsAuth";
 
 export type FlowDocumentResult =
   | { ok: true; snapshot: ModuleSnapshot }
@@ -14,30 +16,12 @@ export type FlowDocumentResult =
 
 export type SaveFlowResult = { ok: true } | { ok: false; error: string };
 
-async function requireEditor() {
-  const state = await getAuthState();
-  if (state.kind === "disabled") return state.context;
-  if (state.kind !== "allowed") {
-    throw new Error("認証が必要です");
-  }
-  if (state.context.role !== "editor") {
-    throw new Error("編集権限がありません");
-  }
-  return state.context;
-}
-
-async function requireViewerOrEditor() {
-  const state = await getAuthState();
-  if (state.kind === "disabled") return state.context;
-  if (state.kind !== "allowed") {
-    throw new Error("認証が必要です");
-  }
-  return state.context;
-}
-
 export async function loadFlowDocument(
-  moduleId: string,
+  moduleUuid: string,
 ): Promise<FlowDocumentResult> {
+  if (!isModuleUuid(moduleUuid)) {
+    return { ok: false, error: "invalid_module_id" };
+  }
   if (isAuthDisabled()) {
     return { ok: false, error: "クラウド未設定" };
   }
@@ -48,7 +32,7 @@ export async function loadFlowDocument(
     const { data, error } = await supabase
       .from("flow_documents")
       .select("payload")
-      .eq("module_id", moduleId)
+      .eq("module_id", moduleUuid)
       .maybeSingle();
 
     if (error) {
@@ -73,9 +57,12 @@ export async function loadFlowDocument(
 }
 
 export async function saveFlowDocument(
-  moduleId: string,
+  moduleUuid: string,
   snapshot: ModuleSnapshot,
 ): Promise<SaveFlowResult> {
+  if (!isModuleUuid(moduleUuid)) {
+    return { ok: false, error: "invalid_module_id" };
+  }
   if (isAuthDisabled()) {
     return { ok: false, error: "クラウド未設定" };
   }
@@ -98,7 +85,7 @@ export async function saveFlowDocument(
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.from("flow_documents").upsert(
       {
-        module_id: moduleId,
+        module_id: moduleUuid,
         title,
         payload: parsed.data,
         updated_at: new Date().toISOString(),

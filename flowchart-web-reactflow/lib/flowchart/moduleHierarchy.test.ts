@@ -1,28 +1,32 @@
 import { describe, expect, it } from "vitest";
 import {
   DEMO_DEVICE_PRESS_A,
-  moduleDraftKey,
-  resolveModuleDraftKey,
+  DEMO_DEVICE_PRESS_B,
+  moduleStorageKey,
+  resolveModuleDraftKeys,
 } from "./moduleHierarchy";
 
 describe("moduleHierarchy", () => {
-  it("moduleDraftKey combines device and module", () => {
-    expect(moduleDraftKey("press-01", "supply-feed")).toBe(
-      "press-01:supply-feed",
-    );
+  it("moduleStorageKey returns module uuid", () => {
+    const uuid = "c0000001-0001-4001-8001-000000001001";
+    expect(moduleStorageKey(uuid)).toBe(uuid);
   });
 
-  it("resolveModuleDraftKey falls back for press-01 legacy ids", () => {
-    expect(resolveModuleDraftKey("press-01", "supply-feed")).toEqual([
-      "press-01:supply-feed",
-      "supply-feed",
-    ]);
+  it("resolveModuleDraftKeys includes uuid and legacy keys for DEMO-001", () => {
+    const mod = DEMO_DEVICE_PRESS_A.units[0]!.modules[0]!;
+    const keys = resolveModuleDraftKeys(mod, DEMO_DEVICE_PRESS_A);
+    expect(keys[0]).toBe(mod.id);
+    expect(keys).toContain("DEMO-001:supply-feed");
+    expect(keys).toContain("press-01:supply-feed");
+    expect(keys).toContain("supply-feed");
   });
 
-  it("resolveModuleDraftKey has no legacy fallback for other devices", () => {
-    expect(resolveModuleDraftKey("press-02", "b-supply-feed")).toEqual([
-      "press-02:b-supply-feed",
-    ]);
+  it("resolveModuleDraftKeys has no bare slug fallback for DEMO-002", () => {
+    const mod = DEMO_DEVICE_PRESS_B.units[0]!.modules[0]!;
+    const keys = resolveModuleDraftKeys(mod, DEMO_DEVICE_PRESS_B);
+    expect(keys).toContain("DEMO-002:b-supply-feed");
+    expect(keys).toContain("press-02:b-supply-feed");
+    expect(keys).not.toContain("b-supply-feed");
   });
 
   it("DEMO_DEVICE_PRESS_A has expected module count", () => {

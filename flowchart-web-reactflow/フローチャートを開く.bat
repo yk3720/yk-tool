@@ -8,6 +8,10 @@ echo   Flowchart Web (React Flow) を起動します
 echo   終了: この窓で Ctrl+C
 echo ========================================
 echo.
+echo [重要] ブラウザは Chrome / Edge 等の外部で開きます。
+echo        Cursor チャットの localhost リンクはクリックしないでください。
+echo        詳細: docs\LOCAL_DEV.md
+echo.
 
 where npm >nul 2>&1
 if errorlevel 1 (
@@ -28,8 +32,8 @@ if not exist "node_modules\" (
   echo.
 )
 
-echo サーバーを起動し、数秒後にブラウザを開きます...
-start "" cmd /c "timeout /t 7 /nobreak >nul && start http://localhost:3000"
+echo サーバーを起動し、数秒後に外部ブラウザで /login を開きます...
+start "" cmd /c "timeout /t 7 /nobreak >nul && start http://localhost:3000/login"
 
 call npm run dev
 

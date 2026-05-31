@@ -1,0 +1,103 @@
+"use server";
+
+import type { Device } from "@/lib/flowchart/moduleHierarchy";
+import { isAuthDisabled } from "@/lib/supabase/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+import { requireViewerOrEditor } from "./flowDocumentsAuth";
+
+export type DeviceHierarchyResult =
+  | { ok: true; devices: Device[] }
+  | { ok: false; error: string };
+
+type DbModuleRow = {
+  id: string;
+  label: string;
+  sort_order: number;
+  legacy_key: string | null;
+};
+
+type DbUnitRow = {
+  id: string;
+  label: string;
+  sort_order: number;
+  modules: DbModuleRow[] | null;
+};
+
+type DbDeviceRow = {
+  id: string;
+  internal_code: string;
+  display_name: string;
+  sort_order: number;
+  units: DbUnitRow[] | null;
+};
+
+function mapDbDevices(rows: DbDeviceRow[]): Device[] {
+  return [...rows]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((d) => ({
+      id: d.id,
+      internalCode: d.internal_code,
+      name: d.display_name,
+      units: [...(d.units ?? [])]
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((u) => ({
+          id: u.id,
+          label: u.label,
+          modules: [...(u.modules ?? [])]
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((m) => ({
+              id: m.id,
+              label: m.label,
+              legacyKey: m.legacy_key ?? undefined,
+            })),
+        })),
+    }));
+}
+
+export async function fetchDeviceHierarchy(): Promise<DeviceHierarchyResult> {
+  if (isAuthDisabled()) {
+    return { ok: false, error: "auth_disabled" };
+  }
+
+  try {
+    await requireViewerOrEditor();
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("devices")
+      .select(
+        `
+        id,
+        internal_code,
+        display_name,
+        sort_order,
+        units (
+          id,
+          label,
+          sort_order,
+          modules (
+            id,
+            label,
+            sort_order,
+            legacy_key
+          )
+        )
+      `,
+      )
+      .order("sort_order");
+
+    if (error) {
+      return { ok: false, error: error.message };
+    }
+    if (!data?.length) {
+      return { ok: false, error: "no_devices" };
+    }
+
+    return { ok: true, devices: mapDbDevices(data as DbDeviceRow[]) };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : String(e),
+    };
+  }
+}

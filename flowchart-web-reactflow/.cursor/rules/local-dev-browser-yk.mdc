@@ -1,0 +1,26 @@
+---
+description: localhost は外部ブラウザで開く — Cursor 内部 Browser Tab 回避 · LOCAL_DEV.md
+globs: "**/flowchart-web-reactflow/**"
+alwaysApply: false
+---
+
+# ローカル確認 — 外部ブラウザ
+
+**SSOT:** [docs/LOCAL_DEV.md](../docs/LOCAL_DEV.md)
+
+## AI の出力
+
+| やる | やらない |
+|------|----------|
+| `http://localhost:3000` 等を **コードブロックのプレーン URL** で渡す | Markdown リンク `[text](http://localhost:…)` |
+| 「**Chrome / Edge のアドレスバーに貼り付け**」と毎回添える | 「リンクをクリック」と誘導 |
+| Cursor 設定 **Show Localhost Links in Browser → OFF** を初回のみ案内 | 内部 Browser Tab を前提にした手順 |
+
+## ユーザー向け（初回または localhost 手順を書くとき）
+
+1. Cursor Settings → Tools & MCP → **Show Localhost Links in Browser → OFF**
+2. サーバー起動後、外部ブラウザに URL を**貼り付け**
+
+## 影響なし
+
+- `npm run test` · `npm run test:e2e`（Playwright）· `npm run build`

@@ -27,17 +27,22 @@
 
 ## 起動（ダブルクリック）
 
-`フローチャートを開く.bat` をダブルクリック → ブラウザで http://localhost:3000（終了は窓で Ctrl+C）
+`フローチャートを開く.bat` をダブルクリック → **外部ブラウザ**で http://localhost:3000/login（終了は窓で Ctrl+C）
+
+> **Cursor 利用時:** チャットの localhost リンクはクリックしない。Settings → Tools & MCP → **Show Localhost Links in Browser → OFF** 推奨。詳細: [docs/LOCAL_DEV.md](./docs/LOCAL_DEV.md)
 
 ## コマンド
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:3000/login — 外部ブラウザに貼り付け
 npm run build
+npm run start    # 本番同等（PC が重いとき）
 npm run test     # lib/flowchart
-npm run test:e2e # Playwright
+npm run test:e2e # Playwright（Cursor 内部ブラウザ設定と無関係）
 ```
+
+ローカル確認の正本: [docs/LOCAL_DEV.md](./docs/LOCAL_DEV.md)
 
 ## M003 比較手順（ADR-010）
 

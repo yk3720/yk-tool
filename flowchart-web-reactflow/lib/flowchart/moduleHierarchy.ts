@@ -1,6 +1,9 @@
 export type FlowModule = {
+  /** modules.id (uuid) — flow_documents FK */
   id: string;
   label: string;
+  /** DB modules.legacy_key — 旧 localStorage / offline キー解決用 */
+  legacyKey?: string;
 };
 
 export type FlowUnit = {
@@ -11,69 +14,122 @@ export type FlowUnit = {
 
 export type Device = {
   id: string;
+  /** equipment_codes.internal_code — 旧 press-01 等の解決用 */
+  internalCode?: string;
   name: string;
   units: FlowUnit[];
 };
 
-/** 永続化キー（localStorage · クラウド · IndexedDB 共通） */
-export function moduleDraftKey(deviceId: string, moduleId: string): string {
-  return `${deviceId}:${moduleId}`;
+/** 永続化キー（localStorage · クラウド · IndexedDB 共通）— modules.id uuid */
+export function moduleStorageKey(moduleUuid: string): string {
+  return moduleUuid;
 }
 
-/** Phase 3 デモ — プレス機 A */
+/** @deprecated DB-2 以前 — moduleStorageKey(moduleUuid) を使用 */
+export function moduleDraftKey(_deviceId: string, moduleId: string): string {
+  return moduleId;
+}
+
+/** Phase 3 デモ — プレス機 A（004 seed と同一 uuid） */
 export const DEMO_DEVICE_PRESS_A: Device = {
-  id: "press-01",
+  id: "a0000001-0001-4001-8001-000000000001",
+  internalCode: "DEMO-001",
   name: "プレス機 A",
   units: [
     {
-      id: "supply",
+      id: "b0000001-0001-4001-8001-000000000101",
       label: "供給ユニット",
       modules: [
-        { id: "supply-feed", label: "供給動作" },
-        { id: "supply-detect", label: "検知動作" },
+        {
+          id: "c0000001-0001-4001-8001-000000001001",
+          label: "供給動作",
+          legacyKey: "DEMO-001:supply-feed",
+        },
+        {
+          id: "c0000001-0001-4001-8001-000000001002",
+          label: "検知動作",
+          legacyKey: "DEMO-001:supply-detect",
+        },
       ],
     },
     {
-      id: "press",
+      id: "b0000001-0001-4001-8001-000000000102",
       label: "プレスユニット",
       modules: [
-        { id: "press-cycle", label: "プレス動作" },
-        { id: "press-release", label: "離脱動作" },
+        {
+          id: "c0000001-0001-4001-8001-000000001003",
+          label: "プレス動作",
+          legacyKey: "DEMO-001:press-cycle",
+        },
+        {
+          id: "c0000001-0001-4001-8001-000000001004",
+          label: "離脱動作",
+          legacyKey: "DEMO-001:press-release",
+        },
       ],
     },
     {
-      id: "storage",
+      id: "b0000001-0001-4001-8001-000000000103",
       label: "収納ユニット",
-      modules: [{ id: "storage-eject", label: "排出動作" }],
+      modules: [
+        {
+          id: "c0000001-0001-4001-8001-000000001005",
+          label: "排出動作",
+          legacyKey: "DEMO-001:storage-eject",
+        },
+      ],
     },
   ],
 };
 
-/** Phase 3 デモ — プレス機 B（モジュール ID は装置ごとに一意） */
+/** Phase 3 デモ — プレス機 B（004 seed と同一 uuid） */
 export const DEMO_DEVICE_PRESS_B: Device = {
-  id: "press-02",
+  id: "a0000001-0001-4001-8001-000000000002",
+  internalCode: "DEMO-002",
   name: "プレス機 B",
   units: [
     {
-      id: "b-supply",
+      id: "b0000002-0001-4001-8001-000000000201",
       label: "供給ユニット",
       modules: [
-        { id: "b-supply-feed", label: "供給動作" },
-        { id: "b-supply-detect", label: "検知動作" },
+        {
+          id: "c0000002-0001-4001-8001-000000002001",
+          label: "供給動作",
+          legacyKey: "DEMO-002:b-supply-feed",
+        },
+        {
+          id: "c0000002-0001-4001-8001-000000002002",
+          label: "検知動作",
+          legacyKey: "DEMO-002:b-supply-detect",
+        },
       ],
     },
     {
-      id: "b-press",
+      id: "b0000002-0001-4001-8001-000000000202",
       label: "プレスユニット",
       modules: [
-        { id: "b-press-cycle", label: "プレス動作" },
-        { id: "b-press-release", label: "離脱動作" },
+        {
+          id: "c0000002-0001-4001-8001-000000002003",
+          label: "プレス動作",
+          legacyKey: "DEMO-002:b-press-cycle",
+        },
+        {
+          id: "c0000002-0001-4001-8001-000000002004",
+          label: "離脱動作",
+          legacyKey: "DEMO-002:b-press-release",
+        },
       ],
     },
     {
-      id: "b-storage",
+      id: "b0000002-0001-4001-8001-000000000203",
       label: "収納ユニット",
-      modules: [{ id: "b-storage-eject", label: "排出動作" }],
+      modules: [
+        {
+          id: "c0000002-0001-4001-8001-000000002005",
+          label: "排出動作",
+          legacyKey: "DEMO-002:b-storage-eject",
+        },
+      ],
     },
   ],
 };
@@ -115,22 +171,37 @@ export function findModuleInDevices(
   return null;
 }
 
-/** press-01 の旧キー（device プレフィックスなし） */
-const LEGACY_MODULE_IDS = new Set(
-  DEMO_DEVICE_PRESS_A.units.flatMap((u) => u.modules.map((m) => m.id)),
-);
+/** 読込用 — uuid 優先 · 旧 text キーへフォールバック */
+export function resolveModuleDraftKeys(
+  module: FlowModule,
+  device: Device,
+): string[] {
+  const keys = [moduleStorageKey(module.id)];
 
-/** 読込用 — 旧 localStorage キーへフォールバック（press-01 のみ） */
+  if (module.legacyKey) {
+    keys.push(module.legacyKey);
+    const slug = module.legacyKey.split(":")[1];
+    if (slug) {
+      if (device.internalCode === "DEMO-001") {
+        keys.push(`press-01:${slug}`, slug);
+      } else if (device.internalCode === "DEMO-002") {
+        keys.push(`press-02:${slug}`);
+      }
+    }
+  }
+
+  return [...new Set(keys)];
+}
+
+/** @deprecated resolveModuleDraftKeys(module, device) を使用 */
 export function resolveModuleDraftKey(
   deviceId: string,
   moduleId: string,
 ): string[] {
-  const primary = moduleDraftKey(deviceId, moduleId);
-  if (
-    deviceId === DEMO_DEVICE_PRESS_A.id &&
-    LEGACY_MODULE_IDS.has(moduleId)
-  ) {
-    return [primary, moduleId];
+  const device = findDevice(DEMO_DEVICES, deviceId);
+  const found = device ? findModule(device, moduleId) : null;
+  if (found) {
+    return resolveModuleDraftKeys(found.module, device!);
   }
-  return [primary];
+  return [moduleDraftKey(deviceId, moduleId)];
 }

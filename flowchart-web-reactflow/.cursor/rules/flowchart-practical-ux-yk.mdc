@@ -15,7 +15,8 @@ alwaysApply: false
 |------|------------|----------|
 | Nav | 装置→ユニット→動作 · `moduleDraftKey` | 装置名をヘッダーに二重表示 |
 | ツールバー | 再生成/表保存/表読込を常時 · 他はその他メニュー | ヘッダーにボタン乱立 |
-| 見た目 | `DEFAULT_LAYOUT` · `flowColors` 固定 | テーマ/サイズ preset 復活 |
+| レイアウト D | workspace: ツールバーは**表ペイン** · プレビュー列は縦 full-bleed（`fillContainer`） | 全幅ヘッダーがプレビュー上に載る |
+| 見た目 | `DEFAULT_LAYOUT` · `flowColors` 固定 · 枠太さは `VISUAL_DESIGN_RULES` §2（2px） | テーマ/サイズ preset 復活 |
 | 警告 | `WARNING_BANNER_HINT` · 平易な直し方 | 警告で生成停止 |
 | ノード文字 | `FlowShapeNode` **`flex-col`** · `measureHeights` | Text1–3 を横並び |
 

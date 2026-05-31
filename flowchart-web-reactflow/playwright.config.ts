@@ -1,6 +1,13 @@
 import { defineConfig } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+/**
+ * E2E は :3001 で起動（日常 dev の :3000 と衝突しない）。
+ * Next 16 は同一ディレクトリで dev を二重起動できないため、既定は `next start`。
+ */
+const devPort = process.env.PLAYWRIGHT_DEV_PORT ?? "3001";
+const baseURL =
+  process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${devPort}`;
+const useDevServer = process.env.PLAYWRIGHT_USE_DEV === "1";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -9,13 +16,21 @@ export default defineConfig({
   use: {
     baseURL,
     headless: true,
+    viewport: { width: 1280, height: 720 },
+    trace: "retain-on-failure",
   },
   webServer: process.env.PLAYWRIGHT_SKIP_WEBSERVER
     ? undefined
     : {
-        command: "npm run dev",
+        command: useDevServer
+          ? `npm run dev -- --port ${devPort}`
+          : `npm run start -- -p ${devPort}`,
         url: baseURL,
-        reuseExistingServer: true,
+        reuseExistingServer: !process.env.PLAYWRIGHT_FORCE_WEBSERVER,
         timeout: 120_000,
+        env: {
+          ...process.env,
+          AUTH_DISABLED: "1",
+        },
       },
 });

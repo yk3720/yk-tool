@@ -48,16 +48,16 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* React Flow: エッジがクリップされないように */
+/* React Flow: エッジ・ノード枠がクリップされないように */
 .react-flow svg {
   overflow: visible;
 }
 
-.flow-node-diamond {
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-  /* clip-path が border を切るため、外形に drop-shadow で黒枠相当を描く */
-  filter: drop-shadow(0 0 0 1.5px #1a1a1a);
+.react-flow__node:has(.flow-shape-node-root) {
+  overflow: visible;
 }
+
+/* 判断菱形の枠は FlowShapeNode.tsx の SVG polygon stroke で描画 */
 
 .flow-node-parallelogram {
   clip-path: polygon(12% 0%, 100% 0%, 88% 100%, 0% 100%);

@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test e2e/manual-check.spec.ts --reporter=line"
+    "test:e2e": "playwright test e2e --reporter=line",
+    "test:e2e:labels": "playwright test e2e/edge-label-placement.spec.ts --reporter=line"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",

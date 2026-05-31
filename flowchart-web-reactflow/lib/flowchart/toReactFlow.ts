@@ -1,6 +1,15 @@
 import { MarkerType, type Edge, type Node } from "@xyflow/react";
-import { FLOW_EDGE_LABEL, FLOW_EDGE_STROKE } from "./flowColors";
+import { branchFromEdgeLabel } from "./edgeLabelPlacement";
+import { FLOW_EDGE_STROKE } from "./flowColors";
 import type { FlowEdge, PlacedNode, ShapeKind } from "./types";
+
+export type FlowEdgeData = {
+  route: FlowEdge["route"];
+  direction: FlowEdge["direction"];
+  branch?: ReturnType<typeof branchFromEdgeLabel>;
+  /** 表示文言（edge.label は使わず二重描画を防ぐ） */
+  edgeLabel?: FlowEdge["label"];
+};
 
 export type FlowNodeData = {
   label: string;
@@ -41,15 +50,13 @@ export function toReactFlow(
     sourceHandle: e.sourceSide,
     targetHandle: e.targetSide,
     type: "labeled",
-    data: { route: e.route },
-    label: e.label,
+    data: {
+      route: e.route,
+      direction: e.direction,
+      branch: branchFromEdgeLabel(e.label),
+      edgeLabel: e.label,
+    } satisfies FlowEdgeData,
     style: { stroke: FLOW_EDGE_STROKE, strokeWidth: 2.25 },
-    labelStyle: {
-      fill: FLOW_EDGE_LABEL,
-      fontWeight: 700,
-      fontSize: 11,
-    },
-    labelBgStyle: { fill: "#ffffff", fillOpacity: 0.9 },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: FLOW_EDGE_STROKE,

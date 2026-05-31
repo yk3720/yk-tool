@@ -2,41 +2,42 @@ import { expect, test } from "@playwright/test";
 import path from "node:path";
 import fs from "node:fs";
 
+import {
+  DEVICE_PRESS_A_ID,
+  DEVICE_PRESS_B_ID,
+  EMPTY_MODULE_MSG,
+  ensureNavExpanded,
+  ensureWorkspaceLoaded,
+  headerRegenerate,
+  loadSampleFromMenu,
+  openMoreMenu,
+  openPreviewWithSample,
+} from "./helpers/flowchart";
+
 const FIXTURE_SIMPLE_YES = path.join(
   process.cwd(),
   "fixtures",
   "sample-simple-yes.json",
 );
 
-function headerRegenerate(page: import("@playwright/test").Page) {
-  return page.locator("header").getByRole("button", { name: "再生成" });
+async function addTableRow(page: import("@playwright/test").Page) {
+  await page.getByRole("button", { name: "行を追加" }).click();
 }
-
-async function openMoreMenu(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "その他" }).click();
-}
-
-async function loadSampleFromMenu(
-  page: import("@playwright/test").Page,
-  label: string,
-) {
-  await openMoreMenu(page);
-  await page.getByRole("menuitem", { name: label }).click();
-}
-
-const EMPTY_MODULE_MSG = "モジュールを選択してください";
 
 test.describe("サンプル表示（モジュール未選択）", () => {
   test("M002 を選ぶと表とプレビューが表示される", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Flowchart Web" })).toBeVisible();
+    await ensureWorkspaceLoaded(page);
 
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(2);
     await loadSampleFromMenu(page, "サンプル: M002（9列·段+列）");
 
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);
-    await expect(page.getByText("サンプル表示（左でモジュールを選ぶと保存できます）")).toBeVisible();
+    await expect(
+      page
+        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
+        .first(),
+    ).toBeVisible();
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
     await expect(page.locator(".react-flow__node")).toHaveCount(14, {
       timeout: 15_000,
@@ -44,52 +45,42 @@ test.describe("サンプル表示（モジュール未選択）", () => {
   });
 });
 
-/** Phase 3: モジュール選択後にサンプル読込・再生成 */
-async function openModuleWithPreview(
-  page: import("@playwright/test").Page,
-) {
-  await page.getByRole("button", { name: "供給動作" }).click();
-  const nodeCount = await page.locator(".react-flow__node").count();
-  if (nodeCount === 0) {
-    await loadSampleFromMenu(page, "サンプル: 基本判断");
-    await headerRegenerate(page).click();
-    await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
-  }
-}
-
-async function addTableRow(page: import("@playwright/test").Page) {
-  await page.getByRole("button", { name: "行を追加" }).click();
-}
-
 test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Flowchart Web" })).toBeVisible();
-    await openModuleWithPreview(page);
-    await expect(page.locator(".react-flow__node")).not.toHaveCount(0, {
-      timeout: 15_000,
-    });
+    await openPreviewWithSample(page);
   });
 
   test("Phase 3: 3ペイン（ナビ・表・プレビュー）", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "フロー" })).toBeVisible();
-    await expect(page.getByRole("combobox", { name: "装置を選択" })).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "装置を選択" }),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
   });
 
   test("Phase 3: 装置切替でナビのユニットが変わる", async ({ page }) => {
-    await page.getByRole("combobox", { name: "装置を選択" }).selectOption("press-02");
+    await ensureNavExpanded(page);
+    await page
+      .getByRole("combobox", { name: "装置を選択" })
+      .selectOption(DEVICE_PRESS_B_ID);
     await expect(page.getByText("供給ユニット")).toBeVisible();
     await expect(page.getByRole("button", { name: "供給動作" })).toBeVisible();
-    await page.getByRole("combobox", { name: "装置を選択" }).selectOption("press-01");
-    await page.getByRole("button", { name: "供給動作" }).click();
+    await page
+      .getByRole("combobox", { name: "装置を選択" })
+      .selectOption(DEVICE_PRESS_A_ID);
+    await expect(page.getByText("供給ユニット")).toBeVisible();
+    await expect(page.getByRole("button", { name: "供給動作" })).toBeVisible();
   });
 
   test("AC-8: 1画面で表とプレビュー", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
-    await expect(page.getByText("閲覧専用")).toBeVisible();
+    await expect(
+      page
+        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
+        .first(),
+    ).toBeVisible();
   });
 
   test("AC-2: 5種ノードの形状が区別できる", async ({ page }) => {
@@ -142,7 +133,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     const nodeCountBefore = await page.locator(".react-flow__node").count();
 
     await page.getByRole("button", { name: "表を読込" }).click();
-    await page.locator('input[type="file"]').setInputFiles({
+    await page.locator('input[type="file"][accept*="json"]').setInputFiles({
       name: "sample-simple-yes.json",
       mimeType: "application/json",
       buffer: Buffer.from(json),
@@ -204,7 +195,12 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(page.getByText("同期テストラベル")).toBeVisible();
   });
 
-  test("B-4: 閲覧専用ラベル", async ({ page }) => {
-    await expect(page.getByText("閲覧専用（表を編集 → 再生成）")).toBeVisible();
+  test("B-4: サンプルプレビュー時のモード表示", async ({ page }) => {
+    await expect(
+      page
+        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
+        .first(),
+    ).toBeVisible();
+    await expect(headerRegenerate(page)).toBeEnabled();
   });
 });

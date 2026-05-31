@@ -42,7 +42,12 @@ http://localhost:3000/login
 |----------|------|
 | `npm run dev` | 日常開発（Turbopack · 初回は重め） |
 | `npm run build` → `npm run start` | 本番同等 · **PC が重いとき / 久しぶりの確認** |
-| `npm run test:e2e` | Playwright（内部ブラウザ設定と無関係） |
+| `npm run build` → `npm run test:e2e` | Playwright 全件（`:3001` · `AUTH_DISABLED=1` · 品質ゲート） |
+| `npm run test:e2e:labels` | Yes ラベルと縦線の重なりだけ（`e2e/edge-label-placement.spec.ts`） |
+
+初回 or コード変更後は **`npm run build`** を挟んでから E2E を実行する（`playwright.config` は `next start` を使う）。
+
+**Yes/No ラベルが線の上の白 pill のまま見えるとき:** dev を再起動 → **Ctrl+Shift+R** → 左ナビでモジュールを開き直す（保存 edges の再生成が走る）。詳細は `c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md` §5.6-4。
 
 ---
 

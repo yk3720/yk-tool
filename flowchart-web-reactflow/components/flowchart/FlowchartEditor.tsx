@@ -243,6 +243,11 @@ export const FlowchartEditor = forwardRef<
     if (workspaceMode) {
       if (moduleId && initialSnapshot) {
         refreshWarnings(initial.doc.table);
+        const text =
+          initialSnapshot.committedJson || initialSnapshot.jsonText;
+        if (text) {
+          runGenerate(text);
+        }
       }
       return;
     }
@@ -404,6 +409,337 @@ export const FlowchartEditor = forwardRef<
   const canExport = !isStale && nodes.length > 0;
   const allErrors = [...parseErrors, ...genErrors];
 
+  const previewModeHint =
+    showEditorPanes && readOnly
+      ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
+      : showEditorPanes && moduleSelected
+        ? "閲覧専用（表を編集 → 再生成）"
+        : showEditorPanes
+          ? "サンプル表示（左でモジュールを選ぶと保存できます）"
+          : null;
+
+  const toolbarButtons = (
+    <>
+      <button
+        ref={headerRegenerateRef}
+        type="button"
+        onClick={handleRegenerate}
+        disabled={!showEditorPanes || readOnly}
+        className={`rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 ${
+          isStale && showEditorPanes && !readOnly
+            ? "ring-2 ring-amber-400 ring-offset-1"
+            : ""
+        }`}
+      >
+        再生成
+      </button>
+
+      {!readOnly ? (
+        <>
+          <button
+            type="button"
+            onClick={handleSaveJson}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+          >
+            表を保存
+          </button>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+          >
+            表を読込
+          </button>
+        </>
+      ) : null}
+
+      <EditorMoreMenu
+        readOnly={readOnly}
+        workspaceMode={workspaceMode}
+        canExport={canExport}
+        clearDraftDisabled={workspaceMode}
+        clearDraftTitle={
+          workspaceMode
+            ? "モジュール単位の下書きは切替時に自動保存されます"
+            : "ブラウザに保存した下書きを削除"
+        }
+        pinOffline={pinOffline}
+        samples={[...SAMPLE_OPTIONS]}
+        onLoadSample={(key) => handleLoadSample(key as SampleKey)}
+        onExportPng={() => void handleExportPng()}
+        onExportSvg={() => void handleExportSvg()}
+        onClearDraft={handleClearDraft}
+      />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) handleImportFile(f);
+          e.target.value = "";
+        }}
+      />
+    </>
+  );
+
+  const statusLine = (
+    <p
+      className={
+        workspaceMode
+          ? "max-w-md text-right text-xs text-slate-600"
+          : "max-w-md text-right text-sm lg:max-w-xl"
+      }
+      role="status"
+      aria-live="polite"
+    >
+      {isStale && (
+        <span className="mr-2 font-medium text-amber-600">プレビューは古い —</span>
+      )}
+      <span className="text-slate-600">{status}</span>
+      {!workspaceMode ? (
+        <span className="ml-2 text-xs text-slate-400">（下書き自動保存）</span>
+      ) : null}
+    </p>
+  );
+
+  const errorBanner =
+    allErrors.length > 0 ? (
+      <div
+        className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
+        role="alert"
+      >
+        <ul className="list-inside list-disc">
+          {allErrors.map((err) => (
+            <li key={err}>
+              <button
+                type="button"
+                onClick={() => jumpToError(err)}
+                className="text-left underline hover:text-red-950"
+              >
+                {err}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+
+  const warningBanner =
+    warnings.length > 0 && allErrors.length === 0 ? (
+      <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+        <p className="font-medium">確認（警告）</p>
+        <p className="mt-0.5 text-xs text-amber-800">{WARNING_BANNER_HINT}</p>
+        <ul className="mt-1 list-inside list-disc">
+          {warnings.map((w) => (
+            <li key={w}>
+              <button
+                type="button"
+                onClick={() => jumpToError(w)}
+                className="underline"
+              >
+                {w}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null;
+
+  const mobilePaneTabs = workspaceMode ? (
+    <div className="flex shrink-0 border-b border-slate-200 px-4 py-2 lg:hidden">
+      <div
+        className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
+        role="tablist"
+        aria-label="表とプレビュー"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={paneView === "table"}
+          onClick={() => setPaneView("table")}
+          className={`rounded px-3 py-1 font-medium ${
+            paneView === "table"
+              ? "bg-slate-800 text-white"
+              : "text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          表
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={paneView === "canvas"}
+          onClick={() => setPaneView("canvas")}
+          className={`rounded px-3 py-1 font-medium ${
+            paneView === "canvas"
+              ? "bg-slate-800 text-white"
+              : "text-slate-600 hover:bg-slate-50"
+          }`}
+        >
+          図
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+  const tablePaneBody = !showEditorPanes ? (
+    <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+      <p>{EMPTY_MODULE_MESSAGE}</p>
+      <p className="text-xs text-slate-400">
+        または上の「サンプルを選択」から表と図を表示できます
+      </p>
+    </div>
+  ) : (
+    <>
+      {!readOnly ? <CsvPastePanel onApply={handleCsvApply} /> : null}
+      <FlowTableEditor
+        ref={tableEditorRef}
+        table={doc.table}
+        onChange={handleTableChange}
+        errorRowIndices={errorRows}
+        readOnly={readOnly}
+        tableSchema={doc.schema}
+      />
+    </>
+  );
+
+  const renderPreviewCanvas = (fullBleed: boolean) => {
+    const wrapClass = fullBleed
+      ? `relative flex min-h-[280px] flex-1 flex-col lg:min-h-0 ${
+          isStale ? "ring-2 ring-inset ring-amber-400" : ""
+        }`
+      : `relative min-h-[420px] flex-1 ${
+          isStale ? "rounded-lg ring-2 ring-amber-400 ring-offset-1" : ""
+        }`;
+
+    if (!showEditorPanes) {
+      return (
+        <div
+          className={
+            fullBleed
+              ? "flex min-h-[280px] flex-1 flex-col items-center justify-center gap-2 border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500 lg:min-h-0 lg:border-0 lg:border-l"
+              : "flex min-h-[420px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500"
+          }
+        >
+          <p>{EMPTY_MODULE_MESSAGE}</p>
+          <p className="text-xs text-slate-400">
+            または上の「サンプルを選択」から表と図を表示できます
+          </p>
+        </div>
+      );
+    }
+    if (hasPreview) {
+      return (
+        <div className={wrapClass}>
+          <FlowCanvas
+            canvasRef={canvasRef}
+            nodes={nodes}
+            edges={edges}
+            fillContainer={fullBleed}
+          />
+          {isStale && (
+            <div className="pointer-events-none absolute inset-0 flex items-start justify-center bg-amber-50/70 p-4">
+              <p className="pointer-events-auto max-w-md rounded-md border border-amber-300 bg-white px-3 py-2 text-center text-sm text-amber-900 shadow-sm">
+                入力が変更されています。{" "}
+                <button
+                  type="button"
+                  onClick={() => headerRegenerateRef.current?.click()}
+                  className="font-medium text-blue-600 underline hover:text-blue-800"
+                >
+                  再生成
+                </button>
+                でプレビューを更新してください。
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+    return (
+      <div
+        className={
+          fullBleed
+            ? "flex min-h-[280px] flex-1 items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500 lg:min-h-0 lg:border-0 lg:border-l"
+            : "flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500"
+        }
+      >
+        {EMPTY_TABLE_MESSAGE}
+      </div>
+    );
+  };
+
+  if (workspaceMode) {
+    return (
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {mobilePaneTabs}
+        <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
+          <section
+            className={`flex min-h-0 min-w-0 flex-col border-r border-slate-200 ${
+              paneView === "canvas" ? "hidden lg:flex" : "flex"
+            }`}
+          >
+            <header className="shrink-0 border-b border-slate-200 px-4 py-2">
+              <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="text-base font-semibold tracking-tight">
+                      Flowchart Web
+                    </h1>
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                      実用版
+                    </span>
+                  </div>
+                  {contextLabel ? (
+                    <p className="text-sm text-slate-600">
+                      <span className="font-medium text-slate-800">
+                        {contextLabel}
+                      </span>
+                    </p>
+                  ) : null}
+                  {previewModeHint ? (
+                    <p className="text-xs text-slate-500">{previewModeHint}</p>
+                  ) : null}
+                </div>
+                {statusLine}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {toolbarButtons}
+              </div>
+            </header>
+            {errorBanner}
+            {warningBanner}
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-4">
+              <h2 className="shrink-0 text-sm font-medium text-slate-700">表</h2>
+              {tablePaneBody}
+            </div>
+          </section>
+
+          <section
+            className={`flex min-h-0 min-w-0 flex-col ${
+              paneView === "table" ? "hidden lg:flex" : "flex"
+            }`}
+          >
+            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-2 lg:hidden">
+              <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
+              {previewModeHint ? (
+                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                  {previewModeHint}
+                </span>
+              ) : null}
+            </div>
+            <h2 className="sr-only">プレビュー</h2>
+            <div className="flex min-h-0 flex-1 flex-col p-4 lg:p-0">
+              {renderPreviewCanvas(true)}
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <header className="border-b border-slate-200 px-4 py-3">
@@ -423,256 +759,32 @@ export const FlowchartEditor = forwardRef<
               </p>
             ) : null}
           </div>
-
-          <p
-            className="max-w-md text-right text-sm lg:max-w-xl"
-            role="status"
-            aria-live="polite"
-          >
-            {isStale && (
-              <span className="mr-2 font-medium text-amber-600">
-                プレビューは古い —
-              </span>
-            )}
-            <span className="text-slate-600">{status}</span>
-            {!workspaceMode ? (
-              <span className="ml-2 text-xs text-slate-400">
-                （下書き自動保存）
-              </span>
-            ) : null}
-          </p>
+          {statusLine}
         </div>
-
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <button
-            ref={headerRegenerateRef}
-            type="button"
-            onClick={handleRegenerate}
-            disabled={!showEditorPanes || readOnly}
-            className={`rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 ${
-              isStale && showEditorPanes && !readOnly
-                ? "ring-2 ring-amber-400 ring-offset-1"
-                : ""
-            }`}
-          >
-            再生成
-          </button>
-
-          {!readOnly ? (
-            <>
-              <button
-                type="button"
-                onClick={handleSaveJson}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-              >
-                表を保存
-              </button>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-              >
-                表を読込
-              </button>
-            </>
-          ) : null}
-
-          <EditorMoreMenu
-            readOnly={readOnly}
-            workspaceMode={workspaceMode}
-            canExport={canExport}
-            clearDraftDisabled={workspaceMode}
-            clearDraftTitle={
-              workspaceMode
-                ? "モジュール単位の下書きは切替時に自動保存されます"
-                : "ブラウザに保存した下書きを削除"
-            }
-            pinOffline={pinOffline}
-            samples={[...SAMPLE_OPTIONS]}
-            onLoadSample={(key) => handleLoadSample(key as SampleKey)}
-            onExportPng={() => void handleExportPng()}
-            onExportSvg={() => void handleExportSvg()}
-            onClearDraft={handleClearDraft}
-          />
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleImportFile(f);
-              e.target.value = "";
-            }}
-          />
+          {toolbarButtons}
         </div>
       </header>
 
-      {allErrors.length > 0 && (
-        <div
-          className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
-          role="alert"
-        >
-          <ul className="list-inside list-disc">
-            {allErrors.map((err) => (
-              <li key={err}>
-                <button
-                  type="button"
-                  onClick={() => jumpToError(err)}
-                  className="text-left underline hover:text-red-950"
-                >
-                  {err}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {warnings.length > 0 && allErrors.length === 0 && (
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
-          <p className="font-medium">確認（警告）</p>
-          <p className="mt-0.5 text-xs text-amber-800">{WARNING_BANNER_HINT}</p>
-          <ul className="mt-1 list-inside list-disc">
-            {warnings.map((w) => (
-              <li key={w}>
-                <button
-                  type="button"
-                  onClick={() => jumpToError(w)}
-                  className="underline"
-                >
-                  {w}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {workspaceMode ? (
-        <div className="flex border-b border-slate-200 px-4 py-2 lg:hidden">
-          <div
-            className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
-            role="tablist"
-            aria-label="表とプレビュー"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={paneView === "table"}
-              onClick={() => setPaneView("table")}
-              className={`rounded px-3 py-1 font-medium ${
-                paneView === "table"
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              表
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={paneView === "canvas"}
-              onClick={() => setPaneView("canvas")}
-              className={`rounded px-3 py-1 font-medium ${
-                paneView === "canvas"
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              図
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {errorBanner}
+      {warningBanner}
 
       <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
-        <section
-          className={`min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4 ${
-            workspaceMode && paneView === "canvas" ? "hidden lg:flex" : "flex"
-          }`}
-        >
+        <section className="flex min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4">
           <h2 className="text-sm font-medium text-slate-700">表</h2>
-
-          {!showEditorPanes ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
-              <p>{EMPTY_MODULE_MESSAGE}</p>
-              <p className="text-xs text-slate-400">
-                または上の「サンプルを選択」から表と図を表示できます
-              </p>
-            </div>
-          ) : (
-            <>
-              {!readOnly ? <CsvPastePanel onApply={handleCsvApply} /> : null}
-              <FlowTableEditor
-                ref={tableEditorRef}
-                table={doc.table}
-                onChange={handleTableChange}
-                errorRowIndices={errorRows}
-                readOnly={readOnly}
-                tableSchema={doc.schema}
-              />
-            </>
-          )}
+          {tablePaneBody}
         </section>
 
-        <section
-          className={`min-h-[320px] flex-col gap-2 p-4 ${
-            workspaceMode && paneView === "table" ? "hidden lg:flex" : "flex"
-          }`}
-        >
+        <section className="flex min-h-[320px] flex-col gap-2 p-4">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
-            {showEditorPanes ? (
+            {previewModeHint ? (
               <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                {readOnly
-                  ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
-                  : moduleSelected
-                    ? "閲覧専用（表を編集 → 再生成）"
-                    : "サンプル表示（左でモジュールを選ぶと保存できます）"}
+                {previewModeHint}
               </span>
             ) : null}
           </div>
-          {!showEditorPanes ? (
-            <div className="flex min-h-[420px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
-              <p>{EMPTY_MODULE_MESSAGE}</p>
-              <p className="text-xs text-slate-400">
-                または上の「サンプルを選択」から表と図を表示できます
-              </p>
-            </div>
-          ) : hasPreview ? (
-            <div
-              className={`relative min-h-[420px] flex-1 ${
-                isStale ? "rounded-lg ring-2 ring-amber-400 ring-offset-1" : ""
-              }`}
-            >
-              <FlowCanvas
-                canvasRef={canvasRef}
-                nodes={nodes}
-                edges={edges}
-              />
-              {isStale && (
-                <div className="pointer-events-none absolute inset-0 flex items-start justify-center rounded-lg bg-amber-50/70 p-4">
-                  <p className="pointer-events-auto max-w-md rounded-md border border-amber-300 bg-white px-3 py-2 text-center text-sm text-amber-900 shadow-sm">
-                    入力が変更されています。{" "}
-                    <button
-                      type="button"
-                      onClick={() => headerRegenerateRef.current?.click()}
-                      className="font-medium text-blue-600 underline hover:text-blue-800"
-                    >
-                      再生成
-                    </button>
-                    でプレビューを更新してください。
-                  </p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500">
-              {EMPTY_TABLE_MESSAGE}
-            </div>
-          )}
+          {renderPreviewCanvas(false)}
         </section>
       </main>
     </div>

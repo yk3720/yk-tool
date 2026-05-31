@@ -28,10 +28,12 @@ export type FlowCanvasHandle = {
 type FlowCanvasProps = {
   nodes: Node<FlowNodeData>[];
   edges: Edge[];
+  /** workspace プレビュー列: 縦いっぱい・左ボーダーのみ */
+  fillContainer?: boolean;
 };
 
 function FlowCanvasInner(
-  { nodes, edges }: FlowCanvasProps,
+  { nodes, edges, fillContainer = false }: FlowCanvasProps,
   ref: React.Ref<FlowCanvasHandle>,
 ) {
   const { fitView } = useReactFlow();
@@ -67,7 +69,11 @@ function FlowCanvasInner(
   return (
     <div
       data-flowchart-export-root
-      className="h-full min-h-[420px] w-full rounded-lg border border-slate-200 bg-slate-50"
+      className={
+        fillContainer
+          ? "h-full min-h-[280px] w-full bg-slate-50 lg:min-h-0 lg:border-0 lg:border-l lg:border-slate-200"
+          : "h-full min-h-[420px] w-full rounded-lg border border-slate-200 bg-slate-50"
+      }
     >
       <ReactFlow
         nodes={nodes}

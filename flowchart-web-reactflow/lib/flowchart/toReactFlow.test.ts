@@ -22,9 +22,15 @@ describe("toReactFlow", () => {
     expect(nodes.every((n) => n.type === "flowShape")).toBe(true);
     expect(nodes.find((n) => n.id === "30")?.data.shapeKind).toBe("diamond");
 
-    const labels = edges.map((e) => e.label).filter(Boolean);
+    const labels = edges
+      .map((e) => (e.data as { edgeLabel?: string })?.edgeLabel)
+      .filter(Boolean);
     expect(labels).toContain("Yes");
     expect(labels).toContain("No");
+    const yesEdge = edges.find(
+      (e) => (e.data as { branch?: string })?.branch === "yes",
+    );
+    expect(yesEdge?.data).toMatchObject({ direction: "down", branch: "yes" });
     expect(
       edges.some((e) => e.source === "30" && e.sourceHandle === "bottom"),
     ).toBe(true);

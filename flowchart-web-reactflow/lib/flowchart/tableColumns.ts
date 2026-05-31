@@ -60,6 +60,9 @@ export const SHAPE_TYPE_OPTIONS = [
 
 export type TableLayout = "legacy8" | "tier9";
 
+/** 新規表・雛形の既定 schema（段 + 列 · ADR-012） */
+export const TIER9_SCHEMA = "table-9col-v1";
+
 const NINE_COL_WIDTH = TABLE_HEADERS_9.length;
 
 function isIntegerish(value: unknown): boolean {
@@ -101,6 +104,30 @@ export function inferTableLayout(
   return "legacy8";
 }
 
+/**
+ * 8列（Level）→ 9列（段 + 列）へ行を変換。
+ * level=0 で段を進め、level>0 は直前行と同じ段・列=level。
+ */
+export function legacy8TableToTier9(table: FlowTableRow[]): FlowTableRow[] {
+  let tier = 0;
+  return table.map((row) => {
+    const r = normalizeRow(row, TABLE_HEADERS_8.length);
+    const level = isIntegerish(r[4]) ? Number(r[4]) : 0;
+    if (level === 0) tier += 1;
+    return [
+      r[0],
+      r[1],
+      r[2],
+      r[3],
+      tier,
+      level,
+      r[5] ?? "",
+      r[6] ?? "",
+      r[7] ?? "",
+    ];
+  });
+}
+
 /** 表 UI / パーサー用の列数（9列レイアウトなら最低 9） */
 export function resolveColumnCount(
   table: FlowTableRow[],
@@ -114,7 +141,9 @@ export function resolveColumnCount(
         : Math.max(...table.map((r) => r?.length ?? 0));
     return Math.max(maxLen, NINE_COL_WIDTH);
   }
-  if (table.length === 0) return TABLE_HEADERS_8.length;
+  if (table.length === 0) {
+    return schema?.includes("9col") ? NINE_COL_WIDTH : TABLE_HEADERS_8.length;
+  }
   return Math.max(...table.map((r) => r?.length ?? 0), TABLE_HEADERS_8.length);
 }
 

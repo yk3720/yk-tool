@@ -3,16 +3,19 @@ import { DEFAULT_LAYOUT } from "./types";
 import {
   ensureNineColumnTable,
   inferTableLayout,
+  TIER9_SCHEMA,
 } from "./tableColumns";
 
 export function createDocument(
   table: FlowTableRow[],
   partial?: Partial<Omit<FlowchartDocument, "version" | "table" | "layout" | "createdAt">>,
 ): FlowchartDocument {
+  const schema = partial?.schema ?? TIER9_SCHEMA;
   return {
     version: 1,
+    schema,
     title: partial?.title ?? "無題のフロー",
-    table,
+    table: ensureNineColumnTable(table, schema),
     layout: { ...DEFAULT_LAYOUT },
     createdAt: new Date().toISOString(),
   };

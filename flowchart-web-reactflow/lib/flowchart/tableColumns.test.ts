@@ -7,9 +7,11 @@ import {
   inferTableLayout,
   isNumericTableColumn,
   normalizeRow,
+  legacy8TableToTier9,
   resolveColumnCount,
   suggestNextId,
   TABLE_HEADERS_9,
+  TIER9_SCHEMA,
 } from "./tableColumns";
 
 describe("tableColumns", () => {
@@ -57,6 +59,20 @@ describe("tableColumns", () => {
     expect(next[0]).toHaveLength(9);
     expect(next[0][5]).toBe(0);
     expect(next[0][6]).toBe("取付経路A");
+  });
+
+  it("legacy8TableToTier9 maps Level to 列 and increments 段 on level 0", () => {
+    const table = [
+      [10, "端子", "20", "", 0, "開始", "", ""],
+      [30, "判断", "40", "50", 0, "条件?", "", ""],
+      [40, "処理", "", "", 0, "Yes側", "", ""],
+      [50, "処理", "", "", 1, "No側", "", ""],
+    ];
+    const next = legacy8TableToTier9(table);
+    expect(next[0]).toEqual([10, "端子", "20", "", 1, 0, "開始", "", ""]);
+    expect(next[2]).toEqual([40, "処理", "", "", 3, 0, "Yes側", "", ""]);
+    expect(next[3]).toEqual([50, "処理", "", "", 3, 1, "No側", "", ""]);
+    expect(inferTableLayout(next, TIER9_SCHEMA)).toBe("tier9");
   });
 
   it("inferTableLayout keeps legacy 8-col sample-basic pattern", () => {

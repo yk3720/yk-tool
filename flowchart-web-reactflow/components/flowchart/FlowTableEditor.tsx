@@ -113,7 +113,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
             </ul>
           ) : (
             <p className="mt-1">
-              8 列形式を推奨します（判断の No 分岐には接続先(右)が必要です）。
+              9 列形式（段・列）を推奨します。判断の No 分岐には接続先(右)が必要です。
             </p>
           )}
         </details>

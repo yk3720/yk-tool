@@ -47,12 +47,18 @@ export const SHAPE_TYPE_COLUMN_HELP =
 export const COLOR_COLUMN_HELP =
   "背景色。通常=自動運転 · 黄=重要な判断 · 橙=要注意/異常系 · 青=手動確認。形+ラベルと併用（表の赤警告とは別）";
 
+/** 作者向け · 接続先（Yes/No · ループ）— SSOT: 02_spec/フローチャート記述ルール.md §4 */
+export const CONNECT_DOWN_HELP =
+  "この ID へ下矢印（判断の Yes 側になりやすい）";
+export const CONNECT_RIGHT_HELP =
+  "右矢印（判断の No）。上へ戻すループは右列（列=1）に1行置き、そこから接続先(下)で戻す";
+
 /** 作者向けの列の説明（8列） */
 export const COLUMN_HELP_8: Record<(typeof TABLE_HEADERS_8)[number], string> = {
   ID: "ノード番号（10, 20…）。他行の接続先にも使う",
   図形種別: SHAPE_TYPE_COLUMN_HELP,
-  "接続先(下)": "この ID へ下矢印（判断の Yes 側になりやすい）",
-  "接続先(右)": "この ID へ右矢印（判断の No 側になりやすい）",
+  "接続先(下)": CONNECT_DOWN_HELP,
+  "接続先(右)": CONNECT_RIGHT_HELP,
   Level: "同じ行内の横位置（0=左、1=右の分岐）",
   Text1: "図形に表示する主テキスト",
   Text2: "補足（2行目）",
@@ -63,8 +69,8 @@ export const COLUMN_HELP_8: Record<(typeof TABLE_HEADERS_8)[number], string> = {
 export const COLUMN_HELP_9: Record<(typeof TABLE_HEADERS_9)[number], string> = {
   ID: "ノード番号（10, 20…）。他行の接続先にも使う",
   図形種別: SHAPE_TYPE_COLUMN_HELP,
-  "接続先(下)": "この ID へ下矢印（判断の Yes 側になりやすい）",
-  "接続先(右)": "この ID へ右矢印（判断の No 側になりやすい）",
+  "接続先(下)": CONNECT_DOWN_HELP,
+  "接続先(右)": CONNECT_RIGHT_HELP,
   段: "縦位置（同じ段 = 同じ高さで横並び）",
   列: "横位置（0=左、1=右 … 分岐の並び）",
   Text1: "図形に表示する主テキスト（例: MR100 · 取付経路A）",

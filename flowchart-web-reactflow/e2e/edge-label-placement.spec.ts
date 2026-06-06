@@ -10,9 +10,10 @@ import {
 async function assertBranchLabelHalo(
   page: Page,
   branch: "yes" | "no",
+  index = 0,
 ) {
-  const label = page.locator(`[data-edge-label-branch="${branch}"]`);
-  await expect(label).toHaveCount(1);
+  const label = page.locator(`[data-edge-label-branch="${branch}"]`).nth(index);
+  await expect(label).toBeVisible();
   await expect(label).toHaveClass(/bg-transparent/);
   await expect(page.locator(".react-flow__edge-text")).toHaveCount(0);
 }
@@ -88,9 +89,9 @@ test.describe("分岐ラベル配置（Yes と縦線）", () => {
     page,
   }) => {
     await openPreviewWithSample(page);
-    await expect(page.getByText("Yes", { exact: true })).toBeVisible();
-    await expect(page.getByText("No", { exact: true })).toBeVisible();
-    await expect(page.locator(".flow-node-diamond")).toHaveCount(1, {
+    await expect(page.locator('[data-edge-label-text="Yes"]')).toHaveCount(3);
+    await expect(page.locator('[data-edge-label-text="No"]')).toHaveCount(3);
+    await expect(page.locator(".flow-node-diamond")).toHaveCount(3, {
       timeout: 15_000,
     });
 
@@ -105,8 +106,8 @@ test.describe("分岐ラベル配置（Yes と縦線）", () => {
     await page.getByRole("button", { name: "供給動作" }).click();
     await loadSampleFromMenu(page, "サンプル: カレーの作り方");
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText("Yes", { exact: true })).toBeVisible();
-    await expect(page.getByText("No", { exact: true })).toBeVisible();
+    await expect(page.locator('[data-edge-label-text="Yes"]')).toHaveCount(3);
+    await expect(page.locator('[data-edge-label-text="No"]')).toHaveCount(3);
 
     await assertBranchLabelHalo(page, "yes");
     await assertBranchLabelHalo(page, "no");

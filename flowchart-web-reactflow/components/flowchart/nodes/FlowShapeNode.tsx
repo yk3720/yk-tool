@@ -34,6 +34,80 @@ function LabelLines({ label }: { label: string }) {
   ));
 }
 
+function polygonPoints(
+  width: number,
+  height: number,
+  verts: readonly [number, number][],
+): string {
+  return verts
+    .map(([xPct, yPct]) => `${(xPct / 100) * width},${(yPct / 100) * height}`)
+    .join(" ");
+}
+
+/** 入出力 — clip-path+border だと角が途切れるため SVG stroke */
+const PARALLELOGRAM_VERTS: [number, number][] = [
+  [12, 0],
+  [100, 0],
+  [88, 100],
+  [0, 100],
+];
+
+/** 手動入力 */
+const MANUAL_VERTS: [number, number][] = [
+  [8, 0],
+  [92, 0],
+  [100, 100],
+  [0, 100],
+];
+
+function SlantedPolygonShape({
+  data,
+  width,
+  height,
+  verts,
+  className,
+}: {
+  data: FlowNodeData;
+  width: number;
+  height: number;
+  verts: readonly [number, number][];
+  className: string;
+}) {
+  const fill = nodeBackgroundColor(data.colorHint);
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      className={`${className} block overflow-visible`}
+      aria-hidden={false}
+    >
+      <title>{data.shapeType}</title>
+      <polygon
+        points={polygonPoints(width, height, verts)}
+        fill={fill}
+        stroke={FLOW_NODE_FRAME_STROKE}
+        strokeWidth={FLOW_NODE_DIAMOND_STROKE_WIDTH}
+        strokeLinejoin="miter"
+        strokeMiterlimit={4}
+      />
+      <foreignObject
+        x={width * 0.1}
+        y={height * 0.12}
+        width={width * 0.8}
+        height={height * 0.76}
+      >
+        <div
+          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as Record<string, string>)}
+          className="flex h-full w-full flex-col items-center justify-center gap-0.5 text-center text-[11px] font-medium leading-snug text-slate-800"
+        >
+          <LabelLines label={data.label} />
+        </div>
+      </foreignObject>
+    </svg>
+  );
+}
+
 function DiamondShape({
   data,
   width,
@@ -112,23 +186,23 @@ function ShapeBody({
       );
     case "parallelogram":
       return (
-        <div
-          className={`${base} flow-node-parallelogram`}
-          style={shapeFrame}
-          title={data.shapeType}
-        >
-          {label}
-        </div>
+        <SlantedPolygonShape
+          data={data}
+          width={width}
+          height={height}
+          verts={PARALLELOGRAM_VERTS}
+          className="flow-node-parallelogram"
+        />
       );
     case "manual":
       return (
-        <div
-          className={`${base} flow-node-manual`}
-          style={shapeFrame}
-          title={data.shapeType}
-        >
-          {label}
-        </div>
+        <SlantedPolygonShape
+          data={data}
+          width={width}
+          height={height}
+          verts={MANUAL_VERTS}
+          className="flow-node-manual"
+        />
       );
     default:
       return (

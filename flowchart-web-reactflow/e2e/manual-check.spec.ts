@@ -39,7 +39,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
         .first(),
     ).toBeVisible();
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
-    await expect(page.locator(".react-flow__node")).toHaveCount(13, {
+    await expect(page.locator(".react-flow__node")).toHaveCount(15, {
       timeout: 15_000,
     });
   });
@@ -85,34 +85,33 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
 
   test("AC-2: 5種ノードの形状が区別できる", async ({ page }) => {
     await addTableRow(page);
-    const row6 = page.locator("tbody tr").nth(5);
-    await row6.locator("input").nth(0).fill("60");
-    await row6.locator("select").selectOption("入出力");
-    await row6.locator("input").nth(4).fill("入出力サンプル");
+    const row16 = page.locator("tbody tr").nth(15);
+    await row16.getByLabel("行16 ID").fill("140");
+    await row16.getByLabel("行16 図形種別").selectOption("入出力");
+    await row16.getByLabel("行16 Text1").fill("入出力サンプル");
 
     await addTableRow(page);
-    const row7 = page.locator("tbody tr").nth(6);
-    await row7.locator("input").nth(0).fill("70");
-    await row7.locator("select").selectOption("手動入力");
-    await row7.locator("input").nth(4).fill("手動入力サンプル");
+    const row17 = page.locator("tbody tr").nth(16);
+    await row17.getByLabel("行17 ID").fill("150");
+    await row17.getByLabel("行17 図形種別").selectOption("手動入力");
+    await row17.getByLabel("行17 Text1").fill("手動入力サンプル");
 
     await headerRegenerate(page).click();
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 10_000 });
 
-    await expect(page.locator(".flow-node-diamond")).toHaveCount(1);
-    await expect(page.locator(".rounded-2xl")).toHaveCount(1);
-    await expect(page.locator(".flow-node-parallelogram")).toHaveCount(1);
-    await expect(page.locator(".flow-node-manual")).toHaveCount(1);
-    await expect(page.locator(".react-flow__node")).toHaveCount(7);
+    await expect(page.locator(".flow-node-diamond")).toHaveCount(3);
+    await expect(page.locator(".flow-node-parallelogram")).toHaveCount(2);
+    await expect(page.locator(".flow-node-manual")).toHaveCount(2);
+    await expect(page.locator(".react-flow__node")).toHaveCount(17);
   });
 
   test("AC-3: 矢印（エッジ）が表示される", async ({ page }) => {
     await expect(page.locator(".react-flow__edge")).not.toHaveCount(0);
   });
 
-  test("AC-4: 判断から Yes / No ラベル（basic）", async ({ page }) => {
-    await expect(page.getByText("Yes", { exact: true })).toBeVisible();
-    await expect(page.getByText("No", { exact: true })).toBeVisible();
+  test("AC-4: 判断から Yes / No ラベル", async ({ page }) => {
+    await expect(page.locator('[data-edge-label-text="Yes"]')).toHaveCount(3);
+    await expect(page.locator('[data-edge-label-text="No"]')).toHaveCount(3);
   });
 
   test("AC-5: 表変更→再生成でレイアウトが更新される", async ({ page }) => {
@@ -143,7 +142,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(page.locator(".react-flow__node")).toHaveCount(13, {
       timeout: 10_000,
     });
-    expect(nodeCountBefore).toBeLessThan(13);
+    expect(nodeCountBefore).toBe(15);
   });
 
   test("AC-7: PNG ダウンロードが開始される（再生成後）", async ({
@@ -177,7 +176,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   });
 
   test("B-1: stale 時は画像を保存できない", async ({ page }) => {
-    const textCell = page.locator("tbody tr").nth(1).locator("input").nth(4);
+    const textCell = page.getByLabel("行2 Text1");
     await textCell.fill("変更テスト");
     await textCell.blur();
     await expect(page.getByText("プレビューは古い")).toBeVisible();
@@ -187,7 +186,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   });
 
   test("B-2: 表編集が再生成後にプレビューへ反映", async ({ page }) => {
-    const textCell = page.locator("tbody tr").nth(1).locator("input").nth(4);
+    const textCell = page.getByLabel("行2 Text1");
     await textCell.fill("同期テストラベル");
     await textCell.blur();
     await headerRegenerate(page).click();

@@ -133,3 +133,36 @@ describe("generateFlowchart (ADR-012 tier-based layout)", () => {
     expect(into6.every((e) => e.route === "elbow")).toBe(true);
   });
 });
+
+describe("generateFlowchart (curry sample loops)", () => {
+  it("No on 接続先(右) uses side column then returns to earlier step", () => {
+    const doc = loadFixture("sample-curry.json");
+    const result = generateFlowchart(doc.table, doc.layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const onionSide = result.edges.find(
+      (e) => e.sourceId === "50" && e.targetId === "55" && e.direction === "right",
+    );
+    const onionLoop = result.edges.find(
+      (e) => e.sourceId === "55" && e.targetId === "40" && e.direction === "down",
+    );
+    const boilSide = result.edges.find(
+      (e) => e.sourceId === "80" && e.targetId === "85" && e.direction === "right",
+    );
+    const boilLoop = result.edges.find(
+      (e) => e.sourceId === "85" && e.targetId === "70" && e.direction === "down",
+    );
+    expect(onionSide?.label).toBe("No");
+    expect(onionLoop?.label).toBeUndefined();
+    expect(boilSide?.label).toBe("No");
+    expect(boilLoop?.label).toBeUndefined();
+
+    const retryOnion = result.placed.find((p) => p.id === "55");
+    const sauté = result.placed.find((p) => p.id === "40");
+    expect(retryOnion && sauté).toBeTruthy();
+    if (!retryOnion || !sauté) return;
+    expect(retryOnion?.level).toBe(1);
+    expect(sauté && retryOnion && retryOnion.x).toBeGreaterThan(sauté.x);
+  });
+});

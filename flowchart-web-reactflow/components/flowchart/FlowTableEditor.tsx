@@ -5,12 +5,14 @@ import {
   getColumnHelp,
   getHeaders,
   getHelpEntries,
+  isColorTableColumn,
   isNumericTableColumn,
   normalizeRow,
   resolveColumnCount,
   SHAPE_TYPE_OPTIONS,
   suggestNextId,
 } from "@/lib/flowchart/tableColumns";
+import { COLOR_HINT_SELECT_OPTIONS } from "@/lib/flowchart/flowColors";
 import type { FlowTableRow } from "@/lib/flowchart/types";
 import {
   forwardRef,
@@ -96,6 +98,9 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
 
     const isShapeColumn = (colIndex: number) =>
       colCount >= 8 ? colIndex === 1 : colIndex === 1 && colCount >= 2;
+
+    const isSelectColumn = (colIndex: number) =>
+      isShapeColumn(colIndex) || isColorTableColumn(colIndex, colCount);
 
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-2">
@@ -185,19 +190,29 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                         key={colIndex}
                         className="border-b border-slate-100 px-0.5 py-0.5"
                       >
-                        {isShapeColumn(colIndex) ? (
+                        {isSelectColumn(colIndex) ? (
                           <select
-                            value={cellToString(row[colIndex]) || "処理"}
+                            value={
+                              isColorTableColumn(colIndex, colCount)
+                                ? cellToString(row[colIndex])
+                                : cellToString(row[colIndex]) || "処理"
+                            }
                             onChange={(e) =>
                               updateCell(rowIndex, colIndex, e.target.value)
                             }
                             disabled={readOnly}
                             className="w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 disabled:cursor-default disabled:opacity-90"
-                            aria-label={`行${rowIndex + 1} 図形種別`}
+                            aria-label={`行${rowIndex + 1} ${h}`}
                           >
-                            {SHAPE_TYPE_OPTIONS.map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt}
+                            {(isColorTableColumn(colIndex, colCount)
+                              ? COLOR_HINT_SELECT_OPTIONS
+                              : SHAPE_TYPE_OPTIONS.map((opt) => ({
+                                  value: opt,
+                                  label: opt,
+                                }))
+                            ).map((opt) => (
+                              <option key={opt.value || "__empty"} value={opt.value}>
+                                {opt.label}
                               </option>
                             ))}
                           </select>

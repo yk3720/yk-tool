@@ -1,4 +1,5 @@
 import { normalizeShapeType } from "./normalizeShapeType";
+import { normalizeColorHint } from "./flowColors";
 import type { FlowNode, FlowTableRow, ParseResult } from "./types";
 
 function normId(v: unknown): string {
@@ -87,6 +88,9 @@ export function parseTable(table: FlowTableRow[]): ParseResult {
       destsRight,
       level,
       ...(tier !== undefined ? { tier } : {}),
+      ...(colCount >= 10
+        ? { colorHint: normalizeColorHint(row[9]).hint }
+        : {}),
       rowIndex: i,
     };
     nodes.push(node);

@@ -12,6 +12,20 @@ export const TABLE_HEADERS_8 = [
   "Text3",
 ] as const;
 
+/** 10列版（段 + 列 + 色 · ADR-012 §B） */
+export const TABLE_HEADERS_10 = [
+  "ID",
+  "図形種別",
+  "接続先(下)",
+  "接続先(右)",
+  "段",
+  "列",
+  "Text1",
+  "Text2",
+  "Text3",
+  "色",
+] as const;
+
 /** 9列版（段 + 列 · ADR-012） */
 export const TABLE_HEADERS_9 = [
   "ID",
@@ -25,10 +39,18 @@ export const TABLE_HEADERS_9 = [
   "Text3",
 ] as const;
 
+/** 作者向け · 図形種別（自動機）— SSOT: 02_spec/フローチャート記述ルール.md §2 */
+export const SHAPE_TYPE_COLUMN_HELP =
+  "端子=開始/終了 · 処理=自動ステップ · 判断=分岐(Yes下/No右) · 入出力=PLC/上位 · 手動入力=オペ操作";
+
+/** 作者向け · 色列（自動機）— SSOT: 02_spec/フローチャート記述ルール.md §3 */
+export const COLOR_COLUMN_HELP =
+  "背景色。通常=自動運転 · 黄=重要な判断 · 橙=要注意/異常系 · 青=手動確認。形+ラベルと併用（表の赤警告とは別）";
+
 /** 作者向けの列の説明（8列） */
 export const COLUMN_HELP_8: Record<(typeof TABLE_HEADERS_8)[number], string> = {
   ID: "ノード番号（10, 20…）。他行の接続先にも使う",
-  図形種別: "端子・処理・判断・入出力・手動入力",
+  図形種別: SHAPE_TYPE_COLUMN_HELP,
   "接続先(下)": "この ID へ下矢印（判断の Yes 側になりやすい）",
   "接続先(右)": "この ID へ右矢印（判断の No 側になりやすい）",
   Level: "同じ行内の横位置（0=左、1=右の分岐）",
@@ -40,7 +62,7 @@ export const COLUMN_HELP_8: Record<(typeof TABLE_HEADERS_8)[number], string> = {
 /** 作者向けの列の説明（9列） */
 export const COLUMN_HELP_9: Record<(typeof TABLE_HEADERS_9)[number], string> = {
   ID: "ノード番号（10, 20…）。他行の接続先にも使う",
-  図形種別: "端子・処理・判断・入出力・手動入力",
+  図形種別: SHAPE_TYPE_COLUMN_HELP,
   "接続先(下)": "この ID へ下矢印（判断の Yes 側になりやすい）",
   "接続先(右)": "この ID へ右矢印（判断の No 側になりやすい）",
   段: "縦位置（同じ段 = 同じ高さで横並び）",
@@ -48,6 +70,12 @@ export const COLUMN_HELP_9: Record<(typeof TABLE_HEADERS_9)[number], string> = {
   Text1: "図形に表示する主テキスト（例: MR100 · 取付経路A）",
   Text2: "補足（2行目）",
   Text3: "補足（3行目）",
+};
+
+/** 作者向けの列の説明（10列） */
+export const COLUMN_HELP_10: Record<(typeof TABLE_HEADERS_10)[number], string> = {
+  ...COLUMN_HELP_9,
+  色: COLOR_COLUMN_HELP,
 };
 
 export const SHAPE_TYPE_OPTIONS = [
@@ -60,10 +88,22 @@ export const SHAPE_TYPE_OPTIONS = [
 
 export type TableLayout = "legacy8" | "tier9";
 
-/** 新規表・雛形の既定 schema（段 + 列 · ADR-012） */
+/** 新規表・雛形の既定 schema（段 + 列 + 色） */
+export const TIER10_SCHEMA = "table-10col-v1";
+
+/** 9列 schema（後方互換） */
 export const TIER9_SCHEMA = "table-9col-v1";
 
 const NINE_COL_WIDTH = TABLE_HEADERS_9.length;
+const TEN_COL_WIDTH = TABLE_HEADERS_10.length;
+
+function usesTenColumnSchema(schema?: string): boolean {
+  return schema?.includes("10col") ?? false;
+}
+
+function usesTierColumnSchema(schema?: string): boolean {
+  return usesTenColumnSchema(schema) || schema?.includes("9col") === true;
+}
 
 function isIntegerish(value: unknown): boolean {
   if (value === null || value === undefined || value === "") return false;
@@ -76,7 +116,7 @@ export function inferTableLayout(
   table: FlowTableRow[],
   schema?: string,
 ): TableLayout {
-  if (schema?.includes("9col")) return "tier9";
+  if (usesTierColumnSchema(schema)) return "tier9";
   if (table.length === 0) return "legacy8";
 
   const maxLen = Math.max(...table.map((r) => r?.length ?? 0));
@@ -128,7 +168,7 @@ export function legacy8TableToTier9(table: FlowTableRow[]): FlowTableRow[] {
   });
 }
 
-/** 表 UI / パーサー用の列数（9列レイアウトなら最低 9） */
+/** 表 UI / パーサー用の列数（tier9 は常に 10 列 · 色列込み） */
 export function resolveColumnCount(
   table: FlowTableRow[],
   schema?: string,
@@ -137,17 +177,18 @@ export function resolveColumnCount(
   if (layout === "tier9") {
     const maxLen =
       table.length === 0
-        ? NINE_COL_WIDTH
+        ? TEN_COL_WIDTH
         : Math.max(...table.map((r) => r?.length ?? 0));
-    return Math.max(maxLen, NINE_COL_WIDTH);
+    return Math.max(maxLen, TEN_COL_WIDTH);
   }
   if (table.length === 0) {
-    return schema?.includes("9col") ? NINE_COL_WIDTH : TABLE_HEADERS_8.length;
+    if (usesTenColumnSchema(schema)) return TEN_COL_WIDTH;
+    return usesTierColumnSchema(schema) ? TEN_COL_WIDTH : TABLE_HEADERS_8.length;
   }
   return Math.max(...table.map((r) => r?.length ?? 0), TABLE_HEADERS_8.length);
 }
 
-/** 9列表にパディング（段·列·Text1 の位置を維持） */
+/** 9/10列表の列幅を揃える（tier9 は 10 列 · 色列を空でパディング） */
 export function ensureNineColumnTable(
   table: FlowTableRow[],
   schema?: string,
@@ -157,11 +198,18 @@ export function ensureNineColumnTable(
   return table.map((row) => normalizeRow(row, colCount));
 }
 
-export function getColumnCount(table: FlowTableRow[]): number {
-  return resolveColumnCount(table);
+export function getColumnCount(table: FlowTableRow[], schema?: string): number {
+  return resolveColumnCount(table, schema);
 }
 
 export function getHeaders(colCount: number, schema?: string): string[] {
+  if (colCount >= TEN_COL_WIDTH || usesTenColumnSchema(schema)) {
+    const headers: string[] = [...TABLE_HEADERS_10];
+    while (headers.length < colCount) {
+      headers.push(`列${headers.length + 1}`);
+    }
+    return headers.slice(0, colCount);
+  }
   if (colCount >= NINE_COL_WIDTH || schema?.includes("9col")) {
     const headers: string[] = [...TABLE_HEADERS_9];
     while (headers.length < colCount) {
@@ -180,6 +228,9 @@ export function getColumnHelp(
   header: string,
   colCount: number,
 ): string | undefined {
+  if (colCount >= TEN_COL_WIDTH && header in COLUMN_HELP_10) {
+    return COLUMN_HELP_10[header as (typeof TABLE_HEADERS_10)[number]];
+  }
   if (colCount >= 9 && header in COLUMN_HELP_9) {
     return COLUMN_HELP_9[header as (typeof TABLE_HEADERS_9)[number]];
   }
@@ -208,6 +259,11 @@ export function isNumericTableColumn(
   if (colCount >= 8 && colCount < 9 && colIndex === 4) return true;
   if (colCount === 7 && colIndex === 3) return true;
   return false;
+}
+
+/** 表 UI: 10列目「色」 */
+export function isColorTableColumn(colIndex: number, colCount: number): boolean {
+  return colCount >= TEN_COL_WIDTH && colIndex === TEN_COL_WIDTH - 1;
 }
 
 /** 行を列数に合わせてパディング */

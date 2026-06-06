@@ -25,11 +25,11 @@ async function addTableRow(page: import("@playwright/test").Page) {
 }
 
 test.describe("サンプル表示（モジュール未選択）", () => {
-  test("M002 を選ぶと表とプレビューが表示される", async ({ page }) => {
+  test("カレーサンプルを選ぶと表とプレビューが表示される", async ({ page }) => {
     await ensureWorkspaceLoaded(page);
 
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(2);
-    await loadSampleFromMenu(page, "サンプル: M002（9列·段+列）");
+    await loadSampleFromMenu(page, "サンプル: カレーの作り方");
 
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);
@@ -39,7 +39,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
         .first(),
     ).toBeVisible();
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
-    await expect(page.locator(".react-flow__node")).toHaveCount(14, {
+    await expect(page.locator(".react-flow__node")).toHaveCount(13, {
       timeout: 15_000,
     });
   });

@@ -1,4 +1,5 @@
 import { parseTable } from "./parseTable";
+import { normalizeColorHint } from "./flowColors";
 import type { FlowTableRow } from "./types";
 
 /** エラーメッセージから表の行インデックス（0-based）を抽出 */
@@ -37,7 +38,7 @@ export const WARNING_BANNER_HINT =
 /** エラーに加え警告（生成は可能なもの） */
 export function validateTableWarnings(table: FlowTableRow[]): string[] {
   const warnings: string[] = [];
-  const { nodes } = parseTable(table);
+  const { nodes, colCount } = parseTable(table);
 
   if (nodes.length === 0) {
     warnings.push(
@@ -56,6 +57,18 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
       if (n.destsDown.length > 1) {
         warnings.push(
           `ID ${n.id}（判断）: 接続先(下) は1件にしてください — 複数あると図が分かりにくいです（Yes は下・No は右が一般的です）`,
+        );
+      }
+    }
+  }
+
+  if (colCount >= 10) {
+    for (const n of nodes) {
+      const cell = table[n.rowIndex]?.[9];
+      const { unknown } = normalizeColorHint(cell);
+      if (unknown) {
+        warnings.push(
+          `ID ${n.id}: 色列の値「${String(cell).trim()}」は未対応です — 空・黄・橙・青のいずれかにしてください（通常として描画します）`,
         );
       }
     }

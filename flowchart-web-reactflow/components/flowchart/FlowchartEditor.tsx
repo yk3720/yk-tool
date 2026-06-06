@@ -10,6 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
+import sampleCurry from "@/fixtures/sample-curry.json";
+import sampleMorning from "@/fixtures/sample-morning.json";
+import sampleAtm from "@/fixtures/sample-atm.json";
 import sampleBasic from "@/fixtures/sample-basic.json";
 import sampleSimpleYes from "@/fixtures/sample-simple-yes.json";
 import templateLinear from "@/fixtures/template-linear.json";
@@ -23,6 +26,7 @@ import {
 } from "@/lib/flowchart/document";
 import { clearDraft, loadDraft, saveDraft } from "@/lib/flowchart/draftStorage";
 import { generateFlowchart } from "@/lib/flowchart/generate";
+import { resolveColumnCount } from "@/lib/flowchart/tableColumns";
 import { toReactFlow, type FlowNodeData } from "@/lib/flowchart/toReactFlow";
 import type { FlowchartDocument } from "@/lib/flowchart/types";
 import {
@@ -34,6 +38,7 @@ import { captureFlowPng } from "./exportPng";
 import { captureFlowSvg } from "./exportSvg";
 import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
+import { FlowColorLegend } from "./FlowColorLegend";
 import { CsvPastePanel } from "./CsvPastePanel";
 import {
   FlowTableEditor,
@@ -41,6 +46,9 @@ import {
 } from "./FlowTableEditor";
 
 const SAMPLES: Record<string, FlowchartDocument> = {
+  curry: sampleCurry as FlowchartDocument,
+  morning: sampleMorning as FlowchartDocument,
+  atm: sampleAtm as FlowchartDocument,
   basic: sampleBasic as FlowchartDocument,
   simpleYes: sampleSimpleYes as FlowchartDocument,
   templateStarter: templateStarter as FlowchartDocument,
@@ -49,11 +57,11 @@ const SAMPLES: Record<string, FlowchartDocument> = {
 };
 
 const SAMPLE_OPTIONS = [
-  { key: "basic", label: "サンプル: 基本判断" },
-  { key: "simpleYes", label: "サンプル: ループあり" },
+  { key: "curry", label: "サンプル: カレーの作り方" },
+  { key: "morning", label: "サンプル: 朝の出勤準備" },
+  { key: "atm", label: "サンプル: ATMで現金を下ろす" },
   { key: "templateStarter", label: "雛形: はじめから" },
   { key: "templateLinear", label: "雛形: 直線" },
-  { key: "m002NineCol", label: "サンプル: M002（9列·段+列）" },
 ] as const;
 
 type SampleKey = (typeof SAMPLE_OPTIONS)[number]["key"];
@@ -96,17 +104,24 @@ function resolveInitialState(props: FlowchartEditorProps): {
 } {
   const snap = props.initialSnapshot;
   if (snap) {
-    const { doc: parsed } = parseFlowchartDocument(snap.jsonText);
+    const raw = snap.committedJson || snap.jsonText;
+    const { doc: parsed } = parseFlowchartDocument(raw);
+    const doc = normalizeFlowchartDocument(
+      parsed ?? (SAMPLES.templateStarter as FlowchartDocument),
+    );
+    const text = serializeDocument(doc);
     return {
-      doc: parsed ?? (SAMPLES.templateStarter as FlowchartDocument),
-      jsonText: snap.jsonText,
-      committedJson: snap.committedJson,
+      doc,
+      jsonText: text,
+      committedJson: text,
       nodes: snap.nodes,
       edges: snap.edges,
     };
   }
   if (props.workspaceMode && props.moduleId) {
-    const starter = SAMPLES.templateStarter as FlowchartDocument;
+    const starter = normalizeFlowchartDocument(
+      SAMPLES.templateStarter as FlowchartDocument,
+    );
     const text = serializeDocument(starter);
     return {
       doc: starter,
@@ -116,7 +131,7 @@ function resolveInitialState(props: FlowchartEditorProps): {
       edges: [],
     };
   }
-  const basic = SAMPLES.basic as FlowchartDocument;
+  const basic = normalizeFlowchartDocument(SAMPLES.curry as FlowchartDocument);
   const text = serializeDocument(basic);
   return {
     doc: basic,
@@ -172,6 +187,7 @@ export const FlowchartEditor = forwardRef<
   const showEditorPanes =
     moduleSelected || (workspaceMode && samplePreviewActive);
   const hasPreview = nodes.length > 0;
+  const showColorLegend = resolveColumnCount(doc.table, doc.schema) >= 10;
 
   useImperativeHandle(
     ref,
@@ -243,10 +259,8 @@ export const FlowchartEditor = forwardRef<
     if (workspaceMode) {
       if (moduleId && initialSnapshot) {
         refreshWarnings(initial.doc.table);
-        const text =
-          initialSnapshot.committedJson || initialSnapshot.jsonText;
-        if (text) {
-          runGenerate(text);
+        if (initial.jsonText) {
+          runGenerate(initial.jsonText);
         }
       }
       return;
@@ -263,7 +277,7 @@ export const FlowchartEditor = forwardRef<
         return;
       }
     }
-    runGenerate(serializeDocument(SAMPLES.basic));
+    runGenerate(serializeDocument(SAMPLES.curry));
   }, [runGenerate, refreshWarnings, workspaceMode, moduleId, initialSnapshot, initial.doc.table]);
 
   useEffect(() => {
@@ -640,6 +654,7 @@ export const FlowchartEditor = forwardRef<
             edges={edges}
             fillContainer={fullBleed}
           />
+          {showColorLegend ? <FlowColorLegend /> : null}
           {isStale && (
             <div className="pointer-events-none absolute inset-0 flex items-start justify-center bg-amber-50/70 p-4">
               <p className="pointer-events-auto max-w-md rounded-md border border-amber-300 bg-white px-3 py-2 text-center text-sm text-amber-900 shadow-sm">

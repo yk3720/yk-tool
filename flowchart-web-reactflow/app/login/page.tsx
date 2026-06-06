@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/LoginForm";
-import { getAuthContext } from "@/lib/auth/session";
+import { getAuthState } from "@/lib/auth/session";
 import { isAuthDisabled } from "@/lib/supabase/env";
 
 type Props = {
@@ -13,9 +13,12 @@ export default async function LoginPage({ searchParams }: Props) {
     redirect("/");
   }
 
-  const auth = await getAuthContext();
-  if (auth) {
+  const state = await getAuthState();
+  if (state.kind === "allowed" || state.kind === "disabled") {
     redirect("/");
+  }
+  if (state.kind === "pending") {
+    redirect("/login/no-access");
   }
 
   const params = await searchParams;

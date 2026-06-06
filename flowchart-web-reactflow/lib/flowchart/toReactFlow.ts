@@ -1,6 +1,6 @@
 import { MarkerType, type Edge, type Node } from "@xyflow/react";
 import { branchFromEdgeLabel } from "./edgeLabelPlacement";
-import { FLOW_EDGE_STROKE } from "./flowColors";
+import { FLOW_EDGE_STROKE, type ColorHint } from "./flowColors";
 import type { FlowEdge, PlacedNode, ShapeKind } from "./types";
 
 export type FlowEdgeData = {
@@ -15,6 +15,7 @@ export type FlowNodeData = {
   label: string;
   shapeKind: ShapeKind;
   shapeType: string;
+  colorHint?: ColorHint;
 };
 
 const NODE_TYPE = "flowShape";
@@ -35,6 +36,7 @@ export function toReactFlow(
       label: p.fullText || p.type,
       shapeKind: p.shapeKind,
       shapeType: p.type,
+      ...(p.colorHint !== undefined ? { colorHint: p.colorHint } : {}),
     },
     width: p.width,
     height: p.height,

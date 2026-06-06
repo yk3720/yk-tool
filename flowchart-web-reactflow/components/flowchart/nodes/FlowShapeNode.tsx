@@ -11,15 +11,20 @@ import {
   FLOW_NODE_DIAMOND_STROKE_WIDTH,
   FLOW_NODE_FRAME_STROKE,
   FLOW_NODE_FRAME_WIDTH,
+  nodeBackgroundColor,
+  type ColorHint,
 } from "@/lib/flowchart/flowColors";
 import type { FlowNodeData } from "@/lib/flowchart/toReactFlow";
 
 const HANDLE_STYLE = { width: 6, height: 6, opacity: 0 };
 
-const FRAME_STYLE = {
-  borderColor: FLOW_NODE_FRAME_STROKE,
-  borderWidth: FLOW_NODE_FRAME_WIDTH,
-} as const;
+function frameStyle(hint?: ColorHint) {
+  return {
+    borderColor: FLOW_NODE_FRAME_STROKE,
+    borderWidth: FLOW_NODE_FRAME_WIDTH,
+    backgroundColor: nodeBackgroundColor(hint),
+  } as const;
+}
 
 function LabelLines({ label }: { label: string }) {
   return label.split("\n").map((line, i) => (
@@ -42,6 +47,7 @@ function DiamondShape({
   const midX = width / 2;
   const midY = height / 2;
   const points = `${midX},${inset} ${width - inset},${midY} ${midX},${height - inset} ${inset},${midY}`;
+  const fill = nodeBackgroundColor(data.colorHint);
 
   return (
     <svg
@@ -53,7 +59,7 @@ function DiamondShape({
       <title>{data.shapeType}</title>
       <polygon
         points={points}
-        fill="#ffffff"
+        fill={fill}
         stroke={FLOW_NODE_FRAME_STROKE}
         strokeWidth={FLOW_NODE_DIAMOND_STROKE_WIDTH}
         strokeLinejoin="miter"
@@ -86,9 +92,10 @@ function ShapeBody({
   height: number;
 }) {
   const label = <LabelLines label={data.label} />;
+  const shapeFrame = frameStyle(data.colorHint);
 
   const base =
-    "flow-shape-body flex h-full w-full flex-col items-center justify-center gap-0.5 border-solid bg-white px-2 py-1 text-center text-[11px] font-medium leading-snug text-slate-800";
+    "flow-shape-body flex h-full w-full flex-col items-center justify-center gap-0.5 border-solid px-2 py-1 text-center text-[11px] font-medium leading-snug text-slate-800";
 
   switch (data.shapeKind) {
     case "diamond":
@@ -97,7 +104,7 @@ function ShapeBody({
       return (
         <div
           className={`${base} rounded-2xl`}
-          style={FRAME_STYLE}
+          style={shapeFrame}
           title={data.shapeType}
         >
           {label}
@@ -107,7 +114,7 @@ function ShapeBody({
       return (
         <div
           className={`${base} flow-node-parallelogram`}
-          style={FRAME_STYLE}
+          style={shapeFrame}
           title={data.shapeType}
         >
           {label}
@@ -117,7 +124,7 @@ function ShapeBody({
       return (
         <div
           className={`${base} flow-node-manual`}
-          style={FRAME_STYLE}
+          style={shapeFrame}
           title={data.shapeType}
         >
           {label}
@@ -127,7 +134,7 @@ function ShapeBody({
       return (
         <div
           className={`${base} rounded-sm`}
-          style={FRAME_STYLE}
+          style={shapeFrame}
           title={data.shapeType}
         >
           {label}

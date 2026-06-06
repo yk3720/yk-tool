@@ -19,6 +19,8 @@ export const DEFAULT_LAYOUT: LayoutConfig = {
   baseTop: 40,
 };
 
+import type { ColorHint } from "./flowColors";
+
 export type ShapeType = "端子" | "処理" | "判断" | "入出力" | "手動入力";
 
 export type FlowNode = {
@@ -31,6 +33,8 @@ export type FlowNode = {
   level: number;
   /** 9列: 段（layoutGrid 段ベース対応時に Y の正本） */
   tier?: number;
+  /** 10列: 表「色」列から（空=normal） */
+  colorHint?: ColorHint;
   rowIndex: number;
 };
 
@@ -64,7 +68,7 @@ export type FlowEdge = {
 
 export type FlowchartDocument = {
   version: 1;
-  /** 例: table-9col-v1-draft（ADR-012） */
+  /** 例: table-9col-v1 · table-10col-v1（ADR-012 + 色列） */
   schema?: string;
   title?: string;
   table: FlowTableRow[];

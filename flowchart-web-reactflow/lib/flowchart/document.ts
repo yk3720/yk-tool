@@ -3,6 +3,7 @@ import { DEFAULT_LAYOUT } from "./types";
 import {
   ensureNineColumnTable,
   inferTableLayout,
+  TIER10_SCHEMA,
   TIER9_SCHEMA,
 } from "./tableColumns";
 
@@ -10,7 +11,7 @@ export function createDocument(
   table: FlowTableRow[],
   partial?: Partial<Omit<FlowchartDocument, "version" | "table" | "layout" | "createdAt">>,
 ): FlowchartDocument {
-  const schema = partial?.schema ?? TIER9_SCHEMA;
+  const schema = partial?.schema ?? TIER10_SCHEMA;
   return {
     version: 1,
     schema,
@@ -62,17 +63,17 @@ export function parseFlowchartDocument(
   return { doc: normalizeFlowchartDocument(doc), errors: [] };
 }
 
-/** 9列表の列幅·schema を揃える（読込時） */
+/** 読込時: tier9 を 10 列に揃え · schema を table-10col-v1 へ */
 export function normalizeFlowchartDocument(
   doc: FlowchartDocument,
 ): FlowchartDocument {
-  const table = ensureNineColumnTable(doc.table, doc.schema);
-  const layout = inferTableLayout(table, doc.schema);
+  const layout = inferTableLayout(doc.table, doc.schema);
+  const schemaForPad =
+    layout === "tier9" ? TIER10_SCHEMA : doc.schema;
+  const table = ensureNineColumnTable(doc.table, schemaForPad);
   const schema =
     layout === "tier9"
-      ? doc.schema?.includes("9col")
-        ? doc.schema
-        : "table-9col-v1"
+      ? TIER10_SCHEMA
       : doc.schema;
   return { ...doc, table, ...(schema ? { schema } : {}) };
 }

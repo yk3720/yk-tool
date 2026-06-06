@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { signInWithPasswordAction } from "@/lib/auth/signInPassword";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type Props = {
@@ -45,14 +46,11 @@ export function LoginForm({ nextPath, authError }: Props) {
     setLoading("password");
     setError(null);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (signInError) {
-        setError(signInError.message);
+      const result = await signInWithPasswordAction(email, password);
+      if (!result.ok) {
+        setError(result.error);
       } else {
+        // Server Action で Cookie 設定後 — フルリロードで middleware / RSC がセッションを読む
         window.location.assign(nextPath);
       }
     } catch (e) {

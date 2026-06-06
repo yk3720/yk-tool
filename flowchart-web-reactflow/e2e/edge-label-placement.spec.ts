@@ -84,7 +84,7 @@ async function assertLabelRightOfVerticalEdge(
 }
 
 test.describe("分岐ラベル配置（Yes と縦線）", () => {
-  test("サンプル基本判断: Yes / No が halo で縦線と重ならない", async ({
+  test("サンプルカレー: Yes / No が halo で縦線と重ならない", async ({
     page,
   }) => {
     await openPreviewWithSample(page);
@@ -103,7 +103,7 @@ test.describe("分岐ラベル配置（Yes と縦線）", () => {
     await ensureWorkspaceLoaded(page);
     await ensureNavExpanded(page);
     await page.getByRole("button", { name: "供給動作" }).click();
-    await loadSampleFromMenu(page, "サンプル: 基本判断");
+    await loadSampleFromMenu(page, "サンプル: カレーの作り方");
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText("Yes", { exact: true })).toBeVisible();
     await expect(page.getByText("No", { exact: true })).toBeVisible();

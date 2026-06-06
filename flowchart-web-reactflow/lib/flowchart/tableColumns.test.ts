@@ -11,7 +11,10 @@ import {
   resolveColumnCount,
   suggestNextId,
   TABLE_HEADERS_9,
+  TABLE_HEADERS_10,
+  TIER10_SCHEMA,
   TIER9_SCHEMA,
+  isColorTableColumn,
 } from "./tableColumns";
 
 describe("tableColumns", () => {
@@ -48,17 +51,18 @@ describe("tableColumns", () => {
       [4, "処理", "6", "", 3, 1, "取付経路B", ""],
     ];
     expect(inferTableLayout(table)).toBe("tier9");
-    expect(resolveColumnCount(table)).toBe(9);
+    expect(resolveColumnCount(table)).toBe(10);
     expect(getHeaders(resolveColumnCount(table))[4]).toBe("段");
-    expect(getHeaders(resolveColumnCount(table))[6]).toBe("Text1");
+    expect(getHeaders(resolveColumnCount(table))[9]).toBe("色");
   });
 
-  it("ensureNineColumnTable pads to 9 without shifting cells", () => {
+  it("ensureNineColumnTable pads tier9 to 10 with empty 色", () => {
     const table = [[3, "処理", "6", "", 3, 0, "取付経路A", ""]];
     const next = ensureNineColumnTable(table);
-    expect(next[0]).toHaveLength(9);
+    expect(next[0]).toHaveLength(10);
     expect(next[0][5]).toBe(0);
     expect(next[0][6]).toBe("取付経路A");
+    expect(next[0][9]).toBe("");
   });
 
   it("legacy8TableToTier9 maps Level to 列 and increments 段 on level 0", () => {
@@ -114,5 +118,26 @@ describe("tableColumns", () => {
     expect(row[1]).toBe("処理");
     expect(row[4]).toBe(0);
     expect(row).toHaveLength(8);
+  });
+
+  it("getHeaders returns 10 columns with 色 for tier10 schema", () => {
+    expect(getHeaders(10, TIER10_SCHEMA)).toEqual([...TABLE_HEADERS_10]);
+    expect(getHeaders(10, TIER10_SCHEMA)[9]).toBe("色");
+  });
+
+  it("resolveColumnCount uses 10 for table-10col-v1", () => {
+    expect(resolveColumnCount([], TIER10_SCHEMA)).toBe(10);
+  });
+
+  it("isColorTableColumn identifies column index 9 at width 10", () => {
+    expect(isColorTableColumn(9, 10)).toBe(true);
+    expect(isColorTableColumn(9, 9)).toBe(false);
+  });
+
+  it("createEmptyRow for 10 columns", () => {
+    const row = createEmptyRow(10, 80);
+    expect(row).toHaveLength(10);
+    expect(row[9]).toBe("");
+    expect(inferTableLayout([row], TIER10_SCHEMA)).toBe("tier9");
   });
 });

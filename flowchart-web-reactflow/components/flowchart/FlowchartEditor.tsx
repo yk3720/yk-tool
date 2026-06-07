@@ -56,15 +56,20 @@ const SAMPLES: Record<string, FlowchartDocument> = {
   m002NineCol: sampleM002NineCol as FlowchartDocument,
 };
 
-const SAMPLE_OPTIONS = [
+const STARTER_OPTIONS = [
+  { key: "templateStarter", label: "雛形: はじめから" },
+  { key: "templateLinear", label: "雛形: 直線フロー" },
+] as const;
+
+const DEMO_SAMPLE_OPTIONS = [
   { key: "curry", label: "サンプル: カレーの作り方" },
   { key: "morning", label: "サンプル: 朝の出勤準備" },
   { key: "atm", label: "サンプル: ATMで現金を下ろす" },
-  { key: "templateStarter", label: "雛形: はじめから" },
-  { key: "templateLinear", label: "雛形: 直線" },
 ] as const;
 
-type SampleKey = (typeof SAMPLE_OPTIONS)[number]["key"];
+type SampleKey =
+  | (typeof STARTER_OPTIONS)[number]["key"]
+  | (typeof DEMO_SAMPLE_OPTIONS)[number]["key"];
 
 type PaneView = "table" | "canvas";
 
@@ -478,7 +483,8 @@ export const FlowchartEditor = forwardRef<
             : "ブラウザに保存した下書きを削除"
         }
         pinOffline={pinOffline}
-        samples={[...SAMPLE_OPTIONS]}
+        starters={[...STARTER_OPTIONS]}
+        samples={[...DEMO_SAMPLE_OPTIONS]}
         onLoadSample={(key) => handleLoadSample(key as SampleKey)}
         onExportPng={() => void handleExportPng()}
         onExportSvg={() => void handleExportSvg()}

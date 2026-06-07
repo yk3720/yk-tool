@@ -1,5 +1,7 @@
 import { toSvg } from "html-to-image";
 
+import { shouldIncludeInFlowExport } from "./exportImageFilter";
+
 export async function captureFlowSvg(
   element: HTMLElement,
   filename = "flowchart.svg",
@@ -11,15 +13,7 @@ export async function captureFlowSvg(
 
   const svg = await toSvg(target, {
     cacheBust: true,
-    filter: (node) => {
-      if (
-        node instanceof HTMLElement &&
-        node.classList?.contains("react-flow__controls")
-      ) {
-        return false;
-      }
-      return true;
-    },
+    filter: shouldIncludeInFlowExport,
   });
 
   const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });

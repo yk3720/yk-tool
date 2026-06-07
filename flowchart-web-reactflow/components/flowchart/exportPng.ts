@@ -1,5 +1,7 @@
 import { toPng } from "html-to-image";
 
+import { shouldIncludeInFlowExport } from "./exportImageFilter";
+
 export async function captureFlowPng(
   element: HTMLElement,
   filename = "flowchart.png",
@@ -13,12 +15,7 @@ export async function captureFlowPng(
     style: {
       transform: "translate(0px, 0px) scale(1)",
     },
-    filter: (node) => {
-      if (node instanceof HTMLElement && node.classList?.contains("react-flow__controls")) {
-        return false;
-      }
-      return true;
-    },
+    filter: shouldIncludeInFlowExport,
   });
 
   const a = document.createElement("a");

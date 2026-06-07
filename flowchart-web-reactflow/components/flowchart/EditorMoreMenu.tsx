@@ -17,6 +17,7 @@ type EditorMoreMenuProps = {
   clearDraftDisabled: boolean;
   clearDraftTitle: string;
   pinOffline?: { pinned: boolean; onToggle: () => void };
+  starters: SampleOption[];
   samples: SampleOption[];
   onLoadSample: (key: string) => void;
   onExportPng: () => void;
@@ -53,9 +54,14 @@ function MenuItem({
   );
 }
 
-function MenuSection({ label }: { label: string }) {
+function MenuSection({ label, isFirst = false }: { label: string; isFirst?: boolean }) {
   return (
-    <p className="px-3 pb-0.5 pt-2 text-xs font-medium text-slate-500">{label}</p>
+    <>
+      {!isFirst ? (
+        <div className="my-1 border-t border-slate-200" role="separator" aria-hidden />
+      ) : null}
+      <p className="px-3 pb-0.5 pt-1.5 text-xs font-semibold text-slate-600">{label}</p>
+    </>
   );
 }
 
@@ -66,6 +72,7 @@ export function EditorMoreMenu({
   clearDraftDisabled,
   clearDraftTitle,
   pinOffline,
+  starters,
   samples,
   onLoadSample,
   onExportPng,
@@ -110,9 +117,33 @@ export function EditorMoreMenu({
         <div
           role="menu"
           aria-label="その他の操作"
-          className="absolute right-0 top-full z-30 mt-1 min-w-[12rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 top-full z-30 mt-1 min-w-[14rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
         >
-          <MenuSection label="出力" />
+          {!readOnly ? (
+            <>
+              <MenuSection label="始め方" isFirst />
+              {starters.map((starter) => (
+                <MenuItem
+                  key={starter.key}
+                  onClick={() => closeAnd(() => onLoadSample(starter.key))}
+                >
+                  {starter.label}
+                </MenuItem>
+              ))}
+
+              <MenuSection label="サンプル（例）" />
+              {samples.map((sample) => (
+                <MenuItem
+                  key={sample.key}
+                  onClick={() => closeAnd(() => onLoadSample(sample.key))}
+                >
+                  {sample.label}
+                </MenuItem>
+              ))}
+            </>
+          ) : null}
+
+          <MenuSection label="出力" isFirst={readOnly} />
           <MenuItem
             disabled={!canExport}
             onClick={() => closeAnd(onExportPng)}
@@ -132,20 +163,6 @@ export function EditorMoreMenu({
               <MenuItem onClick={() => closeAnd(pinOffline.onToggle)}>
                 {pinOffline.pinned ? "オフライン保存を解除" : "オフライン用に保存"}
               </MenuItem>
-            </>
-          ) : null}
-
-          {!readOnly ? (
-            <>
-              <MenuSection label="サンプル" />
-              {samples.map((sample) => (
-                <MenuItem
-                  key={sample.key}
-                  onClick={() => closeAnd(() => onLoadSample(sample.key))}
-                >
-                  {sample.label}
-                </MenuItem>
-              ))}
             </>
           ) : null}
 

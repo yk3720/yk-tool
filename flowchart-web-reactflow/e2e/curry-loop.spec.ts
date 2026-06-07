@@ -24,6 +24,14 @@ test.describe("カレーサンプル — ループと図形", () => {
     await expect(page.locator('[data-edge-label-text="Yes"]')).toHaveCount(3);
   });
 
+  test("プレビュー各ノードに表 ID バッジが表示される", async ({ page }) => {
+    await expect(page.locator('[data-testid="flow-node-id"]')).toHaveCount(15);
+    const decision = page
+      .locator(".react-flow__node")
+      .filter({ hasText: "玉ねぎは透明?" });
+    await expect(decision.locator('[data-testid="flow-node-id"]')).toHaveText("50");
+  });
+
   test("入出力・手動入力は SVG polygon で枠が閉じている", async ({ page }) => {
     const parallelogram = page.locator(".flow-node-parallelogram polygon");
     const manual = page.locator(".flow-node-manual polygon");

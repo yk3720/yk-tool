@@ -34,6 +34,18 @@ function LabelLines({ label }: { label: string }) {
   ));
 }
 
+/** 表 ID — プレビュー専用（exportImageFilter で PNG/SVG から除外） */
+function NodeIdBadge({ id }: { id: string }) {
+  return (
+    <span
+      data-testid="flow-node-id"
+      className="flow-node-id pointer-events-none absolute -left-1 -top-2.5 z-10 rounded-sm border-2 border-slate-200 bg-white px-1 text-[9px] font-bold leading-none tabular-nums text-slate-500 shadow-sm"
+    >
+      {id}
+    </span>
+  );
+}
+
 function polygonPoints(
   width: number,
   height: number,
@@ -218,6 +230,7 @@ function ShapeBody({
 }
 
 function FlowShapeNodeComponent({
+  id,
   data,
   width,
   height,
@@ -230,6 +243,7 @@ function FlowShapeNodeComponent({
       className="flow-shape-node-root relative overflow-visible"
       style={{ width: w, height: h }}
     >
+      <NodeIdBadge id={id} />
       <Handle
         id="top"
         type="target"

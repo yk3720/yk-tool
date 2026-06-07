@@ -14,9 +14,9 @@ alwaysApply: false
 | 領域 | やってよい | やらない |
 |------|------------|----------|
 | Nav | 装置→ユニット→動作 · `moduleDraftKey` | 装置名をヘッダーに二重表示 |
-| ツールバー | 再生成/表保存/表読込を常時 · 他はその他メニュー | ヘッダーにボタン乱立 |
+| ツールバー | 再生成/表保存/表読込を常時 · 他はその他メニュー（**始め方 / サンプル（例） / 出力 / 下書き** · `MenuSection`） | ヘッダーにボタン乱立 |
 | レイアウト D | workspace: ツールバーは**表ペイン** · プレビュー列は縦 full-bleed（`fillContainer`） | 全幅ヘッダーがプレビュー上に載る |
-| 見た目 | `DEFAULT_LAYOUT` · `flowColors` 固定 · 枠太さは `VISUAL_DESIGN_RULES` §2（2px）· 斜め図形は SVG stroke | テーマ/サイズ preset 復活 · `clip-path`+border |
+| 見た目 | `DEFAULT_LAYOUT` · `flowColors` 固定 · 枠太さは `VISUAL_DESIGN_RULES` §2（2px）· 斜め図形は SVG stroke · 表 ID バッジはプレビューのみ | テーマ/サイズ preset 復活 · `clip-path`+border · export にデバッグ UI |
 | 警告 | `WARNING_BANNER_HINT` · 平易な直し方 | 警告で生成停止 |
 | ノード文字 | `FlowShapeNode` **`flex-col`** · `measureHeights` | Text1–3 を横並び |
 
@@ -26,7 +26,8 @@ alwaysApply: false
 |----------|------|
 | `lib/flowchart/moduleHierarchy.ts` | 装置一覧 · `moduleDraftKey` · 旧キー |
 | `components/flowchart/ModuleNavPane.tsx` | 装置 select |
-| `components/flowchart/EditorMoreMenu.tsx` | その他メニュー |
+| `components/flowchart/EditorMoreMenu.tsx` | その他メニュー · セクション IA |
 | `lib/flowchart/validationMeta.ts` | 警告文言 · `WARNING_BANNER_HINT` |
-| `components/flowchart/nodes/FlowShapeNode.tsx` | 縦並びラベル · 斜め図形 SVG |
-| `lib/flowchart/buildEdges.ts` | ループ（`isLoop`）配線 |
+| `components/flowchart/nodes/FlowShapeNode.tsx` | 縦並びラベル · 斜め図形 SVG · ID バッジ |
+| `components/flowchart/exportImageFilter.ts` | PNG/SVG からプレビュー専用 DOM を除外 |
+| `lib/flowchart/buildEdges.ts` | 順方向（`tierDiff > 0`）· ループ（`isLoop`）配線 |

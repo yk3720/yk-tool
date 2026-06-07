@@ -1,0 +1,19 @@
+[project]
+name = "excel-normalize"
+version = "0.1.0"
+description = "入力用 Excel → import.json（装置階層 + フロー表）"
+requires-python = ">=3.10"
+dependencies = [
+  "openpyxl>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.scripts]
+excel-normalize = "excel_normalize.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

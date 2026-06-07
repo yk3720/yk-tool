@@ -1,5 +1,6 @@
 -- DB-2 post-migration verification (read-only)
 -- Run after 003_db2_schema.sql + 004_flow_documents_module_fk.sql
+-- Optional: 005_import_equipment_bundle.sql (import.json bulk import)
 
 select 'equipment_codes' as check_name, count(*)::text as result, '>=2 expected' as note
 from public.equipment_codes
@@ -28,3 +29,7 @@ where schemaname = 'public'
 select proname as admin_function
 from pg_proc
 where proname = 'admin_delete_equipment';
+
+select proname as import_function, '005 optional' as note
+from pg_proc
+where proname = 'import_equipment_bundle';

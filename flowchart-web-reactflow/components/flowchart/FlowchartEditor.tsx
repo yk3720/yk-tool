@@ -94,6 +94,11 @@ export type FlowchartEditorProps = {
   readOnly?: boolean;
   onSnapshotPersist?: () => void;
   pinOffline?: { pinned: boolean; onToggle: () => void };
+  importBundle?: {
+    disabled: boolean;
+    disabledTitle?: string;
+    onSelectFile: (file: File) => void;
+  };
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
@@ -159,6 +164,7 @@ export const FlowchartEditor = forwardRef<
     readOnly = false,
     onSnapshotPersist,
     pinOffline,
+    importBundle,
   } = props;
 
   const initial = useMemo(
@@ -489,6 +495,7 @@ export const FlowchartEditor = forwardRef<
         onExportPng={() => void handleExportPng()}
         onExportSvg={() => void handleExportSvg()}
         onClearDraft={handleClearDraft}
+        importBundle={importBundle}
       />
 
       <input

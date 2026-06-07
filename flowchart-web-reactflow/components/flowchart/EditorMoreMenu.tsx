@@ -23,6 +23,11 @@ type EditorMoreMenuProps = {
   onExportPng: () => void;
   onExportSvg: () => void;
   onClearDraft: () => void;
+  importBundle?: {
+    disabled: boolean;
+    disabledTitle?: string;
+    onSelectFile: (file: File) => void;
+  };
 };
 
 function MenuItem({
@@ -78,9 +83,11 @@ export function EditorMoreMenu({
   onExportPng,
   onExportSvg,
   onClearDraft,
+  importBundle,
 }: EditorMoreMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -163,6 +170,38 @@ export function EditorMoreMenu({
               <MenuItem onClick={() => closeAnd(pinOffline.onToggle)}>
                 {pinOffline.pinned ? "オフライン保存を解除" : "オフライン用に保存"}
               </MenuItem>
+            </>
+          ) : null}
+
+          {!readOnly && workspaceMode && importBundle ? (
+            <>
+              <MenuSection label="装置取込" isFirst={readOnly} />
+              <MenuItem
+                disabled={importBundle.disabled}
+                onClick={() => {
+                  if (importBundle.disabled) return;
+                  importInputRef.current?.click();
+                }}
+              >
+                <span title={importBundle.disabledTitle ?? undefined}>
+                  import.json を取込…
+                </span>
+              </MenuItem>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                aria-hidden
+                tabIndex={-1}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    closeAnd(() => importBundle.onSelectFile(file));
+                  }
+                  e.target.value = "";
+                }}
+              />
             </>
           ) : null}
 

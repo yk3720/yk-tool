@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppAuthBar } from "@/components/auth/AppAuthBar";
 import type { ProfileRole } from "@/lib/auth/types";
+import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
 import {
   loadModuleDraft,
   persistModuleDraft,
@@ -39,6 +41,7 @@ function expandedUnitsForDevice(devices: readonly Device[], deviceId: string): S
 }
 
 export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props) {
+  const router = useRouter();
   const editorRef = useRef<FlowchartEditorHandle>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState(
     devices[0]?.id ?? "",
@@ -55,6 +58,10 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
   const [loadingModule, setLoadingModule] = useState(false);
   const [loadKey, setLoadKey] = useState(0);
   const [pinned, setPinned] = useState(false);
+  const [importBanner, setImportBanner] = useState("");
+  const [selectDeviceAfterImport, setSelectDeviceAfterImport] = useState<
+    string | null
+  >(null);
 
   const isEditor = role === "editor";
   const isOffline =
@@ -136,6 +143,41 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
     [persistCurrentModule, selectedDeviceId, devices],
   );
 
+  useEffect(() => {
+    if (!selectDeviceAfterImport) return;
+    const imported = devices.find(
+      (d) => d.internalCode === selectDeviceAfterImport,
+    );
+    if (imported) {
+      handleSelectDevice(imported.id);
+      setSelectDeviceAfterImport(null);
+    }
+  }, [devices, selectDeviceAfterImport, handleSelectDevice]);
+
+  const handleImportBundleFile = useCallback(
+    async (file: File) => {
+      setImportBanner("import.json を取込中…");
+      try {
+        const text = await file.text();
+        const result = await importEquipmentBundle(text);
+        if (!result.ok) {
+          setImportBanner(`取込失敗: ${result.error}`);
+          return;
+        }
+        setImportBanner(
+          `取込完了: ${result.internal_code}（フロー ${result.flows_upserted} 件）`,
+        );
+        setSelectDeviceAfterImport(result.internal_code);
+        router.refresh();
+      } catch (e) {
+        setImportBanner(
+          `取込失敗: ${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    },
+    [router],
+  );
+
   const handleTogglePin = useCallback(async () => {
     if (!moduleInfo) return;
     const storageKey = moduleStorageKey(moduleInfo.module.id);
@@ -151,18 +193,18 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
     ? `${moduleInfo.unit.label} · ${moduleInfo.module.label}`
     : undefined;
 
-  let statusBanner = "";
-  if (loadingModule) {
+  let statusBanner = importBanner;
+  if (!statusBanner && loadingModule) {
     statusBanner = "モジュールを読み込み中…";
-  } else if (isOffline) {
+  } else if (!statusBanner && isOffline) {
     statusBanner = offlineCachedAt
       ? `オフライン — ${formatCachedAt(offlineCachedAt)} 時点のコピー`
       : "オフライン — キャッシュがありません";
-  } else if (loadSource === "offline") {
+  } else if (!statusBanner && loadSource === "offline") {
     statusBanner = offlineCachedAt
       ? `オフライン用キャッシュ（${formatCachedAt(offlineCachedAt)}）`
       : "オフライン用キャッシュ";
-  } else if (loadSource === "cloud") {
+  } else if (!statusBanner && loadSource === "cloud") {
     statusBanner = "クラウドから読み込み";
   }
 
@@ -215,6 +257,17 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
           pinOffline={
             selectedModuleId
               ? { pinned, onToggle: () => void handleTogglePin() }
+              : undefined
+          }
+          importBundle={
+            isEditor
+              ? {
+                  disabled: Boolean(authDisabled),
+                  disabledTitle: authDisabled
+                    ? "クラウド未設定のため取込できません"
+                    : undefined,
+                  onSelectFile: (file) => void handleImportBundleFile(file),
+                }
               : undefined
           }
         />

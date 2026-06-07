@@ -1,4 +1,4 @@
-# DB-2 マイグレーション Runbook（003 → 004）
+# DB-2 マイグレーション Runbook（003 → 005）
 
 **対象:** 開発用 Supabase プロジェクト（`flowchart-dev` · `.env.local` の URL）  
 **前提:** `001_db1_schema.sql` · `002_fix_profiles_role_protection.sql` **適用済み**  
@@ -12,12 +12,14 @@
 2. **SQL Editor** → New query
 3. **`003_db2_schema.sql` の全文** を貼り付け → **Run**
 4. 成功したら **新しい query** で **`004_flow_documents_module_fk.sql` の全文** → **Run**（順序厳守）
-5. 下記 **§3 検証 SQL** を実行
+5. **装置一括取込を使う場合のみ:** **`005_import_equipment_bundle.sql` の全文** → **Run**（004 の後 · 順序厳守）
+6. 下記 **§3 検証 SQL** を実行
 
 ファイルパス:
 
 - `supabase/migrations/003_db2_schema.sql`
 - `supabase/migrations/004_flow_documents_module_fk.sql`
+- `supabase/migrations/005_import_equipment_bundle.sql`（Excel `import.json` 一括取込 · 任意だが Web 取込に必須）
 - `supabase/migrations/verify_db2.sql`（検証のみ）
 
 ---
@@ -112,21 +114,43 @@ where schemaname = 'public'
 -- admin 関数
 select proname from pg_proc where proname = 'admin_delete_equipment';
 -- 期待: 1 行
+
+-- 005 適用後（import.json 一括取込 · 任意）
+select proname from pg_proc where proname = 'import_equipment_bundle';
+-- 期待: 1 行（005 未適用なら 0 行）
 ```
 
 ---
 
-## 4. やる / やらない（§4）
+## 4. 005 — import.json 一括取込
+
+**Web:** その他 → **「import.json を取込…」**（editor · workspace のみ）
+
+**正規化（ローカル）:**
+
+```powershell
+cd c:\yk-tool\flowchart-web-reactflow
+npm run excel:normalize
+# → tools/excel_normalize/fixtures/import-z00001.json
+```
+
+**005 未適用時:** Server Action が `import_equipment_bundle` RPC 不在で失敗。
+
+**005 は idempotent:** `create or replace function` — 再 Run 可。
+
+---
+
+## 5. やる / やらない（§4）
 
 | やる | やらない |
 |------|----------|
-| dev DB のみ 003 → 004 | 本番 DB |
+| dev DB のみ 003 → 004（+ 005 は取込利用時） | 本番 DB |
 | 上記検証 | アプリ uuid 化（次タスク #2） |
 | 問題時 Runbook 追記 | commit（ユーザー明示まで） |
 
 ---
 
-## 5. 参照
+## 6. 参照
 
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
 - [DB-2_スキーマ草案.md](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/02_spec/DB-2_スキーマ草案.md)

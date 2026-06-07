@@ -9,6 +9,10 @@ function labelForDecision(
   return direction === "down" ? "Yes" : "No";
 }
 
+function nodeTier(n: FlowNode): number {
+  return n.tier ?? n.rowIndex;
+}
+
 export function buildEdges(
   nodes: FlowNode[],
   placed: PlacedNode[],
@@ -18,9 +22,6 @@ export function buildEdges(
   const edges: FlowEdge[] = [];
   let edgeIndex = 0;
 
-  // Merge/bus heuristic (ADR-012 / M002):
-  // When multiple "down" edges converge to one target, prefer side-entry from left/right
-  // so SmoothStep produces a readable horizontal-ish "bus" before entering the target.
   const inboundDownCount = new Map<string, number>();
   for (const n of nodes) {
     for (const did of n.destsDown) {
@@ -43,33 +44,34 @@ export function buildEdges(
 
         const isLoop = tNode.rowIndex < n.rowIndex;
         const levelDiff = tNode.level - n.level;
-        const isMerge = direction === "down" && (inboundDownCount.get(did) ?? 0) > 1;
+        const tierDiff = nodeTier(tNode) - nodeTier(n);
+        const isMerge =
+          direction === "down" && (inboundDownCount.get(did) ?? 0) > 1;
+        const forwardDown = direction === "down" && tierDiff > 0;
 
         let sourceSide: ConnectorSite = "bottom";
         let targetSide: ConnectorSite = "top";
         let route: "straight" | "elbow" = "straight";
 
         if (direction === "down") {
-          if (isMerge && !isLoop) {
-            route = "elbow";
+          if (forwardDown) {
+            // 接続先(下) · 先が下段 — top-to-bottom 慣例（合流も top 入口）
+            sourceSide = "bottom";
             targetSide = "top";
-            if (levelDiff > 0) sourceSide = "right";
-            else if (levelDiff < 0) sourceSide = "left";
-          }
-          if (levelDiff !== 0 || isLoop) {
+            route =
+              Math.abs(source.x - target.x) < 5 && !isMerge ? "straight" : "elbow";
+          } else {
+            // ループ（上へ戻る）· 同段 — 左/右入口
             route = "elbow";
-            if (levelDiff < 0) targetSide = "left";
-            else if (levelDiff > 0) {
+            sourceSide = "bottom";
+            if (levelDiff < 0) {
+              targetSide = "left";
+            } else if (levelDiff > 0) {
               sourceSide = "right";
               targetSide = "top";
+            } else if (isLoop) {
+              targetSide = "left";
             }
-          }
-          if (
-            Math.abs(source.x - target.x) < 5 &&
-            !isLoop &&
-            route === "straight"
-          ) {
-            route = "straight";
           }
         } else {
           sourceSide = "right";
@@ -77,15 +79,6 @@ export function buildEdges(
           route = "elbow";
           if (levelDiff === 0 && isLoop) targetSide = "right";
           else if (levelDiff < 0) targetSide = "left";
-        }
-
-        if (
-          direction === "down" &&
-          Math.abs(source.x - target.x) < 5 &&
-          !isLoop &&
-          !isMerge
-        ) {
-          route = "straight";
         }
 
         edges.push({

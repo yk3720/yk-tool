@@ -165,4 +165,23 @@ describe("generateFlowchart (curry sample loops)", () => {
     expect(retryOnion?.level).toBe(1);
     expect(sauté && retryOnion && retryOnion.x).toBeGreaterThan(sauté.x);
   });
+
+  it("forwardDown cross-column uses bottom→top (55→70)", () => {
+    const doc = loadFixture("sample-curry.json");
+    const table = doc.table.map((row) => [...row]);
+    const row55 = table.find((row) => String(row[0]) === "55");
+    expect(row55).toBeTruthy();
+    if (row55) row55[2] = "70";
+
+    const result = generateFlowchart(table, doc.layout);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const edge = result.edges.find(
+      (e) => e.sourceId === "55" && e.targetId === "70" && e.direction === "down",
+    );
+    expect(edge?.sourceSide).toBe("bottom");
+    expect(edge?.targetSide).toBe("top");
+    expect(edge?.route).toBe("elbow");
+  });
 });

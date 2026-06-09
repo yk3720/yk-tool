@@ -17,7 +17,7 @@ import {
 const FIXTURE_SIMPLE_YES = path.join(
   process.cwd(),
   "fixtures",
-  "sample-simple-yes.json",
+  "sample-simple-yes.json"
 );
 
 async function addTableRow(page: import("@playwright/test").Page) {
@@ -36,7 +36,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
     await expect(
       page
         .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first(),
+        .first()
     ).toBeVisible();
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
     await expect(page.locator(".react-flow__node")).toHaveCount(15, {
@@ -53,10 +53,12 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   test("Phase 3: 3ペイン（ナビ・表・プレビュー）", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "フロー" })).toBeVisible();
     await expect(
-      page.getByRole("combobox", { name: "装置を選択" }),
+      page.getByRole("combobox", { name: "装置を選択" })
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "プレビュー" })
+    ).toBeVisible();
   });
 
   test("Phase 3: 装置切替でナビのユニットが変わる", async ({ page }) => {
@@ -75,11 +77,13 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
 
   test("AC-8: 1画面で表とプレビュー", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "表" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "プレビュー" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "プレビュー" })
+    ).toBeVisible();
     await expect(
       page
         .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first(),
+        .first()
     ).toBeVisible();
   });
 
@@ -115,7 +119,10 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
   });
 
   test("AC-5: 表変更→再生成でレイアウトが更新される", async ({ page }) => {
-    const before = await page.locator(".react-flow__node").first().boundingBox();
+    const before = await page
+      .locator(".react-flow__node")
+      .first()
+      .boundingBox();
     const firstInput = page.locator("tbody input").first();
     await firstInput.fill("999");
     await firstInput.blur();
@@ -145,9 +152,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     expect(nodeCountBefore).toBe(15);
   });
 
-  test("AC-7: PNG ダウンロードが開始される（再生成後）", async ({
-    page,
-  }) => {
+  test("AC-7: PNG ダウンロードが開始される（再生成後）", async ({ page }) => {
     await headerRegenerate(page).click();
     await expect(page.getByText(/生成完了/)).toBeVisible();
 
@@ -170,7 +175,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
 
     await headerRegenerate(page).click();
     await expect(
-      page.getByRole("alert").filter({ hasText: "接続先" }),
+      page.getByRole("alert").filter({ hasText: "接続先" })
     ).toBeVisible();
     await expect(page.locator(".react-flow__node")).toHaveCount(nodesBefore);
   });
@@ -198,7 +203,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(
       page
         .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first(),
+        .first()
     ).toBeVisible();
     await expect(headerRegenerate(page)).toBeEnabled();
   });

@@ -29,14 +29,14 @@ def validate_bundle(
 
     for unit_label, module_label in sorted(expected - found):
         errors.append(
-            f'構成に「{unit_label} · {module_label}」がありますが、'
-            f'ユニットシート「{unit_label}」に対応する Excel テーブルがありません。'
+            f"構成に「{unit_label} · {module_label}」がありますが、"
+            f"ユニットシート「{unit_label}」に対応する Excel テーブルがありません。"
             f"テーブル名を動作名（{module_label}）に合わせてください。"
         )
 
     for unit_label, module_label in sorted(found - expected):
         errors.append(
-            f'ユニットシート「{unit_label}」· テーブル「{module_label}」が構成シートにありません。'
+            f"ユニットシート「{unit_label}」· テーブル「{module_label}」が構成シートにありません。"
             f"構成シートに行を追加するか、テーブルを削除してください。"
         )
 
@@ -44,7 +44,7 @@ def validate_bundle(
         table = flow["payload"]["table"]
         if not table:
             warnings.append(
-                f'動作「{flow["unit_label"]} · {flow["module_label"]}」: フロー行が空です'
+                f"動作「{flow['unit_label']} · {flow['module_label']}」: フロー行が空です"
             )
 
     return errors, warnings

@@ -10,6 +10,8 @@ export const moduleSnapshotSchema = z
     themeId: z.string().optional(),
     layoutPreset: z.string().optional(),
   })
-  .transform(({ themeId: _themeId, layoutPreset: _layoutPreset, ...snap }) => snap);
+  .transform(
+    ({ themeId: _themeId, layoutPreset: _layoutPreset, ...snap }) => snap
+  );
 
 export type ModuleSnapshotPayload = z.infer<typeof moduleSnapshotSchema>;

@@ -47,7 +47,8 @@ function LabeledEdgeComponent({
           borderRadius: 8,
         });
 
-  const text = edgeData?.edgeLabel ?? (typeof label === "string" ? label : undefined);
+  const text =
+    edgeData?.edgeLabel ?? (typeof label === "string" ? label : undefined);
   const branch =
     edgeData?.branch ??
     (text === "Yes" || text === "No" ? branchFromEdgeLabel(text) : undefined);
@@ -63,7 +64,7 @@ function LabeledEdgeComponent({
         sourceX,
         sourceY,
         targetX,
-        targetY,
+        targetY
       )
     : null;
 

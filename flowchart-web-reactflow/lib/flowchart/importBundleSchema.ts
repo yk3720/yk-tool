@@ -31,9 +31,9 @@ export const importBundleSchema = z.object({
         z.object({
           label: z.string().min(1),
           sort_order: z.number().int().nonnegative(),
-        }),
+        })
       ),
-    }),
+    })
   ),
   flows: z.array(
     z.object({
@@ -41,7 +41,7 @@ export const importBundleSchema = z.object({
       module_label: z.string().min(1),
       title: z.string(),
       payload: flowchartDocumentPayloadSchema,
-    }),
+    })
   ),
 });
 
@@ -64,9 +64,9 @@ export type RpcImportBundle = {
   }>;
 };
 
-export function parseImportBundleJson(jsonText: string):
-  | { ok: true; bundle: ImportBundle }
-  | { ok: false; error: string } {
+export function parseImportBundleJson(
+  jsonText: string
+): { ok: true; bundle: ImportBundle } | { ok: false; error: string } {
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonText);

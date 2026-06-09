@@ -9,7 +9,9 @@ import {
 
 export function createDocument(
   table: FlowTableRow[],
-  partial?: Partial<Omit<FlowchartDocument, "version" | "table" | "layout" | "createdAt">>,
+  partial?: Partial<
+    Omit<FlowchartDocument, "version" | "table" | "layout" | "createdAt">
+  >
 ): FlowchartDocument {
   const schema = partial?.schema ?? TIER10_SCHEMA;
   return {
@@ -22,9 +24,10 @@ export function createDocument(
   };
 }
 
-export function parseFlowchartDocument(
-  jsonText: string,
-): { doc: FlowchartDocument | null; errors: string[] } {
+export function parseFlowchartDocument(jsonText: string): {
+  doc: FlowchartDocument | null;
+  errors: string[];
+} {
   const errors: string[] = [];
   let parsed: unknown;
   try {
@@ -65,16 +68,12 @@ export function parseFlowchartDocument(
 
 /** 読込時: tier9 を 10 列に揃え · schema を table-10col-v1 へ */
 export function normalizeFlowchartDocument(
-  doc: FlowchartDocument,
+  doc: FlowchartDocument
 ): FlowchartDocument {
   const layout = inferTableLayout(doc.table, doc.schema);
-  const schemaForPad =
-    layout === "tier9" ? TIER10_SCHEMA : doc.schema;
+  const schemaForPad = layout === "tier9" ? TIER10_SCHEMA : doc.schema;
   const table = ensureNineColumnTable(doc.table, schemaForPad);
-  const schema =
-    layout === "tier9"
-      ? TIER10_SCHEMA
-      : doc.schema;
+  const schema = layout === "tier9" ? TIER10_SCHEMA : doc.schema;
   return { ...doc, table, ...(schema ? { schema } : {}) };
 }
 

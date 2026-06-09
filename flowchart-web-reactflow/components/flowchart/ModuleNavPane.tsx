@@ -1,8 +1,17 @@
 "use client";
 
-import { ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react";
 
-import type { Device, FlowModule, FlowUnit } from "@/lib/flowchart/moduleHierarchy";
+import type {
+  Device,
+  FlowModule,
+  FlowUnit,
+} from "@/lib/flowchart/moduleHierarchy";
 import { cn } from "@/lib/utils";
 
 type ModuleNavPaneProps = {
@@ -36,7 +45,7 @@ function ModuleButton({
         "w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
         selected
           ? "bg-blue-100 font-medium text-blue-900"
-          : "text-slate-700 hover:bg-slate-100",
+          : "text-slate-700 hover:bg-slate-100"
       )}
     >
       {module.label}
@@ -68,7 +77,10 @@ function UnitSection({
         {expanded ? (
           <ChevronDown className="size-4 shrink-0 text-slate-500" aria-hidden />
         ) : (
-          <ChevronRight className="size-4 shrink-0 text-slate-500" aria-hidden />
+          <ChevronRight
+            className="size-4 shrink-0 text-slate-500"
+            aria-hidden
+          />
         )}
         <span className="truncate">{unit.label}</span>
       </button>
@@ -119,7 +131,9 @@ export function ModuleNavPane({
   return (
     <aside className="flex w-full shrink-0 flex-col border-r border-slate-200 bg-slate-50 lg:w-[min(20%,240px)] lg:min-w-[180px]">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
-        <h2 className="truncate text-sm font-semibold text-slate-800">フロー</h2>
+        <h2 className="truncate text-sm font-semibold text-slate-800">
+          フロー
+        </h2>
         <button
           type="button"
           onClick={onToggleCollapsed}

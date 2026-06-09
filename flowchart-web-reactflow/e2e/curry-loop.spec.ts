@@ -29,7 +29,9 @@ test.describe("カレーサンプル — ループと図形", () => {
     const decision = page
       .locator(".react-flow__node")
       .filter({ hasText: "玉ねぎは透明?" });
-    await expect(decision.locator('[data-testid="flow-node-id"]')).toHaveText("50");
+    await expect(decision.locator('[data-testid="flow-node-id"]')).toHaveText(
+      "50"
+    );
   });
 
   test("入出力・手動入力は SVG polygon で枠が閉じている", async ({ page }) => {
@@ -45,7 +47,7 @@ test.describe("カレーサンプル — ループと図形", () => {
     await expect(async () => {
       const result = await page.evaluate(() => {
         const nodes = Array.from(
-          document.querySelectorAll(".react-flow__node"),
+          document.querySelectorAll(".react-flow__node")
         );
         const byText = (snippet: string) =>
           nodes.find((n) => n.textContent?.includes(snippet));
@@ -64,8 +66,8 @@ test.describe("カレーサンプル — ループと図形", () => {
 
         const paths = Array.from(
           document.querySelectorAll(
-            ".react-flow__edge path.react-flow__edge-path",
-          ),
+            ".react-flow__edge path.react-flow__edge-path"
+          )
         );
 
         const hasUpwardFrom = (from: Element, to: Element) => {

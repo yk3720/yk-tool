@@ -17,7 +17,7 @@ export type FlowDocumentResult =
 export type SaveFlowResult = { ok: true } | { ok: false; error: string };
 
 export async function loadFlowDocument(
-  moduleUuid: string,
+  moduleUuid: string
 ): Promise<FlowDocumentResult> {
   if (!isModuleUuid(moduleUuid)) {
     return { ok: false, error: "invalid_module_id" };
@@ -58,7 +58,7 @@ export async function loadFlowDocument(
 
 export async function saveFlowDocument(
   moduleUuid: string,
-  snapshot: ModuleSnapshot,
+  snapshot: ModuleSnapshot
 ): Promise<SaveFlowResult> {
   if (!isModuleUuid(moduleUuid)) {
     return { ok: false, error: "invalid_module_id" };
@@ -91,7 +91,7 @@ export async function saveFlowDocument(
         updated_at: new Date().toISOString(),
         updated_by: ctx.userId,
       },
-      { onConflict: "module_id" },
+      { onConflict: "module_id" }
     );
 
     if (error) {

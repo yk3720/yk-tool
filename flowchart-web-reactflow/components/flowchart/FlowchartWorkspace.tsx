@@ -22,10 +22,7 @@ import {
   setOfflineModulePinned,
 } from "@/lib/flowchart/offlineFlowCache";
 
-import {
-  FlowchartEditor,
-  type FlowchartEditorHandle,
-} from "./FlowchartEditor";
+import { FlowchartEditor, type FlowchartEditorHandle } from "./FlowchartEditor";
 import { ModuleNavPane } from "./ModuleNavPane";
 
 type Props = {
@@ -35,24 +32,33 @@ type Props = {
   devices: readonly Device[];
 };
 
-function expandedUnitsForDevice(devices: readonly Device[], deviceId: string): Set<string> {
+function expandedUnitsForDevice(
+  devices: readonly Device[],
+  deviceId: string
+): Set<string> {
   const device = findDevice(devices, deviceId);
   return new Set(device?.units.map((u) => u.id) ?? []);
 }
 
-export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props) {
+export function FlowchartWorkspace({
+  role,
+  email,
+  authDisabled,
+  devices,
+}: Props) {
   const router = useRouter();
   const editorRef = useRef<FlowchartEditorHandle>(null);
   const [selectedDeviceId, setSelectedDeviceId] = useState(
-    devices[0]?.id ?? "",
+    devices[0]?.id ?? ""
   );
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [expandedUnitIds, setExpandedUnitIds] = useState<Set<string>>(() =>
-    expandedUnitsForDevice(devices, devices[0]?.id ?? ""),
+    expandedUnitsForDevice(devices, devices[0]?.id ?? "")
   );
   const [navCollapsed, setNavCollapsed] = useState(false);
-  const [initialSnapshot, setInitialSnapshot] =
-    useState<ModuleSnapshot | null>(null);
+  const [initialSnapshot, setInitialSnapshot] = useState<ModuleSnapshot | null>(
+    null
+  );
   const [loadSource, setLoadSource] = useState<string>("");
   const [offlineCachedAt, setOfflineCachedAt] = useState<string | null>(null);
   const [loadingModule, setLoadingModule] = useState(false);
@@ -64,14 +70,12 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
   >(null);
 
   const isEditor = role === "editor";
-  const isOffline =
-    typeof navigator !== "undefined" && !navigator.onLine;
+  const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
   const device = findDevice(devices, selectedDeviceId) ?? devices[0];
 
-  const moduleInfo = selectedModuleId && device
-    ? findModule(device, selectedModuleId)
-    : null;
+  const moduleInfo =
+    selectedModuleId && device ? findModule(device, selectedModuleId) : null;
 
   const persistCurrentModule = useCallback(() => {
     if (!moduleInfo || !editorRef.current || !device) return;
@@ -109,7 +113,7 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
         setLoadingModule(false);
       }
     },
-    [],
+    []
   );
 
   const handleSelectModule = useCallback(
@@ -124,7 +128,7 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
         void loadModule(device, moduleId);
       }
     },
-    [persistCurrentModule, loadModule, device],
+    [persistCurrentModule, loadModule, device]
   );
 
   const handleSelectDevice = useCallback(
@@ -140,15 +144,17 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
       setExpandedUnitIds(expandedUnitsForDevice(devices, deviceId));
       setLoadKey((k) => k + 1);
     },
-    [persistCurrentModule, selectedDeviceId, devices],
+    [persistCurrentModule, selectedDeviceId, devices]
   );
 
   useEffect(() => {
     if (!selectDeviceAfterImport) return;
     const imported = devices.find(
-      (d) => d.internalCode === selectDeviceAfterImport,
+      (d) => d.internalCode === selectDeviceAfterImport
     );
     if (imported) {
+      // 取込後に devices が更新されてから選択する（import ハンドラと非同期に連携）
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- devices 反映待ちの意図的パターン
       handleSelectDevice(imported.id);
       setSelectDeviceAfterImport(null);
     }
@@ -165,17 +171,17 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
           return;
         }
         setImportBanner(
-          `取込完了: ${result.internal_code}（フロー ${result.flows_upserted} 件）`,
+          `取込完了: ${result.internal_code}（フロー ${result.flows_upserted} 件）`
         );
         setSelectDeviceAfterImport(result.internal_code);
         router.refresh();
       } catch (e) {
         setImportBanner(
-          `取込失敗: ${e instanceof Error ? e.message : String(e)}`,
+          `取込失敗: ${e instanceof Error ? e.message : String(e)}`
         );
       }
     },
-    [router],
+    [router]
   );
 
   const handleTogglePin = useCallback(async () => {
@@ -218,11 +224,7 @@ export function FlowchartWorkspace({ role, email, authDisabled, devices }: Props
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
-      <AppAuthBar
-        email={email}
-        role={role}
-        showDevBanner={authDisabled}
-      />
+      <AppAuthBar email={email} role={role} showDevBanner={authDisabled} />
       {statusBanner ? (
         <p className="border-b border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
           {statusBanner}
@@ -287,12 +289,11 @@ function formatCachedAt(iso: string): string {
 async function putOfflineFromEditor(
   storageKey: string,
   editorRef: React.RefObject<FlowchartEditorHandle | null>,
-  pinned: boolean,
+  pinned: boolean
 ) {
   if (!editorRef.current) return;
-  const { putOfflineModuleCache } = await import(
-    "@/lib/flowchart/offlineFlowCache"
-  );
+  const { putOfflineModuleCache } =
+    await import("@/lib/flowchart/offlineFlowCache");
   await putOfflineModuleCache(storageKey, editorRef.current.getSnapshot(), {
     pinned,
   });

@@ -14,11 +14,7 @@ import {
 } from "@/lib/flowchart/tableColumns";
 import { COLOR_HINT_SELECT_OPTIONS } from "@/lib/flowchart/flowColors";
 import type { FlowTableRow } from "@/lib/flowchart/types";
-import {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-} from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
 export type FlowTableEditorHandle = {
   scrollToRow: (rowIndex: number) => void;
@@ -41,7 +37,7 @@ function cellToString(value: unknown): string {
 function parseCellValue(
   colIndex: number,
   colCount: number,
-  raw: string,
+  raw: string
 ): string | number {
   if (!isNumericTableColumn(colIndex, colCount)) return raw;
   if (colIndex === 0) {
@@ -57,7 +53,10 @@ function parseCellValue(
 }
 
 export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
-  function FlowTableEditor({ table, onChange, errorRowIndices, readOnly, tableSchema }, ref) {
+  function FlowTableEditor(
+    { table, onChange, errorRowIndices, readOnly, tableSchema },
+    ref
+  ) {
     const colCount = resolveColumnCount(table, tableSchema);
     const headers = getHeaders(colCount, tableSchema);
     const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
@@ -118,7 +117,8 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
             </ul>
           ) : (
             <p className="mt-1">
-              9 列形式（段・列）を推奨します。判断の No 分岐には接続先(右)が必要です。
+              9 列形式（段・列）を推奨します。判断の No
+              分岐には接続先(右)が必要です。
             </p>
           )}
         </details>
@@ -179,7 +179,9 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                     }}
                     data-row-index={rowIndex}
                     className={`odd:bg-white even:bg-slate-50/80 hover:bg-blue-50/40 ${
-                      hasError ? "bg-red-100/90 ring-1 ring-inset ring-red-300" : ""
+                      hasError
+                        ? "bg-red-100/90 ring-1 ring-inset ring-red-300"
+                        : ""
                     }`}
                   >
                     <td className="border-b border-slate-100 px-1 py-0.5 text-center text-slate-400">
@@ -211,7 +213,10 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                                   label: opt,
                                 }))
                             ).map((opt) => (
-                              <option key={opt.value || "__empty"} value={opt.value}>
+                              <option
+                                key={opt.value || "__empty"}
+                                value={opt.value}
+                              >
                                 {opt.label}
                               </option>
                             ))}
@@ -251,5 +256,5 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
         </div>
       </div>
     );
-  },
+  }
 );

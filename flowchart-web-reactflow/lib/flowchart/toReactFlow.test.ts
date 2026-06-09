@@ -28,11 +28,11 @@ describe("toReactFlow", () => {
     expect(labels).toContain("Yes");
     expect(labels).toContain("No");
     const yesEdge = edges.find(
-      (e) => (e.data as { branch?: string })?.branch === "yes",
+      (e) => (e.data as { branch?: string })?.branch === "yes"
     );
     expect(yesEdge?.data).toMatchObject({ direction: "down", branch: "yes" });
     expect(
-      edges.some((e) => e.source === "30" && e.sourceHandle === "bottom"),
+      edges.some((e) => e.source === "30" && e.sourceHandle === "bottom")
     ).toBe(true);
   });
 });

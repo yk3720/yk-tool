@@ -14,7 +14,7 @@ export type EdgeLabelPlacement = {
 };
 
 export function branchFromEdgeLabel(
-  label: FlowEdge["label"],
+  label: FlowEdge["label"]
 ): DecisionBranch | undefined {
   if (label === "Yes") return "yes";
   if (label === "No") return "no";
@@ -30,13 +30,12 @@ export function placementForEdgeLabel(
   sourceX: number,
   sourceY: number,
   targetX: number,
-  targetY: number,
+  targetY: number
 ): EdgeLabelPlacement {
   const gap = FLOW_EDGE_LABEL_GAP;
 
   if (branch === "yes" && direction === "down") {
-    const verticalLegX =
-      Math.abs(sourceX - targetX) < 8 ? sourceX : labelX;
+    const verticalLegX = Math.abs(sourceX - targetX) < 8 ? sourceX : labelX;
     const x = verticalLegX + gap;
     const y = sourceY + Math.max(14, (targetY - sourceY) * 0.12);
     return {

@@ -26,7 +26,7 @@ export function shapeKindToNodeType(_kind: ShapeKind): string {
 
 export function toReactFlow(
   placed: PlacedNode[],
-  edges: FlowEdge[],
+  edges: FlowEdge[]
 ): { nodes: Node<FlowNodeData>[]; edges: Edge[] } {
   const nodes: Node<FlowNodeData>[] = placed.map((p) => ({
     id: p.id,

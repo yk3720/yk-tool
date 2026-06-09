@@ -10,7 +10,11 @@ function splitLine(line: string): string[] {
   return trimmed.split(sep).map((c) => c.trim());
 }
 
-function cellValue(raw: string, colIndex: number, colCount: number): string | number {
+function cellValue(
+  raw: string,
+  colIndex: number,
+  colCount: number
+): string | number {
   if (colIndex === 0) {
     if (raw === "") return "";
     const n = Number(raw);
@@ -43,7 +47,7 @@ export function parseTableRows(rows: string[][]): {
   const colCount = Math.max(...nonEmpty.map((r) => r.length));
   if (colCount < 6) {
     errors.push(
-      `列数が ${colCount} です。6 列以上（判断を含む場合は 8 列）が必要です`,
+      `列数が ${colCount} です。6 列以上（判断を含む場合は 8 列）が必要です`
     );
   }
 

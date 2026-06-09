@@ -39,15 +39,14 @@ function scoreDataSheet(rows: string[][]): number {
 }
 
 /** 8列表が入っていそうなシートを選ぶ（図形シートより表シートを優先） */
-export function pickFlowchartSheetName(
-  workbook: XLSX.WorkBook,
-): string | null {
+export function pickFlowchartSheetName(workbook: XLSX.WorkBook): string | null {
   const names = workbook.SheetNames;
   if (names.length === 0) return null;
 
   for (const preferred of PREFERRED_SHEET_NAMES) {
     const hit = names.find(
-      (n) => n.toLowerCase() === preferred.toLowerCase() || n.includes(preferred),
+      (n) =>
+        n.toLowerCase() === preferred.toLowerCase() || n.includes(preferred)
     );
     if (hit) return hit;
   }

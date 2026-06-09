@@ -11,14 +11,14 @@ type Props = {
 };
 
 export function LoginForm({ nextPath, authError }: Props) {
-  const [loading, setLoading] = useState<"google" | "azure" | "email" | "password" | null>(
-    null,
-  );
+  const [loading, setLoading] = useState<
+    "google" | "azure" | "email" | "password" | null
+  >(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState<string | null>(
-    authError ? "ログインに失敗しました。もう一度お試しください。" : null,
+    authError ? "ログインに失敗しました。もう一度お試しください。" : null
   );
 
   const signIn = async (provider: "google" | "azure") => {
@@ -92,7 +92,10 @@ export function LoginForm({ nextPath, authError }: Props) {
         </p>
       </div>
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">
+        <p
+          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800"
+          role="alert"
+        >
           {error}
         </p>
       ) : null}
@@ -162,7 +165,9 @@ export function LoginForm({ nextPath, authError }: Props) {
               onClick={() => void signInWithEmail()}
               className="rounded-md border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50"
             >
-              {loading === "email" ? "送信中…" : "メールでログイン（Magic Link）"}
+              {loading === "email"
+                ? "送信中…"
+                : "メールでログイン（Magic Link）"}
             </button>
           </div>
         </div>

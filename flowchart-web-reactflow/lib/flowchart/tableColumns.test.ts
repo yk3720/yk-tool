@@ -90,7 +90,7 @@ describe("tableColumns", () => {
       suggestNextId([
         [10, "端子"],
         [50, "処理"],
-      ]),
+      ])
     ).toBe(60);
   });
 

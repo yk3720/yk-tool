@@ -6,7 +6,9 @@ export type PrepareImportResult =
   | { ok: true; bundle: RpcImportBundle }
   | { ok: false; errors: string[] };
 
-export function prepareImportBundleForRpc(bundle: ImportBundle): PrepareImportResult {
+export function prepareImportBundleForRpc(
+  bundle: ImportBundle
+): PrepareImportResult {
   const errors: string[] = [];
   const flows: RpcImportBundle["flows"] = [];
 
@@ -15,7 +17,7 @@ export function prepareImportBundleForRpc(bundle: ImportBundle): PrepareImportRe
     const converted = snapshotFromFlowchartDocument(doc);
     if (!converted.ok) {
       errors.push(
-        `${flow.unit_label} · ${flow.module_label}: ${converted.errors.join(" / ")}`,
+        `${flow.unit_label} · ${flow.module_label}: ${converted.errors.join(" / ")}`
       );
       continue;
     }

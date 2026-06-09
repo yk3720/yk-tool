@@ -99,7 +99,7 @@ def extract_unit_sheet_tables(
 ) -> list[FlowTableBlock]:
     if not ws.tables:
         raise ValueError(
-            f'シート「{ws.title}」: Excel テーブルがありません。'
+            f"シート「{ws.title}」: Excel テーブルがありません。"
             f"各動作を「挿入 → テーブル」で登録してください（期待動作: {', '.join(expected_modules)}）"
         )
 
@@ -112,11 +112,13 @@ def extract_unit_sheet_tables(
         try:
             data_rows = _data_rows_from_matrix(matrix)
         except ValueError as exc:
-            raise ValueError(f'シート「{ws.title}」· テーブル「{table_name}」: {exc}') from exc
+            raise ValueError(
+                f"シート「{ws.title}」· テーブル「{table_name}」: {exc}"
+            ) from exc
 
         if not data_rows:
             raise ValueError(
-                f'シート「{ws.title}」· テーブル「{table_name}」: データ行がありません'
+                f"シート「{ws.title}」· テーブル「{table_name}」: データ行がありません"
             )
 
         module_label = resolve_table_module_label(
@@ -124,12 +126,12 @@ def extract_unit_sheet_tables(
         )
         if module_label is None:
             raise ValueError(
-                f'シート「{ws.title}」· テーブル「{table_name}」: '
+                f"シート「{ws.title}」· テーブル「{table_name}」: "
                 f"構成シートの動作名と一致しません（期待: {', '.join(expected_modules)}）"
             )
         if module_label in seen_modules:
             raise ValueError(
-                f'シート「{ws.title}」: 動作「{module_label}」に対応するテーブルが重複しています'
+                f"シート「{ws.title}」: 動作「{module_label}」に対応するテーブルが重複しています"
             )
         seen_modules.add(module_label)
         blocks.append(
@@ -143,7 +145,9 @@ def extract_unit_sheet_tables(
     return blocks
 
 
-def list_unit_sheets(workbook: Workbook, kosei_unit_labels: list[str]) -> dict[str, Worksheet]:
+def list_unit_sheets(
+    workbook: Workbook, kosei_unit_labels: list[str]
+) -> dict[str, Worksheet]:
     reserved = {"構成"}
     sheets: dict[str, Worksheet] = {}
     for name in workbook.sheetnames:
@@ -156,7 +160,7 @@ def list_unit_sheets(workbook: Workbook, kosei_unit_labels: list[str]) -> dict[s
     for unit in kosei_unit_labels:
         if unit not in sheets:
             raise ValueError(
-                f'構成のユニット「{unit}」に対応するシートがありません。'
+                f"構成のユニット「{unit}」に対応するシートがありません。"
                 f"シート名を構成のユニット列と完全一致させてください（既存: {', '.join(sheets.keys()) or 'なし'}）"
             )
 

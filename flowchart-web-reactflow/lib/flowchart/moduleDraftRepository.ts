@@ -45,7 +45,10 @@ class LocalStorageModuleDraftRepository implements ModuleDraftRepository {
   set(storageKey: string, snapshot: ModuleSnapshot): void {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(STORAGE_PREFIX + storageKey, JSON.stringify(snapshot));
+      localStorage.setItem(
+        STORAGE_PREFIX + storageKey,
+        JSON.stringify(snapshot)
+      );
     } catch {
       /* quota exceeded — ignore */
     }

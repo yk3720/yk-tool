@@ -1,0 +1,60 @@
+name: flowchart-web-reactflow CI
+
+on:
+  push:
+    paths:
+      - "flowchart-web-reactflow/**"
+      - ".github/workflows/flowchart-web-reactflow-ci.yml"
+  pull_request:
+    paths:
+      - "flowchart-web-reactflow/**"
+      - ".github/workflows/flowchart-web-reactflow-ci.yml"
+
+defaults:
+  run:
+    working-directory: flowchart-web-reactflow
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      HUSKY: "0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: flowchart-web-reactflow/package-lock.json
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Prettier check
+        run: npm run format:check
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Vitest
+        run: npm run test
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dev tools
+        run: pip install ruff pre-commit pytest openpyxl
+
+      - name: Ruff (excel_normalize)
+        run: npm run excel:lint
+
+      - name: pre-commit (security + Python hooks)
+        run: pre-commit run --all-files --hook-stage pre-commit
+
+      - name: pytest (excel_normalize)
+        run: npm run excel:test

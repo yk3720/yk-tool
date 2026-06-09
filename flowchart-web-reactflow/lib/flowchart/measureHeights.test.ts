@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  measureTextAwareRowHeight,
-  textLineCount,
-} from "./measureHeights";
+import { measureTextAwareRowHeight, textLineCount } from "./measureHeights";
 import type { FlowNode, LayoutConfig } from "./types";
 import { DEFAULT_LAYOUT } from "./types";
 
@@ -29,11 +26,11 @@ describe("measureHeights", () => {
     const config: LayoutConfig = { ...DEFAULT_LAYOUT, heightMin: 30 };
     const single = measureTextAwareRowHeight(
       [node({ id: "1", fullText: "一行" })],
-      config,
+      config
     );
     const multi = measureTextAwareRowHeight(
       [node({ id: "1", fullText: "1行目\n2行目\n3行目" })],
-      config,
+      config
     );
     expect(multi).toBeGreaterThan(single);
     expect(single).toBe(30);

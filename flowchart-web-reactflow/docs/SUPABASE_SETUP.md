@@ -29,9 +29,9 @@ role 保護: `002_fix_profiles_role_protection.sql` を続けて実行。
 
 ログイン前に、Table Editor → `profiles` に行を追加:
 
-| email | role |
-|-------|------|
-| `user@example.com` | `editor` |
+| email                | role     |
+| -------------------- | -------- |
+| `user@example.com`   | `editor` |
 | `viewer@example.com` | `viewer` |
 
 初回ログイン時に `user_id` が自動で紐づきます。

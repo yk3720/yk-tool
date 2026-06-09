@@ -18,7 +18,7 @@ function shapeKindFor(type: FlowNode["type"]): ShapeKind {
 export function layoutGrid(
   rowMap: Map<number, FlowNode[]>,
   rowHeights: Record<number, number>,
-  config: LayoutConfig,
+  config: LayoutConfig
 ): { placed: PlacedNode[]; bounds: Bounds } {
   const placed: PlacedNode[] = [];
   const lefts: number[] = [];
@@ -44,7 +44,10 @@ export function layoutGrid(
         height: 0,
       };
       bucket.nodes.push(n);
-      bucket.height = Math.max(bucket.height, rowHeights[ri] ?? config.heightMin);
+      bucket.height = Math.max(
+        bucket.height,
+        rowHeights[ri] ?? config.heightMin
+      );
       tierMap.set(tier, bucket);
     }
   }
@@ -60,7 +63,9 @@ export function layoutGrid(
       currentTop += (prev?.height ?? config.heightMin) + config.gapV;
     }
 
-    for (const n of bucket.nodes.sort((a, b) => a.level - b.level || a.id.localeCompare(b.id))) {
+    for (const n of bucket.nodes.sort(
+      (a, b) => a.level - b.level || a.id.localeCompare(b.id)
+    )) {
       const leftPos = config.baseLeft + n.level * (config.width + config.gapH);
       const rowH = bucket.height || config.heightMin;
       const isDiamond = isDecisionType(n.type);

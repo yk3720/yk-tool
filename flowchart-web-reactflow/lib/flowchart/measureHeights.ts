@@ -11,7 +11,7 @@ export function textLineCount(node: FlowNode): number {
 
 export function measureTextAwareRowHeight(
   nodesInRow: FlowNode[],
-  config: LayoutConfig,
+  config: LayoutConfig
 ): number {
   let maxLines = 1;
   for (const n of nodesInRow) {
@@ -19,7 +19,7 @@ export function measureTextAwareRowHeight(
   }
   return Math.max(
     config.heightMin,
-    maxLines * TEXT_LINE_HEIGHT + TEXT_VERTICAL_PAD,
+    maxLines * TEXT_LINE_HEIGHT + TEXT_VERTICAL_PAD
   );
 }
 
@@ -35,7 +35,7 @@ export const fixedRowHeightContext: MeasureContext = {
 export function measureRowHeights(
   rowMap: Map<number, FlowNode[]>,
   config: LayoutConfig,
-  ctx: MeasureContext = fixedRowHeightContext,
+  ctx: MeasureContext = fixedRowHeightContext
 ): Record<number, number> {
   const heights: Record<number, number> = {};
   for (const ri of rowMap.keys()) {

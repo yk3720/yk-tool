@@ -10,7 +10,7 @@ import {
 async function assertBranchLabelHalo(
   page: Page,
   branch: "yes" | "no",
-  index = 0,
+  index = 0
 ) {
   const label = page.locator(`[data-edge-label-branch="${branch}"]`).nth(index);
   await expect(label).toBeVisible();
@@ -21,21 +21,19 @@ async function assertBranchLabelHalo(
 /** 分岐ラベルが近傍の縦エッジの右側にあり、DOM 上で交差しない */
 async function assertLabelRightOfVerticalEdge(
   page: Page,
-  branch: "yes" | "no",
+  branch: "yes" | "no"
 ) {
   await expect(async () => {
     const result = await page.evaluate((b) => {
-      const label = document.querySelector(
-        `[data-edge-label-branch="${b}"]`,
-      );
+      const label = document.querySelector(`[data-edge-label-branch="${b}"]`);
       if (!label) {
         return { ok: false as const, reason: `no-${b}-label` };
       }
       const lb = label.getBoundingClientRect();
       const paths = Array.from(
         document.querySelectorAll(
-          ".react-flow__edge path.react-flow__edge-path",
-        ),
+          ".react-flow__edge path.react-flow__edge-path"
+        )
       );
 
       let matchedVertical = false;
@@ -100,7 +98,9 @@ test.describe("分岐ラベル配置（Yes と縦線）", () => {
     await assertLabelRightOfVerticalEdge(page, "yes");
   });
 
-  test("モジュール選択中: サンプル読込後も Yes / No が halo", async ({ page }) => {
+  test("モジュール選択中: サンプル読込後も Yes / No が halo", async ({
+    page,
+  }) => {
     await ensureWorkspaceLoaded(page);
     await ensureNavExpanded(page);
     await page.getByRole("button", { name: "供給動作" }).click();

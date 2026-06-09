@@ -5,10 +5,9 @@ from pathlib import Path
 
 import pytest
 from openpyxl import Workbook, load_workbook
-from openpyxl.worksheet.table import Table, TableStyleInfo
 
-from excel_normalize.constants import FLOW_HEADERS, KOSEI_HEADERS, KOSEI_SHEET
-from excel_normalize.normalize import NormalizeError, normalize_workbook
+from excel_normalize.constants import KOSEI_HEADERS, KOSEI_SHEET
+from excel_normalize.normalize import normalize_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
@@ -40,7 +39,9 @@ def test_normalize_produces_bundle(input_xlsx: Path) -> None:
 def test_normalize_writes_json_snapshot(input_xlsx: Path, tmp_path: Path) -> None:
     result = normalize_workbook(input_xlsx)
     out = tmp_path / "import.json"
-    out.write_text(json.dumps(result.bundle, ensure_ascii=False, indent=2), encoding="utf-8")
+    out.write_text(
+        json.dumps(result.bundle, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     assert out.stat().st_size > 0
 
 

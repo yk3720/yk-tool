@@ -55,11 +55,11 @@ group by module_id_legacy;
 select module_id from public.flow_documents order by module_id;
 ```
 
-| 問題 | 対処 |
-|------|------|
-| `spike%` 等のテストキー | `delete from public.flow_documents where module_id like 'spike%';` |
-| `press-02:b-press-storage-eject`（誤キー） | `update ... set module_id = 'press-02:b-storage-eject' where module_id = 'press-02:b-press-storage-eject';` |
-| `supply-feed` と `press-01:supply-feed` が **両方ある** | 旧形式を削除: `delete ... where module_id = 'supply-feed';`（正式キーを残す） |
+| 問題                                                    | 対処                                                                                                        |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `spike%` 等のテストキー                                 | `delete from public.flow_documents where module_id like 'spike%';`                                          |
+| `press-02:b-press-storage-eject`（誤キー）              | `update ... set module_id = 'press-02:b-storage-eject' where module_id = 'press-02:b-press-storage-eject';` |
+| `supply-feed` と `press-01:supply-feed` が **両方ある** | 旧形式を削除: `delete ... where module_id = 'supply-feed';`（正式キーを残す）                               |
 
 ### 2.4 `could not create unique index "flow_documents_pkey"`（uuid 重複）
 
@@ -142,16 +142,16 @@ npm run excel:normalize
 
 ## 5. やる / やらない（§4）
 
-| やる | やらない |
-|------|----------|
-| dev DB のみ 003 → 004（+ 005 は取込利用時） | 本番 DB |
-| 上記検証 | アプリ uuid 化（次タスク #2） |
-| 問題時 Runbook 追記 | commit（ユーザー明示まで） |
+| やる                                        | やらない                      |
+| ------------------------------------------- | ----------------------------- |
+| dev DB のみ 003 → 004（+ 005 は取込利用時） | 本番 DB                       |
+| 上記検証                                    | アプリ uuid 化（次タスク #2） |
+| 問題時 Runbook 追記                         | commit（ユーザー明示まで）    |
 
 ---
 
 ## 6. 参照
 
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
-- [DB-2_スキーマ草案.md](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/02_spec/DB-2_スキーマ草案.md)
+- [DB-2\_スキーマ草案.md](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/02_spec/DB-2_スキーマ草案.md)
 - ADR-014 · handoffs `2026-05-31_10_db2-schema-design-session-end.md` §4

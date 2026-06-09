@@ -15,12 +15,15 @@ export default async function NoAccessPage() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4">
-      <h1 className="text-xl font-semibold text-slate-900">アクセス権がありません</h1>
+      <h1 className="text-xl font-semibold text-slate-900">
+        アクセス権がありません
+      </h1>
       <p className="text-sm text-slate-600">
         {user?.email ? (
           <>
             <strong>{user.email}</strong> は許可リストに登録されていません。
-            管理者に <code className="text-xs">profiles</code> テーブルへの登録を依頼してください。
+            管理者に <code className="text-xs">profiles</code>{" "}
+            テーブルへの登録を依頼してください。
           </>
         ) : (
           <>ログイン情報を確認できませんでした。</>
@@ -34,7 +37,10 @@ export default async function NoAccessPage() {
           別のアカウントでログイン
         </button>
       </form>
-      <Link href="/login" className="text-sm text-slate-500 hover:text-slate-700">
+      <Link
+        href="/login"
+        className="text-sm text-slate-500 hover:text-slate-700"
+      >
         ログイン画面へ
       </Link>
     </div>

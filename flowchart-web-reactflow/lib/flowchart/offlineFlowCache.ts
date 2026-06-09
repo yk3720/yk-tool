@@ -28,7 +28,7 @@ function openDb(): Promise<IDBDatabase> {
 export async function putOfflineModuleCache(
   moduleId: string,
   snapshot: ModuleSnapshot,
-  options?: { pinned?: boolean },
+  options?: { pinned?: boolean }
 ): Promise<void> {
   if (typeof indexedDB === "undefined") return;
   const db = await openDb();
@@ -47,9 +47,11 @@ export async function putOfflineModuleCache(
   db.close();
 }
 
-export async function getOfflineModuleCache(
-  moduleId: string,
-): Promise<{ snapshot: ModuleSnapshot; cachedAt: string; pinned: boolean } | null> {
+export async function getOfflineModuleCache(moduleId: string): Promise<{
+  snapshot: ModuleSnapshot;
+  cachedAt: string;
+  pinned: boolean;
+} | null> {
   if (typeof indexedDB === "undefined") return null;
   const db = await openDb();
   const entry = await new Promise<CacheEntry | undefined>((resolve, reject) => {
@@ -69,7 +71,7 @@ export async function getOfflineModuleCache(
 
 export async function setOfflineModulePinned(
   moduleId: string,
-  pinned: boolean,
+  pinned: boolean
 ): Promise<void> {
   const existing = await getOfflineModuleCache(moduleId);
   if (!existing) return;

@@ -5,7 +5,7 @@ import type { FlowTableRow } from "./types";
 /** エラーメッセージから表の行インデックス（0-based）を抽出 */
 export function errorRowIndices(
   errors: string[],
-  table: FlowTableRow[],
+  table: FlowTableRow[]
 ): Set<number> {
   const rows = new Set<number>();
 
@@ -42,7 +42,7 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
 
   if (nodes.length === 0) {
     warnings.push(
-      "ID 列が空です — 各行の ID に番号（10, 20…）を入れてください",
+      "ID 列が空です — 各行の ID に番号（10, 20…）を入れてください"
     );
     return warnings;
   }
@@ -51,12 +51,12 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
     if (n.type === "判断") {
       if (n.destsDown.length === 0 && n.destsRight.length === 0) {
         warnings.push(
-          `ID ${n.id}（判断）: 接続先(下) か 接続先(右) を入れてください — Yes/No の分岐用です`,
+          `ID ${n.id}（判断）: 接続先(下) か 接続先(右) を入れてください — Yes/No の分岐用です`
         );
       }
       if (n.destsDown.length > 1) {
         warnings.push(
-          `ID ${n.id}（判断）: 接続先(下) は1件にしてください — 複数あると図が分かりにくいです（Yes は下・No は右が一般的です）`,
+          `ID ${n.id}（判断）: 接続先(下) は1件にしてください — 複数あると図が分かりにくいです（Yes は下・No は右が一般的です）`
         );
       }
     }
@@ -68,7 +68,7 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
       const { unknown } = normalizeColorHint(cell);
       if (unknown) {
         warnings.push(
-          `ID ${n.id}: 色列の値「${String(cell).trim()}」は未対応です — 空・黄・橙・青のいずれかにしてください（通常として描画します）`,
+          `ID ${n.id}: 色列の値「${String(cell).trim()}」は未対応です — 空・黄・橙・青のいずれかにしてください（通常として描画します）`
         );
       }
     }
@@ -80,7 +80,7 @@ export function validateTableWarnings(table: FlowTableRow[]): string[] {
     const k = posKey(n);
     if (seen.has(k)) {
       warnings.push(
-        `ID ${n.id} と ID ${seen.get(k)}: 同じ行・Level のため図上で重なります — Level または行をずらしてください`,
+        `ID ${n.id} と ID ${seen.get(k)}: 同じ行・Level のため図上で重なります — Level または行をずらしてください`
       );
     } else {
       seen.set(k, n.id);

@@ -40,10 +40,7 @@ import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
 import { FlowColorLegend } from "./FlowColorLegend";
 import { CsvPastePanel } from "./CsvPastePanel";
-import {
-  FlowTableEditor,
-  type FlowTableEditorHandle,
-} from "./FlowTableEditor";
+import { FlowTableEditor, type FlowTableEditorHandle } from "./FlowTableEditor";
 
 const SAMPLES: Record<string, FlowchartDocument> = {
   curry: sampleCurry as FlowchartDocument,
@@ -102,8 +99,7 @@ export type FlowchartEditorProps = {
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
-const EMPTY_TABLE_MESSAGE =
-  "Excel から取込むか、表を入力してください";
+const EMPTY_TABLE_MESSAGE = "Excel から取込むか、表を入力してください";
 
 function resolveInitialState(props: FlowchartEditorProps): {
   doc: FlowchartDocument;
@@ -117,7 +113,7 @@ function resolveInitialState(props: FlowchartEditorProps): {
     const raw = snap.committedJson || snap.jsonText;
     const { doc: parsed } = parseFlowchartDocument(raw);
     const doc = normalizeFlowchartDocument(
-      parsed ?? (SAMPLES.templateStarter as FlowchartDocument),
+      parsed ?? (SAMPLES.templateStarter as FlowchartDocument)
     );
     const text = serializeDocument(doc);
     return {
@@ -130,7 +126,7 @@ function resolveInitialState(props: FlowchartEditorProps): {
   }
   if (props.workspaceMode && props.moduleId) {
     const starter = normalizeFlowchartDocument(
-      SAMPLES.templateStarter as FlowchartDocument,
+      SAMPLES.templateStarter as FlowchartDocument
     );
     const text = serializeDocument(starter);
     return {
@@ -170,7 +166,7 @@ export const FlowchartEditor = forwardRef<
   const initial = useMemo(
     () => resolveInitialState(props),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- key remount per module
-    [moduleId, initialSnapshot],
+    [moduleId, initialSnapshot]
   );
 
   const [doc, setDoc] = useState<FlowchartDocument>(initial.doc);
@@ -185,7 +181,7 @@ export const FlowchartEditor = forwardRef<
   const [status, setStatus] = useState(
     workspaceMode && moduleId && !initialSnapshot
       ? "表を入力するかサンプルを読み込んでください"
-      : "準備完了",
+      : "準備完了"
   );
   const [samplePreviewActive, setSamplePreviewActive] = useState(false);
   const canvasRef = useRef<FlowCanvasHandle>(null);
@@ -210,12 +206,12 @@ export const FlowchartEditor = forwardRef<
         edges,
       }),
     }),
-    [jsonText, committedJson, nodes, edges],
+    [jsonText, committedJson, nodes, edges]
   );
 
   const errorRows = useMemo(
     () => errorRowIndices([...parseErrors, ...genErrors], doc.table),
-    [parseErrors, genErrors, doc.table],
+    [parseErrors, genErrors, doc.table]
   );
 
   const syncJsonFromDoc = useCallback((nextDoc: FlowchartDocument) => {
@@ -247,7 +243,7 @@ export const FlowchartEditor = forwardRef<
       if (!result.ok) {
         setGenErrors(result.errors);
         setStatus(
-          "生成エラー — 直前のプレビューを表示しています。表を直して再生成してください",
+          "生成エラー — 直前のプレビューを表示しています。表を直して再生成してください"
         );
         return false;
       }
@@ -258,12 +254,12 @@ export const FlowchartEditor = forwardRef<
       setEdges(rf.edges);
       setCommittedJson(text);
       setStatus(
-        `生成完了 — ノード ${result.placed.length} / エッジ ${result.edges.length}`,
+        `生成完了 — ノード ${result.placed.length} / エッジ ${result.edges.length}`
       );
       onSnapshotPersist?.();
       return true;
     },
-    [refreshWarnings, onSnapshotPersist],
+    [refreshWarnings, onSnapshotPersist]
   );
 
   useEffect(() => {
@@ -289,7 +285,14 @@ export const FlowchartEditor = forwardRef<
       }
     }
     runGenerate(serializeDocument(SAMPLES.curry));
-  }, [runGenerate, refreshWarnings, workspaceMode, moduleId, initialSnapshot, initial.doc.table]);
+  }, [
+    runGenerate,
+    refreshWarnings,
+    workspaceMode,
+    moduleId,
+    initialSnapshot,
+    initial.doc.table,
+  ]);
 
   useEffect(() => {
     if (workspaceMode) return;
@@ -391,7 +394,7 @@ export const FlowchartEditor = forwardRef<
     }
     const base = (doc.title ?? "flowchart").replace(
       /[^\w\u3040-\u30ff\u4e00-\u9fff-]+/g,
-      "_",
+      "_"
     );
     try {
       await captureFlowPng(el, `${base}.png`);
@@ -413,7 +416,7 @@ export const FlowchartEditor = forwardRef<
     if (!el) return;
     const base = (doc.title ?? "flowchart").replace(
       /[^\w\u3040-\u30ff\u4e00-\u9fff-]+/g,
-      "_",
+      "_"
     );
     try {
       await captureFlowSvg(el, `${base}.svg`);
@@ -523,7 +526,9 @@ export const FlowchartEditor = forwardRef<
       aria-live="polite"
     >
       {isStale && (
-        <span className="mr-2 font-medium text-amber-600">プレビューは古い —</span>
+        <span className="mr-2 font-medium text-amber-600">
+          プレビューは古い —
+        </span>
       )}
       <span className="text-slate-600">{status}</span>
       {!workspaceMode ? (
@@ -740,7 +745,9 @@ export const FlowchartEditor = forwardRef<
             {errorBanner}
             {warningBanner}
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-4">
-              <h2 className="shrink-0 text-sm font-medium text-slate-700">表</h2>
+              <h2 className="shrink-0 text-sm font-medium text-slate-700">
+                表
+              </h2>
               {tablePaneBody}
             </div>
           </section>
@@ -783,7 +790,9 @@ export const FlowchartEditor = forwardRef<
             </div>
             {contextLabel ? (
               <p className="text-sm text-slate-600">
-                <span className="font-medium text-slate-800">{contextLabel}</span>
+                <span className="font-medium text-slate-800">
+                  {contextLabel}
+                </span>
               </p>
             ) : null}
           </div>

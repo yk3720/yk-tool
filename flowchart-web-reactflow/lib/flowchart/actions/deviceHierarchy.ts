@@ -82,7 +82,7 @@ export async function fetchDeviceHierarchy(): Promise<DeviceHierarchyResult> {
             legacy_key
           )
         )
-      `,
+      `
       )
       .order("sort_order");
 

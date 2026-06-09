@@ -32,7 +32,7 @@ describe("moduleHierarchy", () => {
   it("DEMO_DEVICE_PRESS_A has expected module count", () => {
     const count = DEMO_DEVICE_PRESS_A.units.reduce(
       (n, u) => n + u.modules.length,
-      0,
+      0
     );
     expect(count).toBe(5);
   });

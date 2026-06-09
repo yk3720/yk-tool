@@ -2,7 +2,7 @@
 
 表データからフローチャートを自動生成する Web アプリ（**React Flow 描画** · `yk-tool` リポジトリ内）。
 
-**旧ディレクトリ名:** `flowchart-web`（2026-05-23 リネーム · [ADR-010](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/04_decisions/意思決定記録(ADR).md)）
+**旧ディレクトリ名:** `flowchart-web`（2026-05-23 リネーム · [ADR-010](<c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/04_decisions/意思決定記録(ADR).md>)）
 
 ## 図モダリティ（YK 横断）
 
@@ -10,12 +10,12 @@
 
 本アプリは **表 JSON → React Flow**（Level・行順ベースのレイアウト）。**Mermaid `.mmd` の出力・インポートは Phase 外**。
 
-| やりたいこと | 選ぶもの | SSOT |
-|--------------|----------|------|
-| 表・CSV · ブラウザ編集 · PNG/SVG 即出力（**React Flow**） | **本アプリ** | 本 README · `lib/flowchart/` · [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md) |
-| 同じ表から **Mermaid プレビュー**（比較・検証用） | **flowchart-web-mermaid** | [`flowchart-web-mermaid/README.md` §図モダリティ](c:/yk-tool/flowchart-web-mermaid/README.md#図モダリティyk-横断) |
-| テキスト版管理 · Git · MD/ADR 埋め込み | **Mermaid DSL** | [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot) |
-| Excel 連携デスクトップツール | **Python（MZ 系）** | [`PYTHON_RULES.md`](c:/yk-skill/rule/40_python/PYTHON_RULES.md) |
+| やりたいこと                                              | 選ぶもの                  | SSOT                                                                                                              |
+| --------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 表・CSV · ブラウザ編集 · PNG/SVG 即出力（**React Flow**） | **本アプリ**              | 本 README · `lib/flowchart/` · [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md)           |
+| 同じ表から **Mermaid プレビュー**（比較・検証用）         | **flowchart-web-mermaid** | [`flowchart-web-mermaid/README.md` §図モダリティ](c:/yk-tool/flowchart-web-mermaid/README.md#図モダリティyk-横断) |
+| テキスト版管理 · Git · MD/ADR 埋め込み                    | **Mermaid DSL**           | [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot)     |
+| Excel 連携デスクトップツール                              | **Python（MZ 系）**       | [`PYTHON_RULES.md`](c:/yk-skill/rule/40_python/PYTHON_RULES.md)                                                   |
 
 **索引 · 手順:** [`RULE_INDEX.md`](c:/yk-skill/rule/RULE_INDEX.md#タスク別クイック入口) · [`RULE_ROUTING_PLAYBOOK.md`（flowchart RF）](c:/yk-skill/rule/RULE_ROUTING_PLAYBOOK.md#読む順序flowchart-web-reactflow--react-flow-を触るとき) · `yk-tool/catalog.yaml` の `flowchart-web-reactflow`
 
@@ -65,12 +65,12 @@ npm run test:e2e # Playwright（Cursor 内部ブラウザ設定と無関係）
 
 ## ディレクトリ
 
-| パス | 内容 |
-|------|------|
-| `lib/flowchart/` | ドメイン層（React 非依存） |
-| `fixtures/` | サンプル JSON |
-| `components/flowchart/` | UI（client） |
-| `docs/adr/` | ADR（yk-memo と同期） |
+| パス                    | 内容                       |
+| ----------------------- | -------------------------- |
+| `lib/flowchart/`        | ドメイン層（React 非依存） |
+| `fixtures/`             | サンプル JSON              |
+| `components/flowchart/` | UI（client）               |
+| `docs/adr/`             | ADR（yk-memo と同期）      |
 
 ## DB-1（ADR-013 · Supabase）
 

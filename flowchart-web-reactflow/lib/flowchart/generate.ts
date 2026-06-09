@@ -3,16 +3,12 @@ import { layoutGrid } from "./layoutGrid";
 import { measureRowHeights } from "./measureHeights";
 import { parseTable } from "./parseTable";
 import { validateTable } from "./validate";
-import type {
-  FlowTableRow,
-  GenerateResult,
-  LayoutConfig,
-} from "./types";
+import type { FlowTableRow, GenerateResult, LayoutConfig } from "./types";
 import { DEFAULT_LAYOUT } from "./types";
 
 export function generateFlowchart(
   table: FlowTableRow[],
-  layout: LayoutConfig = DEFAULT_LAYOUT,
+  layout: LayoutConfig = DEFAULT_LAYOUT
 ): GenerateResult {
   const errors = validateTable(table);
   if (errors.length > 0) {

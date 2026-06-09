@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT/flowchart-web-reactflow" || exit 1
+
+npm run typecheck
+npm run test
+npm run excel:test

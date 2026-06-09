@@ -144,14 +144,14 @@ export const DEMO_DEVICE = DEMO_DEVICE_PRESS_A;
 
 export function findDevice(
   devices: readonly Device[],
-  deviceId: string,
+  deviceId: string
 ): Device | null {
   return devices.find((d) => d.id === deviceId) ?? null;
 }
 
 export function findModule(
   device: Device,
-  moduleId: string,
+  moduleId: string
 ): { unit: FlowUnit; module: FlowModule } | null {
   for (const unit of device.units) {
     const mod = unit.modules.find((m) => m.id === moduleId);
@@ -162,7 +162,7 @@ export function findModule(
 
 export function findModuleInDevices(
   devices: readonly Device[],
-  moduleId: string,
+  moduleId: string
 ): { device: Device; unit: FlowUnit; module: FlowModule } | null {
   for (const device of devices) {
     const found = findModule(device, moduleId);
@@ -174,7 +174,7 @@ export function findModuleInDevices(
 /** 読込用 — uuid 優先 · 旧 text キーへフォールバック */
 export function resolveModuleDraftKeys(
   module: FlowModule,
-  device: Device,
+  device: Device
 ): string[] {
   const keys = [moduleStorageKey(module.id)];
 
@@ -196,7 +196,7 @@ export function resolveModuleDraftKeys(
 /** @deprecated resolveModuleDraftKeys(module, device) を使用 */
 export function resolveModuleDraftKey(
   deviceId: string,
-  moduleId: string,
+  moduleId: string
 ): string[] {
   const device = findDevice(DEMO_DEVICES, deviceId);
   const found = device ? findModule(device, moduleId) : null;

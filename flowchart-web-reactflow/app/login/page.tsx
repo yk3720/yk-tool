@@ -24,10 +24,5 @@ export default async function LoginPage({ searchParams }: Props) {
   const params = await searchParams;
   const nextPath = params.next?.startsWith("/") ? params.next : "/";
 
-  return (
-    <LoginForm
-      nextPath={nextPath}
-      authError={params.error === "auth"}
-    />
-  );
+  return <LoginForm nextPath={nextPath} authError={params.error === "auth"} />;
 }

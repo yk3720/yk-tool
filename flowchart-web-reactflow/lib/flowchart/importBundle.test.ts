@@ -10,7 +10,7 @@ import { prepareImportBundleForRpc } from "./prepareImportBundle";
 
 const FIXTURE_JSON = join(
   process.cwd(),
-  "tools/excel_normalize/fixtures/import-z00001.json",
+  "tools/excel_normalize/fixtures/import-z00001.json"
 );
 
 describe("importBundleSchema", () => {

@@ -71,7 +71,10 @@ export function parseTable(table: FlowTableRow[]): ParseResult {
       level = parseLevel(row[3]);
     } else {
       txts =
-        row.length > 2 && row[2] !== null && row[2] !== undefined && row[2] !== ""
+        row.length > 2 &&
+        row[2] !== null &&
+        row[2] !== undefined &&
+        row[2] !== ""
           ? [String(row[2])]
           : [];
       destsDown = splitDests(row[3]);
@@ -88,9 +91,7 @@ export function parseTable(table: FlowTableRow[]): ParseResult {
       destsRight,
       level,
       ...(tier !== undefined ? { tier } : {}),
-      ...(colCount >= 10
-        ? { colorHint: normalizeColorHint(row[9]).hint }
-        : {}),
+      ...(colCount >= 10 ? { colorHint: normalizeColorHint(row[9]).hint } : {}),
       rowIndex: i,
     };
     nodes.push(node);

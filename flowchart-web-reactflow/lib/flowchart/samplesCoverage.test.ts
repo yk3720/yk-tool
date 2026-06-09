@@ -14,7 +14,10 @@ const DEMO_SAMPLES = [
   sampleAtm,
 ] as FlowchartDocument[];
 
-const COLOR_CELLS = ["", ...COLOR_HINT_SELECT_OPTIONS.map((o) => o.value).filter(Boolean)];
+const COLOR_CELLS = [
+  "",
+  ...COLOR_HINT_SELECT_OPTIONS.map((o) => o.value).filter(Boolean),
+];
 
 function collectFromSample(doc: FlowchartDocument) {
   const shapes = new Set<string>();
@@ -39,9 +42,10 @@ describe("demo samples coverage", () => {
       expect(shapes.has(shape), `missing shape: ${shape}`).toBe(true);
     }
     for (const color of COLOR_CELLS) {
-      expect(colors.has(color), `missing color cell: ${color || "(通常)"}`).toBe(
-        true,
-      );
+      expect(
+        colors.has(color),
+        `missing color cell: ${color || "(通常)"}`
+      ).toBe(true);
     }
   });
 

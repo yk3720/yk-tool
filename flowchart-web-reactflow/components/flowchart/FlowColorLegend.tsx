@@ -10,7 +10,11 @@ export function FlowColorLegend() {
       aria-label="色列の凡例"
     >
       {COLOR_HINT_LEGEND_ITEMS.map(({ hint, label, title, fill }) => (
-        <span key={hint} className="inline-flex items-center gap-1" title={title}>
+        <span
+          key={hint}
+          className="inline-flex items-center gap-1"
+          title={title}
+        >
           <span
             className="inline-block h-3 w-3 shrink-0 border border-[#1a1a1a]"
             style={{ backgroundColor: fill }}

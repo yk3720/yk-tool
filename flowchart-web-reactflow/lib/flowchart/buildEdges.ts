@@ -3,7 +3,7 @@ import type { ConnectorSite, FlowEdge, FlowNode, PlacedNode } from "./types";
 
 function labelForDecision(
   source: FlowNode,
-  direction: "down" | "right",
+  direction: "down" | "right"
 ): "Yes" | "No" | undefined {
   if (!isDecisionType(source.type)) return undefined;
   return direction === "down" ? "Yes" : "No";
@@ -15,7 +15,7 @@ function nodeTier(n: FlowNode): number {
 
 export function buildEdges(
   nodes: FlowNode[],
-  placed: PlacedNode[],
+  placed: PlacedNode[]
 ): FlowEdge[] {
   const placedById = new Map(placed.map((p) => [p.id, p]));
   const nodeById = new Map(nodes.map((n) => [n.id, n]));
@@ -59,7 +59,9 @@ export function buildEdges(
             sourceSide = "bottom";
             targetSide = "top";
             route =
-              Math.abs(source.x - target.x) < 5 && !isMerge ? "straight" : "elbow";
+              Math.abs(source.x - target.x) < 5 && !isMerge
+                ? "straight"
+                : "elbow";
           } else {
             // ループ（上へ戻る）· 同段 — 左/右入口
             route = "elbow";

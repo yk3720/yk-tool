@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Handle,
-  Position,
-  type Node,
-  type NodeProps,
-} from "@xyflow/react";
+import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { memo } from "react";
 import {
   FLOW_NODE_DIAMOND_STROKE_WIDTH,
@@ -49,7 +44,7 @@ function NodeIdBadge({ id }: { id: string }) {
 function polygonPoints(
   width: number,
   height: number,
-  verts: readonly [number, number][],
+  verts: readonly [number, number][]
 ): string {
   return verts
     .map(([xPct, yPct]) => `${(xPct / 100) * width},${(yPct / 100) * height}`)
@@ -110,7 +105,10 @@ function SlantedPolygonShape({
         height={height * 0.76}
       >
         <div
-          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as Record<string, string>)}
+          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as Record<
+            string,
+            string
+          >)}
           className="flex h-full w-full flex-col items-center justify-center gap-0.5 text-center text-[11px] font-medium leading-snug text-slate-800"
         >
           <LabelLines label={data.label} />
@@ -158,7 +156,10 @@ function DiamondShape({
         height={height * 0.64}
       >
         <div
-          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as Record<string, string>)}
+          {...({ xmlns: "http://www.w3.org/1999/xhtml" } as Record<
+            string,
+            string
+          >)}
           className="flex h-full w-full flex-col items-center justify-center gap-0.5 text-center text-[11px] font-medium leading-snug text-slate-800"
         >
           <LabelLines label={data.label} />

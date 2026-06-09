@@ -20,30 +20,30 @@
 
 ## 2. アプリの開き方（毎回）
 
-| 方法 | 手順 |
-|------|------|
-| **bat（推奨）** | `フローチャートを開く.bat` — OS 既定ブラウザで `/login` を開く |
-| **手動** | `npm run dev` または `npm run start` 後、**Chrome / Edge のアドレスバー**に URL を貼る |
+| 方法            | 手順                                                                                   |
+| --------------- | -------------------------------------------------------------------------------------- |
+| **bat（推奨）** | `フローチャートを開く.bat` — OS 既定ブラウザで `/login` を開く                         |
+| **手動**        | `npm run dev` または `npm run start` 後、**Chrome / Edge のアドレスバー**に URL を貼る |
 
 ```text
 http://localhost:3000/login
 ```
 
-| やらない | 理由 |
-|----------|------|
-| Cursor チャットの **localhost リンクをクリック** | 内部 Browser Tab になりやすい |
-| Cursor **内部ブラウザ**で重いアプリを長時間開く | Renderer メモリ増 · 固まりやすい |
+| やらない                                         | 理由                             |
+| ------------------------------------------------ | -------------------------------- |
+| Cursor チャットの **localhost リンクをクリック** | 内部 Browser Tab になりやすい    |
+| Cursor **内部ブラウザ**で重いアプリを長時間開く  | Renderer メモリ増 · 固まりやすい |
 
 ---
 
 ## 3. 起動コマンド
 
-| コマンド | 用途 |
-|----------|------|
-| `npm run dev` | 日常開発（Turbopack · 初回は重め） |
-| `npm run build` → `npm run start` | 本番同等 · **PC が重いとき / 久しぶりの確認** |
-| `npm run build` → `npm run test:e2e` | Playwright 全件（`:3001` · `AUTH_DISABLED=1` · 品質ゲート） |
-| `npm run test:e2e:labels` | Yes ラベルと縦線の重なりだけ（`e2e/edge-label-placement.spec.ts`） |
+| コマンド                             | 用途                                                               |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| `npm run dev`                        | 日常開発（Turbopack · 初回は重め）                                 |
+| `npm run build` → `npm run start`    | 本番同等 · **PC が重いとき / 久しぶりの確認**                      |
+| `npm run build` → `npm run test:e2e` | Playwright 全件（`:3001` · `AUTH_DISABLED=1` · 品質ゲート）        |
+| `npm run test:e2e:labels`            | Yes ラベルと縦線の重なりだけ（`e2e/edge-label-placement.spec.ts`） |
 
 初回 or コード変更後は **`npm run build`** を挟んでから E2E を実行する（`playwright.config` は `next start` を使う）。
 

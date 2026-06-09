@@ -16,7 +16,9 @@ export function validateTable(table: FlowTableRow[]): string[] {
   for (let i = 0; i < table.length; i++) {
     const len = table[i]?.length ?? 0;
     if (len !== colCount) {
-      errors.push(`行 ${i + 1}: 列数が先頭行（${colCount}）と一致しません（${len}列）`);
+      errors.push(
+        `行 ${i + 1}: 列数が先頭行（${colCount}）と一致しません（${len}列）`
+      );
     }
   }
 

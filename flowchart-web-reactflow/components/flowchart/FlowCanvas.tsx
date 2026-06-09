@@ -34,7 +34,7 @@ type FlowCanvasProps = {
 
 function FlowCanvasInner(
   { nodes, edges, fillContainer = false }: FlowCanvasProps,
-  ref: React.Ref<FlowCanvasHandle>,
+  ref: React.Ref<FlowCanvasHandle>
 ) {
   const { fitView } = useReactFlow();
 
@@ -47,7 +47,7 @@ function FlowCanvasInner(
       getExportElement: () =>
         document.querySelector("[data-flowchart-export-root]"),
     }),
-    [fitView],
+    [fitView]
   );
 
   useEffect(() => {
@@ -63,7 +63,7 @@ function FlowCanvasInner(
     () => ({
       type: "labeled" as const,
     }),
-    [],
+    []
   );
 
   return (
@@ -99,7 +99,9 @@ function FlowCanvasInner(
 
 const FlowCanvasWithRef = forwardRef(FlowCanvasInner);
 
-export function FlowCanvas(props: FlowCanvasProps & { canvasRef?: React.Ref<FlowCanvasHandle> }) {
+export function FlowCanvas(
+  props: FlowCanvasProps & { canvasRef?: React.Ref<FlowCanvasHandle> }
+) {
   const { canvasRef, ...rest } = props;
   return (
     <ReactFlowProvider>

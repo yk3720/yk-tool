@@ -20,7 +20,9 @@ export function CsvPastePanel({ onApply }: Props) {
       return;
     }
     onApply(table);
-    setMessage(`${detail} — ${table.length} 行を表に反映しました。続けて「再生成」してください`);
+    setMessage(
+      `${detail} — ${table.length} 行を表に反映しました。続けて「再生成」してください`
+    );
     setText("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };

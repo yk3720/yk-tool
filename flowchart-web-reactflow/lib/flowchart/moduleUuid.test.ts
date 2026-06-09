@@ -4,9 +4,7 @@ import { isModuleUuid } from "./moduleUuid";
 
 describe("moduleUuid", () => {
   it("accepts lowercase uuid", () => {
-    expect(
-      isModuleUuid("c0000001-0001-4001-8001-000000001001"),
-    ).toBe(true);
+    expect(isModuleUuid("c0000001-0001-4001-8001-000000001001")).toBe(true);
   });
 
   it("rejects legacy text keys", () => {

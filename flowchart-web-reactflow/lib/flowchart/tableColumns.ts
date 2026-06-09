@@ -79,10 +79,11 @@ export const COLUMN_HELP_9: Record<(typeof TABLE_HEADERS_9)[number], string> = {
 };
 
 /** 作者向けの列の説明（10列） */
-export const COLUMN_HELP_10: Record<(typeof TABLE_HEADERS_10)[number], string> = {
-  ...COLUMN_HELP_9,
-  色: COLOR_COLUMN_HELP,
-};
+export const COLUMN_HELP_10: Record<(typeof TABLE_HEADERS_10)[number], string> =
+  {
+    ...COLUMN_HELP_9,
+    色: COLOR_COLUMN_HELP,
+  };
 
 export const SHAPE_TYPE_OPTIONS = [
   "端子",
@@ -120,7 +121,7 @@ function isIntegerish(value: unknown): boolean {
 /** 8列幅でも中身が段+列+Text か（Text3 列欠落） */
 export function inferTableLayout(
   table: FlowTableRow[],
-  schema?: string,
+  schema?: string
 ): TableLayout {
   if (usesTierColumnSchema(schema)) return "tier9";
   if (table.length === 0) return "legacy8";
@@ -177,7 +178,7 @@ export function legacy8TableToTier9(table: FlowTableRow[]): FlowTableRow[] {
 /** 表 UI / パーサー用の列数（tier9 は常に 10 列 · 色列込み） */
 export function resolveColumnCount(
   table: FlowTableRow[],
-  schema?: string,
+  schema?: string
 ): number {
   const layout = inferTableLayout(table, schema);
   if (layout === "tier9") {
@@ -189,7 +190,9 @@ export function resolveColumnCount(
   }
   if (table.length === 0) {
     if (usesTenColumnSchema(schema)) return TEN_COL_WIDTH;
-    return usesTierColumnSchema(schema) ? TEN_COL_WIDTH : TABLE_HEADERS_8.length;
+    return usesTierColumnSchema(schema)
+      ? TEN_COL_WIDTH
+      : TABLE_HEADERS_8.length;
   }
   return Math.max(...table.map((r) => r?.length ?? 0), TABLE_HEADERS_8.length);
 }
@@ -197,7 +200,7 @@ export function resolveColumnCount(
 /** 9/10列表の列幅を揃える（tier9 は 10 列 · 色列を空でパディング） */
 export function ensureNineColumnTable(
   table: FlowTableRow[],
-  schema?: string,
+  schema?: string
 ): FlowTableRow[] {
   if (inferTableLayout(table, schema) !== "tier9") return table;
   const colCount = resolveColumnCount(table, schema);
@@ -232,7 +235,7 @@ export function getHeaders(colCount: number, schema?: string): string[] {
 
 export function getColumnHelp(
   header: string,
-  colCount: number,
+  colCount: number
 ): string | undefined {
   if (colCount >= TEN_COL_WIDTH && header in COLUMN_HELP_10) {
     return COLUMN_HELP_10[header as (typeof TABLE_HEADERS_10)[number]];
@@ -248,7 +251,7 @@ export function getColumnHelp(
 
 export function getHelpEntries(
   colCount: number,
-  schema?: string,
+  schema?: string
 ): { header: string; help: string }[] {
   return getHeaders(colCount, schema)
     .map((header) => ({ header, help: getColumnHelp(header, colCount) }))
@@ -258,7 +261,7 @@ export function getHelpEntries(
 /** 表 UI で数値として編集する列 */
 export function isNumericTableColumn(
   colIndex: number,
-  colCount: number,
+  colCount: number
 ): boolean {
   if (colIndex === 0) return true;
   if (colCount >= 9 && (colIndex === 4 || colIndex === 5)) return true;
@@ -268,14 +271,17 @@ export function isNumericTableColumn(
 }
 
 /** 表 UI: 10列目「色」 */
-export function isColorTableColumn(colIndex: number, colCount: number): boolean {
+export function isColorTableColumn(
+  colIndex: number,
+  colCount: number
+): boolean {
   return colCount >= TEN_COL_WIDTH && colIndex === TEN_COL_WIDTH - 1;
 }
 
 /** 行を列数に合わせてパディング */
 export function normalizeRow(
   row: FlowTableRow,
-  colCount: number,
+  colCount: number
 ): FlowTableRow {
   const out = [...row];
   while (out.length < colCount) out.push("");

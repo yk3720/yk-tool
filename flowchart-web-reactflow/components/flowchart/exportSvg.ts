@@ -4,10 +4,10 @@ import { shouldIncludeInFlowExport } from "./exportImageFilter";
 
 export async function captureFlowSvg(
   element: HTMLElement,
-  filename = "flowchart.svg",
+  filename = "flowchart.svg"
 ): Promise<void> {
   const viewport = element.querySelector(
-    ".react-flow__viewport",
+    ".react-flow__viewport"
   ) as HTMLElement | null;
   const target = viewport ?? element;
 

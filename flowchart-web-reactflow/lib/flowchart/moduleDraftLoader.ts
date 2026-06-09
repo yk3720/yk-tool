@@ -24,9 +24,13 @@ export type ModuleLoadResult = {
 
 async function loadFromCloud(
   moduleUuid: string,
-  primaryKey: string,
+  primaryKey: string
 ): Promise<ModuleLoadResult | null> {
-  if (isAuthDisabled() || typeof navigator === "undefined" || !navigator.onLine) {
+  if (
+    isAuthDisabled() ||
+    typeof navigator === "undefined" ||
+    !navigator.onLine
+  ) {
     return null;
   }
 
@@ -51,7 +55,7 @@ async function loadFromCloud(
 
 export async function loadModuleDraft(
   module: FlowModule,
-  device: Device,
+  device: Device
 ): Promise<ModuleLoadResult> {
   const storageKeys = resolveModuleDraftKeys(module, device);
   const primaryKey = moduleStorageKey(module.id);
@@ -92,16 +96,15 @@ export async function persistModuleDraft(
   module: FlowModule,
   _device: Device,
   snapshot: ModuleSnapshot,
-  options: { saveToCloud: boolean },
+  options: { saveToCloud: boolean }
 ): Promise<void> {
   const primaryKey = moduleStorageKey(module.id);
   moduleDraftRepository.set(primaryKey, snapshot);
   await putOfflineModuleCache(primaryKey, snapshot);
 
   if (options.saveToCloud && !isAuthDisabled() && navigator.onLine) {
-    const { saveFlowDocument } = await import(
-      "@/lib/flowchart/actions/flowDocuments"
-    );
+    const { saveFlowDocument } =
+      await import("@/lib/flowchart/actions/flowDocuments");
     await saveFlowDocument(module.id, snapshot);
   }
 }

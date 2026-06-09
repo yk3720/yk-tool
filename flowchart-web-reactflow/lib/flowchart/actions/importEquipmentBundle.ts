@@ -2,9 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import {
-  parseImportBundleJson,
-} from "@/lib/flowchart/importBundleSchema";
+import { parseImportBundleJson } from "@/lib/flowchart/importBundleSchema";
 import { prepareImportBundleForRpc } from "@/lib/flowchart/prepareImportBundle";
 import { isAuthDisabled } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -34,7 +32,7 @@ function mapRpcError(message: string): string {
 }
 
 export async function importEquipmentBundle(
-  jsonText: string,
+  jsonText: string
 ): Promise<ImportEquipmentResult> {
   if (isAuthDisabled()) {
     return { ok: false, error: "クラウド未設定（AUTH_DISABLED）" };

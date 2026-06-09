@@ -51,7 +51,7 @@ function MenuItem({
         "w-full px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
         destructive
           ? "text-red-700 hover:bg-red-50"
-          : "text-slate-800 hover:bg-slate-100",
+          : "text-slate-800 hover:bg-slate-100"
       )}
     >
       {children}
@@ -59,13 +59,25 @@ function MenuItem({
   );
 }
 
-function MenuSection({ label, isFirst = false }: { label: string; isFirst?: boolean }) {
+function MenuSection({
+  label,
+  isFirst = false,
+}: {
+  label: string;
+  isFirst?: boolean;
+}) {
   return (
     <>
       {!isFirst ? (
-        <div className="my-1 border-t border-slate-200" role="separator" aria-hidden />
+        <div
+          className="my-1 border-t border-slate-200"
+          role="separator"
+          aria-hidden
+        />
       ) : null}
-      <p className="px-3 pb-0.5 pt-1.5 text-xs font-semibold text-slate-600">{label}</p>
+      <p className="px-3 pb-0.5 pt-1.5 text-xs font-semibold text-slate-600">
+        {label}
+      </p>
     </>
   );
 }
@@ -115,7 +127,10 @@ export function EditorMoreMenu({
       >
         その他
         <ChevronDown
-          className={cn("size-4 text-slate-500 transition-transform", open && "rotate-180")}
+          className={cn(
+            "size-4 text-slate-500 transition-transform",
+            open && "rotate-180"
+          )}
           aria-hidden
         />
       </button>
@@ -151,16 +166,10 @@ export function EditorMoreMenu({
           ) : null}
 
           <MenuSection label="出力" isFirst={readOnly} />
-          <MenuItem
-            disabled={!canExport}
-            onClick={() => closeAnd(onExportPng)}
-          >
+          <MenuItem disabled={!canExport} onClick={() => closeAnd(onExportPng)}>
             PNG
           </MenuItem>
-          <MenuItem
-            disabled={!canExport}
-            onClick={() => closeAnd(onExportSvg)}
-          >
+          <MenuItem disabled={!canExport} onClick={() => closeAnd(onExportSvg)}>
             SVG
           </MenuItem>
 
@@ -168,7 +177,9 @@ export function EditorMoreMenu({
             <>
               <MenuSection label="オフライン" />
               <MenuItem onClick={() => closeAnd(pinOffline.onToggle)}>
-                {pinOffline.pinned ? "オフライン保存を解除" : "オフライン用に保存"}
+                {pinOffline.pinned
+                  ? "オフライン保存を解除"
+                  : "オフライン用に保存"}
               </MenuItem>
             </>
           ) : null}

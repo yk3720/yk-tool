@@ -9,14 +9,14 @@ export type SnapshotFromDocumentResult =
   | { ok: false; errors: string[] };
 
 export function snapshotFromFlowchartDocument(
-  doc: FlowchartDocument,
+  doc: FlowchartDocument
 ): SnapshotFromDocumentResult {
   const normalized = normalizeFlowchartDocument(doc);
   const generated = generateFlowchart(normalized.table, normalized.layout);
   if (!generated.ok) {
     return {
       ok: false,
-      errors: generated.errors.map((e) => e.message),
+      errors: generated.errors,
     };
   }
 

@@ -44,7 +44,7 @@ def _cell_str(value: object) -> str:
 
 def parse_kosei_sheet(workbook: Workbook) -> KoseiSheet:
     if KOSEI_SHEET not in workbook.sheetnames:
-        raise ValueError(f'シート「{KOSEI_SHEET}」がありません')
+        raise ValueError(f"シート「{KOSEI_SHEET}」がありません")
 
     ws = workbook[KOSEI_SHEET]
     matrix: list[list[str]] = []
@@ -52,12 +52,12 @@ def parse_kosei_sheet(workbook: Workbook) -> KoseiSheet:
         matrix.append([_cell_str(v) for v in row])
 
     if not matrix:
-        raise ValueError(f'シート「{KOSEI_SHEET}」が空です')
+        raise ValueError(f"シート「{KOSEI_SHEET}」が空です")
 
     header = tuple(matrix[0][:4])
     if header != KOSEI_HEADERS:
         raise ValueError(
-            f'シート「{KOSEI_SHEET}」1行目は {KOSEI_HEADERS} である必要があります（実際: {header}）'
+            f"シート「{KOSEI_SHEET}」1行目は {KOSEI_HEADERS} である必要があります（実際: {header}）"
         )
 
     rows: list[KoseiRow] = []
@@ -71,7 +71,7 @@ def parse_kosei_sheet(workbook: Workbook) -> KoseiSheet:
         internal_code, display_name, unit_label, module_label = cells
         if not all([internal_code, display_name, unit_label, module_label]):
             raise ValueError(
-                f'シート「{KOSEI_SHEET}」{idx + 2}行目: 4列すべて入力してください'
+                f"シート「{KOSEI_SHEET}」{idx + 2}行目: 4列すべて入力してください"
             )
         codes.add(internal_code)
         display_names.add(display_name)
@@ -86,15 +86,15 @@ def parse_kosei_sheet(workbook: Workbook) -> KoseiSheet:
         )
 
     if not rows:
-        raise ValueError(f'シート「{KOSEI_SHEET}」にデータ行がありません')
+        raise ValueError(f"シート「{KOSEI_SHEET}」にデータ行がありません")
 
     if len(codes) != 1:
         raise ValueError(
-            f'装置製番（社内番号）がファイル内で一意ではありません: {sorted(codes)}'
+            f"装置製番（社内番号）がファイル内で一意ではありません: {sorted(codes)}"
         )
     if len(display_names) != 1:
         raise ValueError(
-            f'装置名がファイル内で一意ではありません: {sorted(display_names)}'
+            f"装置名がファイル内で一意ではありません: {sorted(display_names)}"
         )
 
     return KoseiSheet(

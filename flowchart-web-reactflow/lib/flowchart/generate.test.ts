@@ -59,10 +59,10 @@ describe("generateFlowchart (golden: sample-basic)", () => {
     expect(n50!.x).toBeGreaterThan(n30!.x);
 
     const yesEdge = result.edges.find(
-      (e) => e.sourceId === "30" && e.direction === "down",
+      (e) => e.sourceId === "30" && e.direction === "down"
     );
     const noEdge = result.edges.find(
-      (e) => e.sourceId === "30" && e.direction === "right",
+      (e) => e.sourceId === "30" && e.direction === "right"
     );
     expect(yesEdge?.label).toBe("Yes");
     expect(noEdge?.label).toBe("No");
@@ -88,7 +88,7 @@ describe("generateFlowchart (golden: sample-basic)", () => {
   it("stops on missing connection target", () => {
     const doc = loadFixture("sample-basic.json");
     const bad = doc.table.map((row) =>
-      row[0] === 20 ? [20, "処理", "99", "", 0, "処理A", "", ""] : row,
+      row[0] === 20 ? [20, "処理", "99", "", 0, "処理A", "", ""] : row
     );
     const result = generateFlowchart(bad, doc.layout);
     expect(result.ok).toBe(false);
@@ -126,7 +126,7 @@ describe("generateFlowchart (ADR-012 tier-based layout)", () => {
       (e) =>
         e.direction === "down" &&
         e.targetId === "6" &&
-        ["3", "4", "5"].includes(e.sourceId),
+        ["3", "4", "5"].includes(e.sourceId)
     );
     // Regression guard for ADR-012 / M002 fixture.
     expect(into6).toHaveLength(3);
@@ -142,16 +142,20 @@ describe("generateFlowchart (curry sample loops)", () => {
     if (!result.ok) return;
 
     const onionSide = result.edges.find(
-      (e) => e.sourceId === "50" && e.targetId === "55" && e.direction === "right",
+      (e) =>
+        e.sourceId === "50" && e.targetId === "55" && e.direction === "right"
     );
     const onionLoop = result.edges.find(
-      (e) => e.sourceId === "55" && e.targetId === "40" && e.direction === "down",
+      (e) =>
+        e.sourceId === "55" && e.targetId === "40" && e.direction === "down"
     );
     const boilSide = result.edges.find(
-      (e) => e.sourceId === "80" && e.targetId === "85" && e.direction === "right",
+      (e) =>
+        e.sourceId === "80" && e.targetId === "85" && e.direction === "right"
     );
     const boilLoop = result.edges.find(
-      (e) => e.sourceId === "85" && e.targetId === "70" && e.direction === "down",
+      (e) =>
+        e.sourceId === "85" && e.targetId === "70" && e.direction === "down"
     );
     expect(onionSide?.label).toBe("No");
     expect(onionLoop?.label).toBeUndefined();
@@ -178,7 +182,8 @@ describe("generateFlowchart (curry sample loops)", () => {
     if (!result.ok) return;
 
     const edge = result.edges.find(
-      (e) => e.sourceId === "55" && e.targetId === "70" && e.direction === "down",
+      (e) =>
+        e.sourceId === "55" && e.targetId === "70" && e.direction === "down"
     );
     expect(edge?.sourceSide).toBe("bottom");
     expect(edge?.targetSide).toBe("top");

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseExcelBuffer, pickFlowchartSheetName } from "./parseExcel";
 
 function buildWorkbookBuffer(
-  sheets: Record<string, (string | number)[][]>,
+  sheets: Record<string, (string | number)[][]>
 ): ArrayBuffer {
   const wb = XLSX.utils.book_new();
   for (const [name, data] of Object.entries(sheets)) {
@@ -17,7 +17,16 @@ describe("parseExcelBuffer", () => {
     const buffer = buildWorkbookBuffer({
       図形: [["ignored"]],
       表: [
-        ["ID", "図形種別", "接続先(下)", "接続先(右)", "Level", "Text1", "Text2", "Text3"],
+        [
+          "ID",
+          "図形種別",
+          "接続先(下)",
+          "接続先(右)",
+          "Level",
+          "Text1",
+          "Text2",
+          "Text3",
+        ],
         [10, "端子", 20, "", 0, "開始", "", ""],
         [20, "処理", 30, "", 0, "処理A", "", ""],
       ],
@@ -39,7 +48,7 @@ describe("parseExcelBuffer", () => {
       ],
     });
     expect(pickFlowchartSheetName(XLSX.read(buffer, { type: "array" }))).toBe(
-      "Sheet2",
+      "Sheet2"
     );
   });
 });

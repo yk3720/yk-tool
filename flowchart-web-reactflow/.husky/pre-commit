@@ -3,6 +3,7 @@ set -e
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 APP_DIR="$REPO_ROOT/flowchart-web-reactflow"
+CONFIG="$APP_DIR/.pre-commit-config.yaml"
 
 cd "$APP_DIR" || exit 1
 npx lint-staged
@@ -10,9 +11,15 @@ npx lint-staged
 STAGED=$(git -C "$REPO_ROOT" diff --cached --name-only --diff-filter=ACM | grep -E '^flowchart-web-reactflow/' || true)
 if [ -n "$STAGED" ]; then
   if command -v pre-commit >/dev/null 2>&1; then
-    pre-commit run --hook-stage pre-commit --files $STAGED
+  (
+    cd "$REPO_ROOT" || exit 1
+    pre-commit run --hook-stage pre-commit --config "$CONFIG" --files $STAGED
+  )
   elif python -m pre_commit --version >/dev/null 2>&1; then
-    python -m pre_commit run --hook-stage pre-commit --files $STAGED
+  (
+    cd "$REPO_ROOT" || exit 1
+    python -m pre_commit run --hook-stage pre-commit --config "$CONFIG" --files $STAGED
+  )
   else
     echo "pre-commit not found. Install: pip install -e flowchart-web-reactflow/tools/excel_normalize[dev]" >&2
     exit 1

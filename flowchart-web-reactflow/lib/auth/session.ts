@@ -39,7 +39,7 @@ export async function getAuthState(): Promise<AuthState> {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("email, role, user_id")
-    .eq("email", email)
+    .ilike("email", email)
     .maybeSingle();
 
   if (profileError || !profile || !isProfileRole(profile.role)) {

@@ -42,7 +42,7 @@ export function buildEdges(
         const tNode = nodeById.get(did);
         if (!target || !tNode) continue;
 
-        const isLoop = tNode.rowIndex < n.rowIndex;
+        const isLoop = nodeTier(tNode) < nodeTier(n);
         const levelDiff = tNode.level - n.level;
         const tierDiff = nodeTier(tNode) - nodeTier(n);
         const isMerge =

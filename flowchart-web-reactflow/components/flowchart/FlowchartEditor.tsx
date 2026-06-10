@@ -440,11 +440,17 @@ export const FlowchartEditor = forwardRef<
   const previewModeHint =
     showEditorPanes && readOnly
       ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
-      : showEditorPanes && moduleSelected
-        ? "閲覧専用（表を編集 → 再生成）"
-        : showEditorPanes
-          ? "サンプル表示（左でモジュールを選ぶと保存できます）"
-          : null;
+      : showEditorPanes && !moduleSelected
+        ? "サンプル表示（左でモジュールを選ぶと保存できます）"
+        : null;
+
+  const exportDisabledTitle = !canExport
+    ? isStale
+      ? "先に「再生成」してください"
+      : nodes.length === 0
+        ? "先に再生成してプレビューを表示してください"
+        : undefined
+    : undefined;
 
   const toolbarButtons = (
     <>
@@ -485,6 +491,7 @@ export const FlowchartEditor = forwardRef<
         readOnly={readOnly}
         workspaceMode={workspaceMode}
         canExport={canExport}
+        exportDisabledTitle={exportDisabledTitle}
         clearDraftDisabled={workspaceMode}
         clearDraftTitle={
           workspaceMode
@@ -626,7 +633,12 @@ export const FlowchartEditor = forwardRef<
     </div>
   ) : (
     <>
-      {!readOnly ? <CsvPastePanel onApply={handleCsvApply} /> : null}
+      {!readOnly ? (
+        <CsvPastePanel
+          onApply={handleCsvApply}
+          onRegenerate={handleRegenerate}
+        />
+      ) : null}
       <FlowTableEditor
         ref={tableEditorRef}
         table={doc.table}

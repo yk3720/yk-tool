@@ -45,20 +45,6 @@ export async function importEquipmentBundle(
     return { ok: false, error: parsed.error };
   }
 
-  if (isImportE2eStubEnabled()) {
-    const flowCount = parsed.bundle.flows.length;
-    const moduleCount = parsed.bundle.units.reduce(
-      (sum, unit) => sum + unit.modules.length,
-      0
-    );
-    return {
-      ok: true,
-      internal_code: parsed.bundle.internal_code,
-      modules_upserted: moduleCount,
-      flows_upserted: flowCount,
-    };
-  }
-
   if (isAuthDisabled()) {
     return { ok: false, error: "クラウド未設定（AUTH_DISABLED）" };
   }
@@ -70,6 +56,21 @@ export async function importEquipmentBundle(
 
   try {
     await requireEditor();
+
+    if (isImportE2eStubEnabled()) {
+      const flowCount = parsed.bundle.flows.length;
+      const moduleCount = parsed.bundle.units.reduce(
+        (sum, unit) => sum + unit.modules.length,
+        0
+      );
+      return {
+        ok: true,
+        internal_code: parsed.bundle.internal_code,
+        modules_upserted: moduleCount,
+        flows_upserted: flowCount,
+      };
+    }
+
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase.rpc("import_equipment_bundle", {
       p_bundle: prepared.bundle,
@@ -81,10 +82,20 @@ export async function importEquipmentBundle(
 
     const row = data as {
       ok?: boolean;
+      error?: string;
       internal_code?: string;
       modules_upserted?: number;
       flows_upserted?: number;
     };
+
+    if (row.ok === false) {
+      return {
+        ok: false,
+        error: mapRpcError(
+          row.error ?? "import_equipment_bundle が失敗しました"
+        ),
+      };
+    }
 
     revalidatePath("/");
 

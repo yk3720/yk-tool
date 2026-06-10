@@ -93,10 +93,10 @@ export function layoutGrid(
   const bounds: Bounds =
     lefts.length > 0
       ? {
-          left: Math.min(...lefts),
-          top: Math.min(...tops),
-          right: Math.max(...rights),
-          bottom: Math.max(...bottoms),
+          left: lefts.reduce((a, b) => Math.min(a, b), Infinity),
+          top: tops.reduce((a, b) => Math.min(a, b), Infinity),
+          right: rights.reduce((a, b) => Math.max(a, b), -Infinity),
+          bottom: bottoms.reduce((a, b) => Math.max(a, b), -Infinity),
         }
       : { left: 0, top: 0, right: 0, bottom: 0 };
 

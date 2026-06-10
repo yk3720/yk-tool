@@ -48,6 +48,8 @@ export function FlowchartWorkspace({
 }: Props) {
   const router = useRouter();
   const editorRef = useRef<FlowchartEditorHandle>(null);
+  /** モジュール読込の世代 — 古い loadModule 完了を無視する */
+  const loadGenerationRef = useRef(0);
   const [selectedDeviceId, setSelectedDeviceId] = useState(
     devices[0]?.id ?? ""
   );
@@ -65,6 +67,7 @@ export function FlowchartWorkspace({
   const [loadKey, setLoadKey] = useState(0);
   const [pinned, setPinned] = useState(false);
   const [importBanner, setImportBanner] = useState("");
+  const [cloudSaveBanner, setCloudSaveBanner] = useState("");
   const [selectDeviceAfterImport, setSelectDeviceAfterImport] = useState<
     string | null
   >(null);
@@ -82,6 +85,10 @@ export function FlowchartWorkspace({
     const snapshot = editorRef.current.getSnapshot();
     void persistModuleDraft(moduleInfo.module, device, snapshot, {
       saveToCloud: isEditor,
+    }).then((result) => {
+      if (result.cloudError) {
+        setCloudSaveBanner(`クラウド保存に失敗: ${result.cloudError}`);
+      }
     });
   }, [moduleInfo, device, isEditor]);
 
@@ -99,9 +106,12 @@ export function FlowchartWorkspace({
       const found = findModule(targetDevice, moduleId);
       if (!found) return;
 
+      const generation = ++loadGenerationRef.current;
       setLoadingModule(true);
       try {
         const result = await loadModuleDraft(found.module, targetDevice);
+        if (generation !== loadGenerationRef.current) return;
+
         setInitialSnapshot(result.snapshot);
         setLoadSource(result.source);
         setOfflineCachedAt(result.offlineCachedAt ?? null);
@@ -110,15 +120,27 @@ export function FlowchartWorkspace({
         setPinned(cache?.pinned ?? false);
         setLoadKey((k) => k + 1);
       } finally {
-        setLoadingModule(false);
+        if (generation === loadGenerationRef.current) {
+          setLoadingModule(false);
+        }
       }
     },
     []
   );
 
+  const resetModuleLoadState = useCallback(() => {
+    loadGenerationRef.current += 1;
+    setInitialSnapshot(null);
+    setLoadSource("");
+    setOfflineCachedAt(null);
+    setPinned(false);
+    setLoadKey((k) => k + 1);
+  }, []);
+
   const handleSelectModule = useCallback(
     (moduleId: string) => {
       persistCurrentModule();
+      resetModuleLoadState();
       setSelectedModuleId(moduleId);
       const found = device ? findModule(device, moduleId) : null;
       if (found) {
@@ -128,13 +150,14 @@ export function FlowchartWorkspace({
         void loadModule(device, moduleId);
       }
     },
-    [persistCurrentModule, loadModule, device]
+    [persistCurrentModule, resetModuleLoadState, loadModule, device]
   );
 
   const handleSelectDevice = useCallback(
     (deviceId: string) => {
       if (deviceId === selectedDeviceId) return;
       persistCurrentModule();
+      loadGenerationRef.current += 1;
       setSelectedDeviceId(deviceId);
       setSelectedModuleId(null);
       setInitialSnapshot(null);
@@ -199,7 +222,7 @@ export function FlowchartWorkspace({
     ? `${moduleInfo.unit.label} · ${moduleInfo.module.label}`
     : undefined;
 
-  let statusBanner = importBanner;
+  let statusBanner = importBanner || cloudSaveBanner;
   if (!statusBanner && loadingModule) {
     statusBanner = "モジュールを読み込み中…";
   } else if (!statusBanner && isOffline) {

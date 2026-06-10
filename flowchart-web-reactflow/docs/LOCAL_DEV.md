@@ -38,13 +38,15 @@ http://localhost:3000/login
 
 ## 3. 起動コマンド
 
-| コマンド                                        | 用途                                                               |
-| ----------------------------------------------- | ------------------------------------------------------------------ |
-| `npm run dev`                                   | 日常開発（Turbopack · 初回は重め）                                 |
-| `npm run build` → `npm run start`               | 本番同等 · **PC が重いとき / 久しぶりの確認**                      |
-| `npm run build` → `npm run test:e2e`            | Playwright 全件（`:3001` · `AUTH_DISABLED=1` · 品質ゲート）        |
-| `npm run test:e2e:labels`                       | Yes ラベルと縦線の重なりだけ（`e2e/edge-label-placement.spec.ts`） |
-| `npx playwright test e2e/import-bundle.spec.ts` | import.json 取込 UI（`IMPORT_E2E_STUB=1` · DB 不要）               |
+| コマンド                             | 用途                                                        |
+| ------------------------------------ | ----------------------------------------------------------- |
+| `npm run dev`                        | 日常開発（Turbopack · 初回は重め）                          |
+| `npm run build` → `npm run start`    | 本番同等 · **PC が重いとき / 久しぶりの確認**               |
+| `npm run build` → `npm run test:e2e` | Playwright 全件（`:3001` · `AUTH_DISABLED=1` · 品質ゲート） |
+
+**Supabase なしの日常 dev:** `.env.local` に `AUTH_DISABLED=1` を設定（URL 未設定だけでは認証バイパスになりません）。
+| `npm run test:e2e:labels` | Yes ラベルと縦線の重なりだけ（`e2e/edge-label-placement.spec.ts`） |
+| `npx playwright test e2e/import-bundle.spec.ts` | import.json 取込 UI（`IMPORT_E2E_STUB=1` · DB 不要） |
 
 **import.json E2E:** Playwright 起動時のみ `IMPORT_E2E_STUB=1` で Server Action が RPC をスキップします。本番・通常 dev には影響しません。dev Supabase への実取込確認は手動（Runbook §4）。
 

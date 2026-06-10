@@ -1,6 +1,9 @@
 import * as XLSX from "xlsx";
 import { parseTableRows } from "./parseCsv";
 
+/** zip bomb 対策 — 展開前のファイルサイズ上限 */
+export const MAX_EXCEL_BYTES = 5 * 1024 * 1024;
+
 const PREFERRED_SHEET_NAMES = [
   "表",
   "データ",
@@ -74,6 +77,15 @@ export type ParseExcelResult = {
  * .xlsx / .xls の ArrayBuffer → 表行配列
  */
 export function parseExcelBuffer(buffer: ArrayBuffer): ParseExcelResult {
+  if (buffer.byteLength > MAX_EXCEL_BYTES) {
+    const mb = (MAX_EXCEL_BYTES / (1024 * 1024)).toFixed(0);
+    return {
+      table: [],
+      errors: [`Excel ファイルが大きすぎます（上限 ${mb} MB）`],
+      sheetName: "",
+    };
+  }
+
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheetName = pickFlowchartSheetName(workbook);
   if (!sheetName) {

@@ -1,6 +1,6 @@
+/** 認証バイパスは AUTH_DISABLED=1 の明示時のみ（URL 未設定では無効化しない） */
 export function isAuthDisabled(): boolean {
-  if (process.env.AUTH_DISABLED === "1") return true;
-  return !process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  return process.env.AUTH_DISABLED === "1";
 }
 
 export function getSupabaseEnv() {
@@ -12,4 +12,11 @@ export function getSupabaseEnv() {
     );
   }
   return { url, anonKey };
+}
+
+/** 本番で Supabase 未設定かつ AUTH_DISABLED でない場合は起動を止める */
+export function assertProductionSupabaseEnv(): void {
+  if (process.env.NODE_ENV !== "production") return;
+  if (isAuthDisabled()) return;
+  getSupabaseEnv();
 }

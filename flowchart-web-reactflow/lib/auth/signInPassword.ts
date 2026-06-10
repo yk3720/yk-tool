@@ -24,7 +24,10 @@ export async function signInWithPasswordAction(
   });
 
   if (error) {
-    return { ok: false, error: error.message };
+    return {
+      ok: false,
+      error: "メールアドレスまたはパスワードが正しくありません。",
+    };
   }
 
   return { ok: true };

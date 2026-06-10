@@ -7,22 +7,24 @@ import type { FlowTableRow } from "@/lib/flowchart/types";
 
 type Props = {
   onApply: (table: FlowTableRow[]) => void;
+  onRegenerate?: () => void;
 };
 
-export function CsvPastePanel({ onApply }: Props) {
+export function CsvPastePanel({ onApply, onRegenerate }: Props) {
   const [text, setText] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [showRegenerateCallout, setShowRegenerateCallout] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const applyTable = (table: FlowTableRow[], detail: string) => {
     if (table.length === 0) {
       setMessage("表にできる行がありません");
+      setShowRegenerateCallout(false);
       return;
     }
     onApply(table);
-    setMessage(
-      `${detail} — ${table.length} 行を表に反映しました。続けて「再生成」してください`
-    );
+    setMessage(`${detail} — ${table.length} 行を表に反映しました`);
+    setShowRegenerateCallout(true);
     setText("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -31,6 +33,7 @@ export function CsvPastePanel({ onApply }: Props) {
     const { table, errors } = parseCsvPaste(text);
     if (errors.length > 0) {
       setMessage(errors.join(" / "));
+      setShowRegenerateCallout(false);
       return;
     }
     applyTable(table, "貼り付け");
@@ -41,6 +44,7 @@ export function CsvPastePanel({ onApply }: Props) {
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
     if (ext !== "xlsx" && ext !== "xls") {
       setMessage(".xlsx または .xls を選んでください");
+      setShowRegenerateCallout(false);
       return;
     }
     try {
@@ -48,11 +52,17 @@ export function CsvPastePanel({ onApply }: Props) {
       const { table, errors, sheetName } = parseExcelBuffer(buffer);
       if (errors.length > 0) {
         setMessage(errors.join(" / "));
+        setShowRegenerateCallout(false);
         return;
       }
       applyTable(table, `Excel（シート: ${sheetName}）`);
-    } catch {
-      setMessage("Excel ファイルの読み込みに失敗しました");
+    } catch (e) {
+      setMessage(
+        e instanceof Error
+          ? e.message
+          : "Excel ファイルの読み込みに失敗しました"
+      );
+      setShowRegenerateCallout(false);
     }
   };
 
@@ -66,6 +76,7 @@ export function CsvPastePanel({ onApply }: Props) {
         onChange={(e) => {
           setText(e.target.value);
           setMessage(null);
+          setShowRegenerateCallout(false);
         }}
         placeholder="Excel やスプレッドシートから表をコピーして貼り付け（タブ区切り）"
         rows={3}
@@ -90,16 +101,35 @@ export function CsvPastePanel({ onApply }: Props) {
             className="sr-only"
             onChange={(e) => {
               setMessage(null);
+              setShowRegenerateCallout(false);
               void handleExcelFile(e.target.files?.[0]);
             }}
           />
         </label>
-        {message && (
+        {message ? (
           <span className="text-xs text-slate-600" role="status">
             {message}
           </span>
-        )}
+        ) : null}
       </div>
+      {showRegenerateCallout && onRegenerate ? (
+        <div
+          className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-xs text-amber-900"
+          role="status"
+        >
+          <span>プレビューはまだ古いままです。</span>
+          <button
+            type="button"
+            onClick={() => {
+              onRegenerate();
+              setShowRegenerateCallout(false);
+            }}
+            className="rounded-md bg-amber-600 px-2.5 py-1 font-medium text-white hover:bg-amber-700"
+          >
+            再生成
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

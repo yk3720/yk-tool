@@ -92,12 +92,17 @@ export async function loadModuleDraft(
   return { snapshot: null, source: "none" };
 }
 
+export type PersistModuleDraftResult = {
+  cloudSaved: boolean;
+  cloudError?: string;
+};
+
 export async function persistModuleDraft(
   module: FlowModule,
   _device: Device,
   snapshot: ModuleSnapshot,
   options: { saveToCloud: boolean }
-): Promise<void> {
+): Promise<PersistModuleDraftResult> {
   const primaryKey = moduleStorageKey(module.id);
   moduleDraftRepository.set(primaryKey, snapshot);
   await putOfflineModuleCache(primaryKey, snapshot);
@@ -105,6 +110,12 @@ export async function persistModuleDraft(
   if (options.saveToCloud && !isAuthDisabled() && navigator.onLine) {
     const { saveFlowDocument } =
       await import("@/lib/flowchart/actions/flowDocuments");
-    await saveFlowDocument(module.id, snapshot);
+    const result = await saveFlowDocument(module.id, snapshot);
+    if (!result.ok) {
+      return { cloudSaved: false, cloudError: result.error };
+    }
+    return { cloudSaved: true };
   }
+
+  return { cloudSaved: false };
 }

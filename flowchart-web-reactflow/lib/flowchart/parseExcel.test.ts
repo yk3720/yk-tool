@@ -1,6 +1,10 @@
 import * as XLSX from "xlsx";
 import { describe, expect, it } from "vitest";
-import { parseExcelBuffer, pickFlowchartSheetName } from "./parseExcel";
+import {
+  MAX_EXCEL_BYTES,
+  parseExcelBuffer,
+  pickFlowchartSheetName,
+} from "./parseExcel";
 
 function buildWorkbookBuffer(
   sheets: Record<string, (string | number)[][]>
@@ -37,6 +41,13 @@ describe("parseExcelBuffer", () => {
     expect(table).toHaveLength(2);
     expect(table[0][0]).toBe(10);
     expect(table[0][1]).toBe("端子");
+  });
+
+  it("rejects files larger than MAX_EXCEL_BYTES", () => {
+    const oversized = new ArrayBuffer(MAX_EXCEL_BYTES + 1);
+    const { table, errors } = parseExcelBuffer(oversized);
+    expect(table).toHaveLength(0);
+    expect(errors[0]).toMatch(/大きすぎます/);
   });
 
   it("picks sheet with most data rows when name is generic", () => {

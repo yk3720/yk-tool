@@ -14,6 +14,7 @@ type EditorMoreMenuProps = {
   readOnly: boolean;
   workspaceMode: boolean;
   canExport: boolean;
+  exportDisabledTitle?: string;
   clearDraftDisabled: boolean;
   clearDraftTitle: string;
   pinOffline?: { pinned: boolean; onToggle: () => void };
@@ -34,11 +35,13 @@ function MenuItem({
   children,
   disabled,
   destructive,
+  title,
   onClick,
 }: {
   children: React.ReactNode;
   disabled?: boolean;
   destructive?: boolean;
+  title?: string;
   onClick: () => void;
 }) {
   return (
@@ -46,6 +49,7 @@ function MenuItem({
       type="button"
       role="menuitem"
       disabled={disabled}
+      title={disabled ? title : undefined}
       onClick={onClick}
       className={cn(
         "w-full px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
@@ -86,6 +90,7 @@ export function EditorMoreMenu({
   readOnly,
   workspaceMode,
   canExport,
+  exportDisabledTitle,
   clearDraftDisabled,
   clearDraftTitle,
   pinOffline,
@@ -166,10 +171,18 @@ export function EditorMoreMenu({
           ) : null}
 
           <MenuSection label="出力" isFirst={readOnly} />
-          <MenuItem disabled={!canExport} onClick={() => closeAnd(onExportPng)}>
+          <MenuItem
+            disabled={!canExport}
+            title={exportDisabledTitle}
+            onClick={() => closeAnd(onExportPng)}
+          >
             PNG
           </MenuItem>
-          <MenuItem disabled={!canExport} onClick={() => closeAnd(onExportSvg)}>
+          <MenuItem
+            disabled={!canExport}
+            title={exportDisabledTitle}
+            onClick={() => closeAnd(onExportSvg)}
+          >
             SVG
           </MenuItem>
 

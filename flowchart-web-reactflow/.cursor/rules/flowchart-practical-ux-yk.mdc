@@ -28,9 +28,11 @@ alwaysApply: false
 |----------|------|
 | `lib/flowchart/moduleHierarchy.ts` | 装置一覧 · `moduleDraftKey` · 旧キー |
 | `components/flowchart/ModuleNavPane.tsx` | 装置 select |
-| `components/flowchart/EditorMoreMenu.tsx` | その他メニュー · セクション IA · **装置取込** |
-| `lib/flowchart/actions/importEquipmentBundle.ts` | import.json → RPC `import_equipment_bundle` |
+| `components/flowchart/EditorMoreMenu.tsx` | その他メニュー · セクション IA · **装置取込** · 取込 file input は **`data-testid="import-bundle-file"`**（**メニュー open 時のみ DOM** · 表読込 input と別） |
+| `lib/flowchart/actions/importEquipmentBundle.ts` | import.json → RPC `import_equipment_bundle` · **E2E:** `PLAYWRIGHT_E2E=1` + `IMPORT_E2E_STUB=1` 時のみ RPC スキップ（`playwright.config` · 本番・通常 dev 無効） |
 | `tools/excel_normalize/` | 入力用 xlsx → import.json（**正規化 SSOT · pytest**） |
+| `tools/excel_normalize/templates/入力用テンプレ_v0.1.xlsx` | 作者向けテンプレ v0.1 · 再生成 `npm run excel:template` |
+| `e2e/import-bundle.spec.ts` | import.json 取込 UI（DB 不要 · 実 Supabase 取込は Runbook §4 手動） |
 | `lib/flowchart/validationMeta.ts` | 警告文言 · `WARNING_BANNER_HINT` |
 | `components/flowchart/nodes/FlowShapeNode.tsx` | 縦並びラベル · 斜め図形 SVG · ID バッジ |
 | `components/flowchart/exportImageFilter.ts` | PNG/SVG からプレビュー専用 DOM を除外 |

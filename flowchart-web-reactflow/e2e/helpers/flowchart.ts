@@ -13,6 +13,22 @@ export async function openMoreMenu(page: Page) {
   await page.getByRole("button", { name: "その他" }).click();
 }
 
+export function importJsonFileInput(page: Page) {
+  return page.getByTestId("import-bundle-file");
+}
+
+export async function importBundleJsonFile(
+  page: Page,
+  file: { name: string; buffer: Buffer }
+) {
+  await openMoreMenu(page);
+  await importJsonFileInput(page).setInputFiles({
+    name: file.name,
+    mimeType: "application/json",
+    buffer: file.buffer,
+  });
+}
+
 export async function loadSampleFromMenu(page: Page, label: string) {
   await openMoreMenu(page);
   await page.getByRole("menuitem", { name: label }).click();

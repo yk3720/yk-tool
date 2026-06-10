@@ -17,13 +17,27 @@ cd c:\yk-tool\flowchart-web-reactflow\tools\excel_normalize
 python -m pip install -e ".[dev]"
 ```
 
-## テンプレ fixture 生成
+## 作者向けテンプレ v0.1
+
+**配置:** [`templates/入力用テンプレ_v0.1.xlsx`](templates/入力用テンプレ_v0.1.xlsx)
+
+- 構成シート（4 列）+ 供給·収納ユニット · 各 2 動作（横並び Excel テーブル）
+- テーブル名: `{ユニット短名}_{動作名}`（例: `供給_取出`）
+- `_使い方` シートに記入ルール（正規化対象外）
+
+コピーして装置ごとに編集し、正規化 CLI で `import.json` を生成します。
+
+```powershell
+python scripts/build_template.py
+```
+
+## テスト用 fixture 生成
 
 ```powershell
 python scripts/build_fixture.py
 ```
 
-`fixtures/input-device-z00001.xlsx` が出力されます（供給·収納 · 各2動作 · 横並び）。
+`fixtures/input-device-z00001.xlsx` が出力されます（テンプレと同構成 · `_使い方` なし）。
 
 ## 正規化
 
@@ -35,12 +49,14 @@ python -m excel_normalize.cli fixtures/input-device-z00001.xlsx -o fixtures/impo
 
 ```powershell
 python -m pytest
+python -m mypy excel_normalize
 ```
 
 ## npm（リポジトリルートから）
 
 ```powershell
 cd c:\yk-tool\flowchart-web-reactflow
+npm run excel:template
 npm run excel:fixture
 npm run excel:normalize
 npm run excel:test

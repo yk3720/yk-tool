@@ -203,6 +203,7 @@ export function EditorMoreMenu({
                 type="file"
                 accept="application/json,.json"
                 className="hidden"
+                data-testid="import-bundle-file"
                 aria-hidden
                 tabIndex={-1}
                 onChange={(e) => {

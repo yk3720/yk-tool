@@ -11,7 +11,9 @@ from excel_normalize.normalize import normalize_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
+TEMPLATES = ROOT / "templates"
 INPUT_XLSX = FIXTURES / "input-device-z00001.xlsx"
+TEMPLATE_XLSX = TEMPLATES / "入力用テンプレ_v0.1.xlsx"
 
 
 @pytest.fixture(scope="session")
@@ -19,6 +21,13 @@ def input_xlsx() -> Path:
     if not INPUT_XLSX.is_file():
         pytest.skip("fixture 未生成 — scripts/build_fixture.py を実行してください")
     return INPUT_XLSX
+
+
+@pytest.fixture(scope="session")
+def template_xlsx() -> Path:
+    if not TEMPLATE_XLSX.is_file():
+        pytest.skip("テンプレ未生成 — scripts/build_template.py を実行してください")
+    return TEMPLATE_XLSX
 
 
 def test_normalize_produces_bundle(input_xlsx: Path) -> None:
@@ -34,6 +43,15 @@ def test_normalize_produces_bundle(input_xlsx: Path) -> None:
         assert flow["payload"]["schema"] == "table-10col-v1"
         assert len(flow["payload"]["table"]) >= 1
         assert len(flow["payload"]["table"][0]) == 10
+
+
+def test_template_normalizes(template_xlsx: Path) -> None:
+    result = normalize_workbook(template_xlsx)
+    bundle = result.bundle
+
+    assert bundle["internal_code"] == "Z00001"
+    assert len(bundle["units"]) == 2
+    assert len(bundle["flows"]) == 4
 
 
 def test_normalize_writes_json_snapshot(input_xlsx: Path, tmp_path: Path) -> None:

@@ -48,13 +48,22 @@ jobs:
           python-version: "3.12"
 
       - name: Install Python dev tools
-        run: pip install ruff pre-commit pytest openpyxl
+        run: pip install ruff pre-commit pytest openpyxl mypy
 
       - name: Ruff (excel_normalize)
         run: npm run excel:lint
 
+      - name: mypy (excel_normalize)
+        run: npm run excel:mypy
+
       - name: pre-commit (security + Python hooks)
-        run: pre-commit run --all-files --hook-stage pre-commit
+        working-directory: .
+        run: pre-commit run --all-files --hook-stage pre-commit --config flowchart-web-reactflow/.pre-commit-config.yaml
 
       - name: pytest (excel_normalize)
         run: npm run excel:test
+
+      - name: Next.js build
+        run: npm run build
+        env:
+          AUTH_DISABLED: "1"

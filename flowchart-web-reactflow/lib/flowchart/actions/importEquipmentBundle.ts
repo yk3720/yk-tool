@@ -31,16 +31,36 @@ function mapRpcError(message: string): string {
   return message;
 }
 
+function isImportE2eStubEnabled(): boolean {
+  return (
+    process.env.PLAYWRIGHT_E2E === "1" && process.env.IMPORT_E2E_STUB === "1"
+  );
+}
+
 export async function importEquipmentBundle(
   jsonText: string
 ): Promise<ImportEquipmentResult> {
-  if (isAuthDisabled()) {
-    return { ok: false, error: "クラウド未設定（AUTH_DISABLED）" };
-  }
-
   const parsed = parseImportBundleJson(jsonText);
   if (!parsed.ok) {
     return { ok: false, error: parsed.error };
+  }
+
+  if (isImportE2eStubEnabled()) {
+    const flowCount = parsed.bundle.flows.length;
+    const moduleCount = parsed.bundle.units.reduce(
+      (sum, unit) => sum + unit.modules.length,
+      0
+    );
+    return {
+      ok: true,
+      internal_code: parsed.bundle.internal_code,
+      modules_upserted: moduleCount,
+      flows_upserted: flowCount,
+    };
+  }
+
+  if (isAuthDisabled()) {
+    return { ok: false, error: "クラウド未設定（AUTH_DISABLED）" };
   }
 
   const prepared = prepareImportBundleForRpc(parsed.bundle);

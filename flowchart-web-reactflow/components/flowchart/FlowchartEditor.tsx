@@ -34,8 +34,10 @@ import {
   validateTableWarnings,
   WARNING_BANNER_HINT,
 } from "@/lib/flowchart/validationMeta";
+import { isModuleContentDirty } from "@/lib/flowchart/moduleContentDirty";
 import { captureFlowPng } from "./exportPng";
 import { captureFlowSvg } from "./exportSvg";
+import { ConfirmReplaceDialog } from "./ConfirmReplaceDialog";
 import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
 import { FlowColorLegend } from "./FlowColorLegend";
@@ -54,19 +56,42 @@ const SAMPLES: Record<string, FlowchartDocument> = {
 };
 
 const STARTER_OPTIONS = [
-  { key: "templateStarter", label: "雛形: はじめから" },
-  { key: "templateLinear", label: "雛形: 直線フロー" },
+  { key: "templateStarter", label: "雛形を適用: はじめから" },
+  { key: "templateLinear", label: "雛形を適用: 直線フロー" },
 ] as const;
 
 const DEMO_SAMPLE_OPTIONS = [
-  { key: "curry", label: "サンプル: カレーの作り方" },
-  { key: "morning", label: "サンプル: 朝の出勤準備" },
-  { key: "atm", label: "サンプル: ATMで現金を下ろす" },
+  { key: "curry", label: "例を見る: カレーの作り方" },
+  { key: "morning", label: "例を見る: 朝の出勤準備" },
+  { key: "atm", label: "例を見る: ATMで現金を下ろす" },
 ] as const;
 
-type SampleKey =
-  | (typeof STARTER_OPTIONS)[number]["key"]
-  | (typeof DEMO_SAMPLE_OPTIONS)[number]["key"];
+type StarterKey = (typeof STARTER_OPTIONS)[number]["key"];
+type DemoSampleKey = (typeof DEMO_SAMPLE_OPTIONS)[number]["key"];
+type SampleKey = StarterKey | DemoSampleKey;
+
+type EditorRestorePoint = {
+  jsonText: string;
+  committedJson: string;
+  nodes: Node<FlowNodeData>[];
+  edges: Edge[];
+  doc: FlowchartDocument;
+  userTouched: boolean;
+  hasInitialSnapshot: boolean;
+};
+
+type PendingConfirm =
+  | { kind: "starter"; key: StarterKey; label: string }
+  | { kind: "apply-preview"; label: string }
+  | { kind: "import"; text: string };
+
+function isStarterKey(key: string): key is StarterKey {
+  return STARTER_OPTIONS.some((o) => o.key === key);
+}
+
+function isDemoSampleKey(key: string): key is DemoSampleKey {
+  return DEMO_SAMPLE_OPTIONS.some((o) => o.key === key);
+}
 
 type PaneView = "table" | "canvas";
 
@@ -90,6 +115,8 @@ export type FlowchartEditorProps = {
   /** 閲覧者: 表編集・取込・再生成を不可（ADR-013） */
   readOnly?: boolean;
   onSnapshotPersist?: () => void;
+  /** モジュール選択中にユーザーが内容を上書きしたとき — 遅延 loadModule を無効化 */
+  onInvalidatePendingModuleLoad?: () => void;
   pinOffline?: { pinned: boolean; onToggle: () => void };
   importBundle?: {
     disabled: boolean;
@@ -159,9 +186,27 @@ export const FlowchartEditor = forwardRef<
     workspaceMode = false,
     readOnly = false,
     onSnapshotPersist,
+    onInvalidatePendingModuleLoad,
     pinOffline,
     importBundle,
   } = props;
+
+  const skipSnapshotHydrationRef = useRef(false);
+  const userTouchedRef = useRef(false);
+  const prePreviewRestoreRef = useRef<EditorRestorePoint | null>(null);
+
+  const [moduleSamplePreviewActive, setModuleSamplePreviewActive] =
+    useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm | null>(
+    null
+  );
+
+  const notifyUserContentOverride = useCallback(() => {
+    if (workspaceMode && moduleId) {
+      skipSnapshotHydrationRef.current = true;
+      onInvalidatePendingModuleLoad?.();
+    }
+  }, [workspaceMode, moduleId, onInvalidatePendingModuleLoad]);
 
   const initial = useMemo(
     () => resolveInitialState(props),
@@ -192,7 +237,9 @@ export const FlowchartEditor = forwardRef<
   const isStale = jsonText !== committedJson;
   const moduleSelected = !workspaceMode || moduleId !== null;
   const showEditorPanes =
-    moduleSelected || (workspaceMode && samplePreviewActive);
+    moduleSelected ||
+    (workspaceMode && samplePreviewActive) ||
+    (workspaceMode && moduleSamplePreviewActive);
   const hasPreview = nodes.length > 0;
   const showColorLegend = resolveColumnCount(doc.table, doc.schema) >= 10;
 
@@ -224,8 +271,35 @@ export const FlowchartEditor = forwardRef<
     setWarnings(validateTableWarnings(table));
   }, []);
 
+  const getDirtyInput = useCallback(
+    () => ({
+      userTouched: userTouchedRef.current,
+      committedJson,
+      hasInitialSnapshot: Boolean(initialSnapshot),
+    }),
+    [committedJson, initialSnapshot]
+  );
+
+  const clearModuleSamplePreview = useCallback(() => {
+    setModuleSamplePreviewActive(false);
+    prePreviewRestoreRef.current = null;
+  }, []);
+
+  const stashForPreviewRestore = useCallback(() => {
+    prePreviewRestoreRef.current = {
+      jsonText,
+      committedJson,
+      nodes,
+      edges,
+      doc,
+      userTouched: userTouchedRef.current,
+      hasInitialSnapshot: Boolean(initialSnapshot),
+    };
+  }, [jsonText, committedJson, nodes, edges, doc, initialSnapshot]);
+
   const runGenerate = useCallback(
-    (text: string) => {
+    (text: string, options?: { persist?: boolean }) => {
+      const shouldPersist = options?.persist ?? true;
       const { doc: parsed, errors: docErrors } = parseFlowchartDocument(text);
       if (docErrors.length > 0) {
         setParseErrors(docErrors);
@@ -253,21 +327,32 @@ export const FlowchartEditor = forwardRef<
       setNodes(rf.nodes);
       setEdges(rf.edges);
       setCommittedJson(text);
+      const baseStatus = `生成完了 — ノード ${result.placed.length} / エッジ ${result.edges.length}`;
       setStatus(
-        `生成完了 — ノード ${result.placed.length} / エッジ ${result.edges.length}`
+        shouldPersist ? baseStatus : `${baseStatus} — プレビュー（未保存）`
       );
-      onSnapshotPersist?.();
+      if (shouldPersist) {
+        onSnapshotPersist?.();
+        userTouchedRef.current = false;
+      }
       return true;
     },
     [refreshWarnings, onSnapshotPersist]
   );
 
   useEffect(() => {
+    skipSnapshotHydrationRef.current = false;
+    userTouchedRef.current = false;
+    clearModuleSamplePreview();
+    setSamplePreviewActive(false);
+  }, [moduleId, clearModuleSamplePreview]);
+
+  useEffect(() => {
     if (workspaceMode) {
-      if (moduleId && initialSnapshot) {
+      if (moduleId && initialSnapshot && !skipSnapshotHydrationRef.current) {
         refreshWarnings(initial.doc.table);
         if (initial.jsonText) {
-          runGenerate(initial.jsonText);
+          runGenerate(initial.jsonText, { persist: false });
         }
       }
       return;
@@ -305,26 +390,164 @@ export const FlowchartEditor = forwardRef<
       setStatus("閲覧者は再生成できません");
       return;
     }
+    notifyUserContentOverride();
+    clearModuleSamplePreview();
     refreshWarnings(doc.table);
-    runGenerate(jsonText);
+    runGenerate(jsonText, { persist: true });
   };
 
-  const loadDocument = (sample: FlowchartDocument) => {
-    const text = serializeDocument(sample);
+  const loadDocument = (
+    sample: FlowchartDocument,
+    options?: { persist?: boolean }
+  ) => {
     syncJsonFromDoc(sample);
     refreshWarnings(sample.table);
-    runGenerate(text);
+    runGenerate(serializeDocument(sample), options);
   };
 
-  const handleLoadSample = (key: SampleKey) => {
-    if (workspaceMode && !moduleId) {
-      setSamplePreviewActive(true);
+  const executeApplyStarter = useCallback(
+    (key: StarterKey) => {
+      if (workspaceMode && moduleId) notifyUserContentOverride();
+      clearModuleSamplePreview();
+      setSamplePreviewActive(false);
+      loadDocument(SAMPLES[key], { persist: true });
+    },
+    [
+      workspaceMode,
+      moduleId,
+      notifyUserContentOverride,
+      clearModuleSamplePreview,
+    ]
+  );
+
+  const handleApplyStarter = useCallback(
+    (key: string) => {
+      if (!isStarterKey(key)) return;
+      const label = STARTER_OPTIONS.find((o) => o.key === key)?.label ?? "雛形";
+      if (workspaceMode && moduleId && isModuleContentDirty(getDirtyInput())) {
+        setPendingConfirm({ kind: "starter", key, label });
+        return;
+      }
+      executeApplyStarter(key);
+    },
+    [workspaceMode, moduleId, getDirtyInput, executeApplyStarter]
+  );
+
+  const executePreviewSample = useCallback(
+    (key: DemoSampleKey) => {
+      if (workspaceMode && moduleId) {
+        stashForPreviewRestore();
+        notifyUserContentOverride();
+        setModuleSamplePreviewActive(true);
+        loadDocument(SAMPLES[key], { persist: false });
+      } else {
+        setSamplePreviewActive(true);
+        loadDocument(SAMPLES[key], { persist: false });
+      }
+    },
+    [workspaceMode, moduleId, stashForPreviewRestore, notifyUserContentOverride]
+  );
+
+  const handlePreviewSample = useCallback(
+    (key: string) => {
+      if (!isDemoSampleKey(key)) return;
+      executePreviewSample(key);
+    },
+    [executePreviewSample]
+  );
+
+  const executeApplyPreview = useCallback(() => {
+    notifyUserContentOverride();
+    clearModuleSamplePreview();
+    runGenerate(jsonText, { persist: true });
+  }, [
+    notifyUserContentOverride,
+    clearModuleSamplePreview,
+    runGenerate,
+    jsonText,
+  ]);
+
+  const handleApplyPreviewToModule = useCallback(() => {
+    const restore = prePreviewRestoreRef.current;
+    const label = doc.title ?? "この例";
+    if (
+      restore &&
+      isModuleContentDirty({
+        userTouched: restore.userTouched,
+        committedJson: restore.committedJson,
+        hasInitialSnapshot: restore.hasInitialSnapshot,
+      })
+    ) {
+      setPendingConfirm({ kind: "apply-preview", label });
+      return;
     }
-    loadDocument(SAMPLES[key]);
-  };
+    executeApplyPreview();
+  }, [doc.title, executeApplyPreview]);
+
+  const handleCancelModulePreview = useCallback(() => {
+    const restore = prePreviewRestoreRef.current;
+    if (restore) {
+      setDoc(restore.doc);
+      setJsonText(restore.jsonText);
+      setCommittedJson(restore.committedJson);
+      setNodes(restore.nodes);
+      setEdges(restore.edges);
+      userTouchedRef.current = restore.userTouched;
+      setParseErrors([]);
+      setGenErrors([]);
+      refreshWarnings(restore.doc.table);
+      setStatus("プレビューを終了しました");
+    }
+    clearModuleSamplePreview();
+  }, [refreshWarnings, clearModuleSamplePreview]);
+
+  const executeImportText = useCallback(
+    (text: string) => {
+      notifyUserContentOverride();
+      clearModuleSamplePreview();
+      setSamplePreviewActive(false);
+      setJsonText(text);
+      const { doc: parsed } = parseFlowchartDocument(text);
+      if (parsed) {
+        setDoc(normalizeFlowchartDocument(parsed));
+        refreshWarnings(parsed.table);
+      }
+      runGenerate(text, { persist: true });
+    },
+    [
+      notifyUserContentOverride,
+      clearModuleSamplePreview,
+      refreshWarnings,
+      runGenerate,
+    ]
+  );
+
+  const handleConfirmReplace = useCallback(() => {
+    if (!pendingConfirm) return;
+    const action = pendingConfirm;
+    setPendingConfirm(null);
+    switch (action.kind) {
+      case "starter":
+        executeApplyStarter(action.key);
+        break;
+      case "apply-preview":
+        executeApplyPreview();
+        break;
+      case "import":
+        executeImportText(action.text);
+        break;
+    }
+  }, [
+    pendingConfirm,
+    executeApplyStarter,
+    executeApplyPreview,
+    executeImportText,
+  ]);
 
   const handleTableChange = (table: FlowchartDocument["table"]) => {
     if (readOnly) return;
+    userTouchedRef.current = true;
+    notifyUserContentOverride();
     const next: FlowchartDocument = {
       ...doc,
       table,
@@ -360,13 +583,11 @@ export const FlowchartEditor = forwardRef<
     const reader = new FileReader();
     reader.onload = () => {
       const text = String(reader.result ?? "");
-      setJsonText(text);
-      const { doc: parsed } = parseFlowchartDocument(text);
-      if (parsed) {
-        setDoc(normalizeFlowchartDocument(parsed));
-        refreshWarnings(parsed.table);
+      if (workspaceMode && moduleId && isModuleContentDirty(getDirtyInput())) {
+        setPendingConfirm({ kind: "import", text });
+        return;
       }
-      runGenerate(text);
+      executeImportText(text);
     };
     reader.readAsText(file);
   };
@@ -440,9 +661,36 @@ export const FlowchartEditor = forwardRef<
   const previewModeHint =
     showEditorPanes && readOnly
       ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
-      : showEditorPanes && !moduleSelected
-        ? "サンプル表示（左でモジュールを選ぶと保存できます）"
-        : null;
+      : showEditorPanes && moduleSamplePreviewActive
+        ? "例をプレビュー中（未保存）"
+        : showEditorPanes && !moduleSelected
+          ? "サンプル表示（左でモジュールを選ぶと保存できます）"
+          : null;
+
+  const confirmDialog = (() => {
+    if (!pendingConfirm) return null;
+    switch (pendingConfirm.kind) {
+      case "starter":
+        return {
+          title: "表を雛形で始め直しますか？",
+          description: `いまの表は「${pendingConfirm.label}」に置き換わります。元に戻せません。`,
+          confirmLabel: "雛形を適用",
+        };
+      case "apply-preview":
+        return {
+          title: "例をモジュールに適用しますか？",
+          description: `いまの表は「${pendingConfirm.label}」で置き換わり、モジュールに保存されます。元に戻せません。`,
+          confirmLabel: "モジュールに適用",
+        };
+      case "import":
+        return {
+          title: "表を読込ファイルで置き換えますか？",
+          description:
+            "いまの表とプレビューは読込 JSON の内容に置き換わり、モジュールに保存されます。元に戻せません。",
+          confirmLabel: "置き換える",
+        };
+    }
+  })();
 
   const exportDisabledTitle = !canExport
     ? isStale
@@ -490,6 +738,7 @@ export const FlowchartEditor = forwardRef<
       <EditorMoreMenu
         readOnly={readOnly}
         workspaceMode={workspaceMode}
+        moduleSelected={moduleSelected}
         canExport={canExport}
         exportDisabledTitle={exportDisabledTitle}
         clearDraftDisabled={workspaceMode}
@@ -501,12 +750,34 @@ export const FlowchartEditor = forwardRef<
         pinOffline={pinOffline}
         starters={[...STARTER_OPTIONS]}
         samples={[...DEMO_SAMPLE_OPTIONS]}
-        onLoadSample={(key) => handleLoadSample(key as SampleKey)}
+        onApplyStarter={handleApplyStarter}
+        onPreviewSample={handlePreviewSample}
         onExportPng={() => void handleExportPng()}
         onExportSvg={() => void handleExportSvg()}
         onClearDraft={handleClearDraft}
         importBundle={importBundle}
       />
+
+      {moduleSamplePreviewActive && moduleSelected && !readOnly ? (
+        <>
+          <button
+            type="button"
+            data-testid="apply-sample-preview"
+            onClick={handleApplyPreviewToModule}
+            className="rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 hover:bg-blue-100"
+          >
+            モジュールに適用
+          </button>
+          <button
+            type="button"
+            data-testid="cancel-sample-preview"
+            onClick={handleCancelModulePreview}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+          >
+            プレビューを終了
+          </button>
+        </>
+      ) : null}
 
       <input
         ref={fileInputRef}
@@ -716,9 +987,22 @@ export const FlowchartEditor = forwardRef<
     );
   };
 
+  const replaceConfirmDialog =
+    confirmDialog != null ? (
+      <ConfirmReplaceDialog
+        open
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel={confirmDialog.confirmLabel}
+        onConfirm={handleConfirmReplace}
+        onCancel={() => setPendingConfirm(null)}
+      />
+    ) : null;
+
   if (workspaceMode) {
     return (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        {replaceConfirmDialog}
         {mobilePaneTabs}
         <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
           <section
@@ -789,6 +1073,7 @@ export const FlowchartEditor = forwardRef<
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      {replaceConfirmDialog}
       <header className="border-b border-slate-200 px-4 py-3">
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
           <div className="flex min-w-0 flex-col gap-0.5">

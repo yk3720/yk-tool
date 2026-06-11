@@ -28,7 +28,7 @@ where schemaname = 'public'
 
 select proname as admin_function
 from pg_proc
-where proname = 'admin_delete_equipment';
+where proname in ('admin_delete_equipment', 'rpc_admin_delete_equipment');
 
 select proname as import_function, '005 optional' as note
 from pg_proc

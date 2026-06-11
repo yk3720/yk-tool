@@ -1,11 +1,9 @@
 import { isAuthDisabled } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-import type { AuthContext, ProfileRole } from "./types";
+import { isAppRole } from "./roles";
 
-function isProfileRole(value: string): value is ProfileRole {
-  return value === "editor" || value === "viewer";
-}
+import type { AuthContext } from "./types";
 
 export type AuthState =
   | { kind: "disabled"; context: AuthContext }
@@ -42,7 +40,7 @@ export async function getAuthState(): Promise<AuthState> {
     .ilike("email", email)
     .maybeSingle();
 
-  if (profileError || !profile || !isProfileRole(profile.role)) {
+  if (profileError || !profile || !isAppRole(profile.role)) {
     return { kind: "pending", email };
   }
 

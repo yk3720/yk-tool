@@ -1,5 +1,9 @@
 "use client";
 
+import Link from "next/link";
+
+import { getRoleLabel, isAdminRole } from "@/lib/auth/roles";
+
 import type { ProfileRole } from "@/lib/auth/types";
 
 type Props = {
@@ -19,9 +23,18 @@ export function AppAuthBar({ email, role, showDevBanner }: Props) {
       <span>
         {email}
         <span className="ml-2 rounded bg-slate-200 px-1.5 py-0.5 font-medium text-slate-800">
-          {role === "editor" ? "編集者" : "閲覧者"}
+          {getRoleLabel(role)}
         </span>
       </span>
+      {isAdminRole(role) ? (
+        <Link
+          href="/admin"
+          data-testid="admin-nav-link"
+          className="rounded border border-slate-300 px-2 py-1 hover:bg-white"
+        >
+          管理
+        </Link>
+      ) : null}
       <form action="/auth/signout" method="post" className="ml-auto">
         <button
           type="submit"

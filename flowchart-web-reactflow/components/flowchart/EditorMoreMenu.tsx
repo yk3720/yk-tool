@@ -13,6 +13,7 @@ export type SampleOption = {
 type EditorMoreMenuProps = {
   readOnly: boolean;
   workspaceMode: boolean;
+  moduleSelected: boolean;
   canExport: boolean;
   exportDisabledTitle?: string;
   clearDraftDisabled: boolean;
@@ -20,7 +21,8 @@ type EditorMoreMenuProps = {
   pinOffline?: { pinned: boolean; onToggle: () => void };
   starters: SampleOption[];
   samples: SampleOption[];
-  onLoadSample: (key: string) => void;
+  onApplyStarter: (key: string) => void;
+  onPreviewSample: (key: string) => void;
   onExportPng: () => void;
   onExportSvg: () => void;
   onClearDraft: () => void;
@@ -65,9 +67,11 @@ function MenuItem({
 
 function MenuSection({
   label,
+  hint,
   isFirst = false,
 }: {
   label: string;
+  hint?: string;
   isFirst?: boolean;
 }) {
   return (
@@ -82,6 +86,9 @@ function MenuSection({
       <p className="px-3 pb-0.5 pt-1.5 text-xs font-semibold text-slate-600">
         {label}
       </p>
+      {hint ? (
+        <p className="px-3 pb-1 text-xs leading-snug text-slate-500">{hint}</p>
+      ) : null}
     </>
   );
 }
@@ -89,6 +96,7 @@ function MenuSection({
 export function EditorMoreMenu({
   readOnly,
   workspaceMode,
+  moduleSelected,
   canExport,
   exportDisabledTitle,
   clearDraftDisabled,
@@ -96,7 +104,8 @@ export function EditorMoreMenu({
   pinOffline,
   starters,
   samples,
-  onLoadSample,
+  onApplyStarter,
+  onPreviewSample,
   onExportPng,
   onExportSvg,
   onClearDraft,
@@ -121,6 +130,14 @@ export function EditorMoreMenu({
     setOpen(false);
   };
 
+  const starterHint = moduleSelected
+    ? "選択中モジュールの表を雛形で始めます（編集中は確認）"
+    : undefined;
+
+  const sampleHint = moduleSelected
+    ? "例はプレビューのみ。保存する場合は「モジュールに適用」"
+    : "保存せずに例の表と図を表示";
+
   return (
     <div className="relative" ref={rootRef}>
       <button
@@ -144,25 +161,25 @@ export function EditorMoreMenu({
         <div
           role="menu"
           aria-label="その他の操作"
-          className="absolute right-0 top-full z-30 mt-1 min-w-[14rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
+          className="absolute right-0 top-full z-30 mt-1 min-w-[16rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
         >
           {!readOnly ? (
             <>
-              <MenuSection label="始め方" isFirst />
+              <MenuSection label="始め方" hint={starterHint} isFirst />
               {starters.map((starter) => (
                 <MenuItem
                   key={starter.key}
-                  onClick={() => closeAnd(() => onLoadSample(starter.key))}
+                  onClick={() => closeAnd(() => onApplyStarter(starter.key))}
                 >
                   {starter.label}
                 </MenuItem>
               ))}
 
-              <MenuSection label="サンプル（例）" />
+              <MenuSection label="サンプル（例）" hint={sampleHint} />
               {samples.map((sample) => (
                 <MenuItem
                   key={sample.key}
-                  onClick={() => closeAnd(() => onLoadSample(sample.key))}
+                  onClick={() => closeAnd(() => onPreviewSample(sample.key))}
                 >
                   {sample.label}
                 </MenuItem>

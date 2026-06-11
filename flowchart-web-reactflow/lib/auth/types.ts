@@ -1,4 +1,4 @@
-export type ProfileRole = "editor" | "viewer";
+export type ProfileRole = "editor" | "viewer" | "admin";
 
 export type AuthContext = {
   userId: string;

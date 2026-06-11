@@ -22,9 +22,15 @@ export type ModuleLoadResult = {
   offlineCachedAt?: string;
 };
 
+export type ModuleLoadOptions = {
+  /** true のとき結果を適用しない（進行中読込の無効化） */
+  isCancelled?: () => boolean;
+};
+
 async function loadFromCloud(
   moduleUuid: string,
-  primaryKey: string
+  primaryKey: string,
+  isCancelled?: () => boolean
 ): Promise<ModuleLoadResult | null> {
   if (
     isAuthDisabled() ||
@@ -35,8 +41,11 @@ async function loadFromCloud(
   }
 
   const cloud = await loadFlowDocument(moduleUuid);
+  if (isCancelled?.()) return null;
   if (cloud.ok) {
-    await putOfflineModuleCache(primaryKey, cloud.snapshot);
+    if (!isCancelled?.()) {
+      await putOfflineModuleCache(primaryKey, cloud.snapshot);
+    }
     return { snapshot: cloud.snapshot, source: "cloud" };
   }
   if (cloud.error !== "not_found" && cloud.error !== "invalid_module_id") {
@@ -55,16 +64,26 @@ async function loadFromCloud(
 
 export async function loadModuleDraft(
   module: FlowModule,
-  device: Device
+  device: Device,
+  options?: ModuleLoadOptions
 ): Promise<ModuleLoadResult> {
+  const isCancelled = options?.isCancelled;
   const storageKeys = resolveModuleDraftKeys(module, device);
   const primaryKey = moduleStorageKey(module.id);
 
-  const fromCloud = await loadFromCloud(module.id, primaryKey);
-  if (fromCloud) return fromCloud;
+  const fromCloud = await loadFromCloud(module.id, primaryKey, isCancelled);
+  if (fromCloud) {
+    if (isCancelled?.()) {
+      return { snapshot: null, source: "none" };
+    }
+    return fromCloud;
+  }
 
   for (const key of storageKeys) {
     const offline = await getOfflineModuleCache(key);
+    if (isCancelled?.()) {
+      return { snapshot: null, source: "none" };
+    }
     if (offline) {
       if (key !== primaryKey) {
         await putOfflineModuleCache(primaryKey, offline.snapshot, {
@@ -80,6 +99,9 @@ export async function loadModuleDraft(
   }
 
   for (const key of storageKeys) {
+    if (isCancelled?.()) {
+      return { snapshot: null, source: "none" };
+    }
     const local = moduleDraftRepository.get(key);
     if (local) {
       if (key !== primaryKey) {

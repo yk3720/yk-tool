@@ -4,7 +4,7 @@ import { openPreviewWithSample } from "./helpers/flowchart";
 
 test.describe("カレーサンプル — ループと図形", () => {
   test.beforeEach(async ({ page }) => {
-    await openPreviewWithSample(page, "サンプル: カレーの作り方");
+    await openPreviewWithSample(page, "例を見る: カレーの作り方");
   });
 
   test("生成完了: 15 ノード · ループ用の右列ステップを含む", async ({

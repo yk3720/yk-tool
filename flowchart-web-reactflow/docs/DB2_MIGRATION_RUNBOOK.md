@@ -150,6 +150,24 @@ npm run excel:normalize
 
 ---
 
+## 7. 006 — admin ロール + 管理画面用 RPC（M-3 v0.1）
+
+**開発 Supabase のみ。** 前提: 004 適用済み（`admin_delete_equipment` 存在）。
+
+1. [SQL Editor](https://supabase.com/dashboard/project/jnywuetpkbzjdmcqghoh/sql/new) → New query
+2. **`supabase/scripts/apply_006_admin_dev.sql` の全文** を貼り付け → **Run**
+3. 末尾の検証で `ykoba56@gmail.com` が `role = admin` · RPC が 2 行であること
+
+個別適用する場合は `006_admin_role_and_rpc.sql` のみ Run し、profiles は手動:
+
+```sql
+update public.profiles set role = 'admin' where lower(email) = lower('ykoba56@gmail.com');
+```
+
+**アプリ確認:** 再ログイン → ヘッダー「管理」→ `/admin`
+
+---
+
 ## 6. 参照
 
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)

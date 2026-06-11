@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import type { ModuleSnapshot } from "@/lib/flowchart/moduleDraftRepository";
 import { moduleSnapshotSchema } from "@/lib/flowchart/moduleSnapshotSchema";
 import { isModuleUuid } from "@/lib/flowchart/moduleUuid";
@@ -98,7 +96,7 @@ export async function saveFlowDocument(
       return { ok: false, error: error.message };
     }
 
-    revalidatePath("/");
+    // フロー保存のたびに revalidate しない（サンプル読込後の遅延 refresh で UI が巻き戻るのを防ぐ）
     return { ok: true };
   } catch (e) {
     return {

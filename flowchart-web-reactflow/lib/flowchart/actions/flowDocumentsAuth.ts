@@ -1,3 +1,4 @@
+import { canEditFlowchart } from "@/lib/auth/roles";
 import { getAuthState } from "@/lib/auth/session";
 
 export async function requireEditor() {
@@ -6,7 +7,7 @@ export async function requireEditor() {
   if (state.kind !== "allowed") {
     throw new Error("認証が必要です");
   }
-  if (state.context.role !== "editor") {
+  if (!canEditFlowchart(state.context.role)) {
     throw new Error("編集権限がありません");
   }
   return state.context;

@@ -29,7 +29,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
     await ensureWorkspaceLoaded(page);
 
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(2);
-    await loadSampleFromMenu(page, "サンプル: カレーの作り方");
+    await loadSampleFromMenu(page, "例を見る: カレーの作り方");
 
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);

@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AppAuthBar } from "@/components/auth/AppAuthBar";
+import { canEditFlowchart } from "@/lib/auth/roles";
+
 import type { ProfileRole } from "@/lib/auth/types";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
 import {
@@ -50,6 +52,8 @@ export function FlowchartWorkspace({
   const editorRef = useRef<FlowchartEditorHandle>(null);
   /** モジュール読込の世代 — 古い loadModule 完了を無視する */
   const loadGenerationRef = useRef(0);
+  /** ユーザーがサンプル等で上書きしたら true — 遅延 loadModule の適用を拒否 */
+  const userContentOverrideRef = useRef(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState(
     devices[0]?.id ?? ""
   );
@@ -72,7 +76,7 @@ export function FlowchartWorkspace({
     string | null
   >(null);
 
-  const isEditor = role === "editor";
+  const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
   const device = findDevice(devices, selectedDeviceId) ?? devices[0];
@@ -101,6 +105,17 @@ export function FlowchartWorkspace({
     });
   }, []);
 
+  const isModuleLoadStale = useCallback((generation: number) => {
+    return generation !== loadGenerationRef.current;
+  }, []);
+
+  const invalidatePendingModuleLoad = useCallback(() => {
+    userContentOverrideRef.current = true;
+    loadGenerationRef.current += 1;
+    setLoadingModule(false);
+    setInitialSnapshot(null);
+  }, []);
+
   const loadModule = useCallback(
     async (targetDevice: Device, moduleId: string) => {
       const found = findModule(targetDevice, moduleId);
@@ -109,26 +124,35 @@ export function FlowchartWorkspace({
       const generation = ++loadGenerationRef.current;
       setLoadingModule(true);
       try {
-        const result = await loadModuleDraft(found.module, targetDevice);
-        if (generation !== loadGenerationRef.current) return;
+        const result = await loadModuleDraft(found.module, targetDevice, {
+          isCancelled: () => isModuleLoadStale(generation),
+        });
+        if (isModuleLoadStale(generation) || userContentOverrideRef.current) {
+          return;
+        }
+
+        const storageKey = moduleStorageKey(found.module.id);
+        const cache = await getOfflineModuleCache(storageKey);
+        if (isModuleLoadStale(generation) || userContentOverrideRef.current) {
+          return;
+        }
 
         setInitialSnapshot(result.snapshot);
         setLoadSource(result.source);
         setOfflineCachedAt(result.offlineCachedAt ?? null);
-        const storageKey = moduleStorageKey(found.module.id);
-        const cache = await getOfflineModuleCache(storageKey);
         setPinned(cache?.pinned ?? false);
         setLoadKey((k) => k + 1);
       } finally {
-        if (generation === loadGenerationRef.current) {
+        if (!isModuleLoadStale(generation)) {
           setLoadingModule(false);
         }
       }
     },
-    []
+    [isModuleLoadStale]
   );
 
   const resetModuleLoadState = useCallback(() => {
+    userContentOverrideRef.current = false;
     loadGenerationRef.current += 1;
     setInitialSnapshot(null);
     setLoadSource("");
@@ -157,6 +181,7 @@ export function FlowchartWorkspace({
     (deviceId: string) => {
       if (deviceId === selectedDeviceId) return;
       persistCurrentModule();
+      userContentOverrideRef.current = false;
       loadGenerationRef.current += 1;
       setSelectedDeviceId(deviceId);
       setSelectedModuleId(null);
@@ -279,6 +304,7 @@ export function FlowchartWorkspace({
           workspaceMode
           readOnly={!isEditor}
           onSnapshotPersist={persistCurrentModule}
+          onInvalidatePendingModuleLoad={invalidatePendingModuleLoad}
           pinOffline={
             selectedModuleId
               ? { pinned, onToggle: () => void handleTogglePin() }

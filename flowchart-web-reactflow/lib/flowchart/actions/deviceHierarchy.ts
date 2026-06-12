@@ -21,6 +21,7 @@ type DbUnitRow = {
   id: string;
   label: string;
   sort_order: number;
+  created_by: string | null;
   modules: DbModuleRow[] | null;
 };
 
@@ -29,6 +30,7 @@ type DbDeviceRow = {
   internal_code: string;
   display_name: string;
   sort_order: number;
+  created_by: string | null;
   units: DbUnitRow[] | null;
 };
 
@@ -39,11 +41,13 @@ function mapDbDevices(rows: DbDeviceRow[]): Device[] {
       id: d.id,
       internalCode: d.internal_code,
       name: d.display_name,
+      ...(d.created_by ? { createdBy: d.created_by } : {}),
       units: [...(d.units ?? [])]
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((u) => ({
           id: u.id,
           label: u.label,
+          ...(u.created_by ? { createdBy: u.created_by } : {}),
           modules: [...(u.modules ?? [])]
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((m) => ({
@@ -71,10 +75,12 @@ export async function fetchDeviceHierarchy(): Promise<DeviceHierarchyResult> {
         internal_code,
         display_name,
         sort_order,
+        created_by,
         units (
           id,
           label,
           sort_order,
+          created_by,
           modules (
             id,
             label,

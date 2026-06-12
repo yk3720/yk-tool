@@ -7,7 +7,9 @@ import { AppAuthBar } from "@/components/auth/AppAuthBar";
 import { canEditFlowchart } from "@/lib/auth/roles";
 
 import type { ProfileRole } from "@/lib/auth/types";
+import { deleteUnitById } from "@/lib/flowchart/actions/deleteUnit";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
+import { canDeleteUnit } from "@/lib/flowchart/unitDeletePermissions";
 import {
   loadModuleDraft,
   persistModuleDraft,
@@ -30,6 +32,7 @@ import { ModuleNavPane } from "./ModuleNavPane";
 type Props = {
   role: ProfileRole;
   email: string;
+  userId?: string;
   authDisabled?: boolean;
   devices: readonly Device[];
 };
@@ -45,6 +48,7 @@ function expandedUnitsForDevice(
 export function FlowchartWorkspace({
   role,
   email,
+  userId,
   authDisabled,
   devices,
 }: Props) {
@@ -75,6 +79,10 @@ export function FlowchartWorkspace({
   const [selectDeviceAfterImport, setSelectDeviceAfterImport] = useState<
     string | null
   >(null);
+  const [unitDeleteTargetId, setUnitDeleteTargetId] = useState<string | null>(
+    null
+  );
+  const [unitDeletePending, setUnitDeletePending] = useState(false);
 
   const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
@@ -208,6 +216,46 @@ export function FlowchartWorkspace({
     }
   }, [devices, selectDeviceAfterImport, handleSelectDevice]);
 
+  const unitDeleteTarget = unitDeleteTargetId
+    ? (device?.units.find((u) => u.id === unitDeleteTargetId) ?? null)
+    : null;
+
+  const canDeleteUnitId = useCallback(
+    (unitId: string) => {
+      if (!device || authDisabled || !userId) return false;
+      const unit = device.units.find((u) => u.id === unitId);
+      if (!unit) return false;
+      return canDeleteUnit(role, userId, device, unit);
+    },
+    [device, authDisabled, userId, role]
+  );
+
+  const handleConfirmDeleteUnit = useCallback(async () => {
+    if (!unitDeleteTargetId) return;
+    setUnitDeletePending(true);
+    try {
+      const result = await deleteUnitById(unitDeleteTargetId);
+      if (!result.ok) {
+        setImportBanner(`削除失敗: ${result.error}`);
+        return;
+      }
+      if (selectedModuleId) {
+        const deletedUnit = device?.units.find(
+          (u) => u.id === unitDeleteTargetId
+        );
+        if (deletedUnit?.modules.some((m) => m.id === selectedModuleId)) {
+          setSelectedModuleId(null);
+          setInitialSnapshot(null);
+        }
+      }
+      setUnitDeleteTargetId(null);
+      setImportBanner("ユニットを削除しました");
+      router.refresh();
+    } finally {
+      setUnitDeletePending(false);
+    }
+  }, [unitDeleteTargetId, selectedModuleId, device?.units, router]);
+
   const handleImportBundleFile = useCallback(
     async (file: File) => {
       setImportBanner("import.json を取込中…");
@@ -290,6 +338,8 @@ export function FlowchartWorkspace({
           onSelectDevice={handleSelectDevice}
           onToggleUnit={handleToggleUnit}
           onSelectModule={handleSelectModule}
+          canDeleteUnit={canDeleteUnitId}
+          onRequestDeleteUnit={setUnitDeleteTargetId}
         />
         <FlowchartEditor
           key={
@@ -323,6 +373,56 @@ export function FlowchartWorkspace({
           }
         />
       </div>
+
+      {unitDeleteTarget ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !unitDeletePending) {
+              setUnitDeleteTargetId(null);
+            }
+          }}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-unit-title"
+            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+          >
+            <h2
+              id="delete-unit-title"
+              className="text-base font-semibold text-slate-900"
+            >
+              ユニットを削除しますか？
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              <strong>{unitDeleteTarget.label}</strong>
+              と配下の動作・フロー表をすべて削除します。取り消せません。
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                autoFocus
+                disabled={unitDeletePending}
+                onClick={() => setUnitDeleteTargetId(null)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                disabled={unitDeletePending}
+                onClick={() => void handleConfirmDeleteUnit()}
+                data-testid="delete-unit-confirm"
+                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                削除する
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

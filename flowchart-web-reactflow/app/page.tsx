@@ -38,6 +38,7 @@ export default async function HomePage() {
     <FlowchartWorkspace
       role={context.role}
       email={context.email}
+      userId={state.kind === "allowed" ? context.userId : undefined}
       authDisabled={state.kind === "disabled"}
       devices={devices}
     />

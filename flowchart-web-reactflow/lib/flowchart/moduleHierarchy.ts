@@ -10,6 +10,8 @@ export type FlowUnit = {
   id: string;
   label: string;
   modules: FlowModule[];
+  /** import 時の登録者（units.created_by） */
+  createdBy?: string;
 };
 
 export type Device = {
@@ -18,6 +20,8 @@ export type Device = {
   internalCode?: string;
   name: string;
   units: FlowUnit[];
+  /** import 時の登録者（devices.created_by） */
+  createdBy?: string;
 };
 
 /** 永続化キー（localStorage · クラウド · IndexedDB 共通）— modules.id uuid */

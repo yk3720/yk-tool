@@ -5,6 +5,7 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
+  Trash2,
 } from "lucide-react";
 
 import type {
@@ -25,6 +26,8 @@ type ModuleNavPaneProps = {
   onSelectDevice: (deviceId: string) => void;
   onToggleUnit: (unitId: string) => void;
   onSelectModule: (moduleId: string) => void;
+  canDeleteUnit?: (unitId: string) => boolean;
+  onRequestDeleteUnit?: (unitId: string) => void;
 };
 
 function ModuleButton({
@@ -59,31 +62,52 @@ function UnitSection({
   selectedModuleId,
   onToggleUnit,
   onSelectModule,
+  showDelete,
+  onRequestDelete,
 }: {
   unit: FlowUnit;
   expanded: boolean;
   selectedModuleId: string | null;
   onToggleUnit: () => void;
   onSelectModule: (moduleId: string) => void;
+  showDelete: boolean;
+  onRequestDelete?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <button
-        type="button"
-        onClick={onToggleUnit}
-        aria-expanded={expanded}
-        className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm font-medium text-slate-800 hover:bg-slate-100"
-      >
-        {expanded ? (
-          <ChevronDown className="size-4 shrink-0 text-slate-500" aria-hidden />
-        ) : (
-          <ChevronRight
-            className="size-4 shrink-0 text-slate-500"
-            aria-hidden
-          />
-        )}
-        <span className="truncate">{unit.label}</span>
-      </button>
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={onToggleUnit}
+          aria-expanded={expanded}
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm font-medium text-slate-800 hover:bg-slate-100"
+        >
+          {expanded ? (
+            <ChevronDown
+              className="size-4 shrink-0 text-slate-500"
+              aria-hidden
+            />
+          ) : (
+            <ChevronRight
+              className="size-4 shrink-0 text-slate-500"
+              aria-hidden
+            />
+          )}
+          <span className="truncate">{unit.label}</span>
+        </button>
+        {showDelete && onRequestDelete ? (
+          <button
+            type="button"
+            onClick={onRequestDelete}
+            data-testid={`delete-unit-${unit.id}`}
+            className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
+            title={`${unit.label} を削除`}
+            aria-label={`${unit.label} を削除`}
+          >
+            <Trash2 className="size-3.5" aria-hidden />
+          </button>
+        ) : null}
+      </div>
       {expanded ? (
         <div className="flex flex-col gap-0.5 pl-5">
           {unit.modules.map((mod) => (
@@ -111,6 +135,8 @@ export function ModuleNavPane({
   onSelectDevice,
   onToggleUnit,
   onSelectModule,
+  canDeleteUnit,
+  onRequestDeleteUnit,
 }: ModuleNavPaneProps) {
   if (collapsed) {
     return (
@@ -175,6 +201,12 @@ export function ModuleNavPane({
             selectedModuleId={selectedModuleId}
             onToggleUnit={() => onToggleUnit(unit.id)}
             onSelectModule={onSelectModule}
+            showDelete={canDeleteUnit?.(unit.id) ?? false}
+            onRequestDelete={
+              onRequestDeleteUnit
+                ? () => onRequestDeleteUnit(unit.id)
+                : undefined
+            }
           />
         ))}
       </nav>

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppAuthBar } from "@/components/auth/AppAuthBar";
 import { canEditFlowchart } from "@/lib/auth/roles";
 
 import type { ProfileRole } from "@/lib/auth/types";
+import { deleteEquipmentByInternalCode } from "@/lib/flowchart/actions/deleteEquipment";
 import { deleteUnitById } from "@/lib/flowchart/actions/deleteUnit";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
 import {
@@ -85,11 +86,21 @@ export function FlowchartWorkspace({
   );
   const [unitDeletePending, setUnitDeletePending] = useState(false);
   const unitDeleteInFlightRef = useRef(false);
+  const [deviceDeleteConfirmOpen, setDeviceDeleteConfirmOpen] = useState(false);
+  const [deviceDeletePending, setDeviceDeletePending] = useState(false);
+  const deviceDeleteInFlightRef = useRef(false);
 
   const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
-  const device = findDevice(devices, selectedDeviceId) ?? devices[0];
+  const activeDeviceId = useMemo(() => {
+    if (devices.some((d) => d.id === selectedDeviceId)) {
+      return selectedDeviceId;
+    }
+    return devices[0]?.id ?? "";
+  }, [devices, selectedDeviceId]);
+
+  const device = findDevice(devices, activeDeviceId) ?? devices[0];
 
   const moduleInfo =
     selectedModuleId && device ? findModule(device, selectedModuleId) : null;
@@ -257,6 +268,28 @@ export function FlowchartWorkspace({
     }
   }, [unitDeleteTargetId, selectedModuleId, device?.units, router]);
 
+  const handleConfirmDeleteDevice = useCallback(async () => {
+    const code = device?.internalCode?.trim();
+    if (!code || deviceDeleteInFlightRef.current) return;
+    deviceDeleteInFlightRef.current = true;
+    setDeviceDeletePending(true);
+    try {
+      const result = await deleteEquipmentByInternalCode(code);
+      if (!result.ok) {
+        setImportBanner(`削除失敗: ${result.error}`);
+        return;
+      }
+      setDeviceDeleteConfirmOpen(false);
+      setSelectedModuleId(null);
+      setInitialSnapshot(null);
+      setImportBanner("装置を削除しました");
+      router.refresh();
+    } finally {
+      deviceDeleteInFlightRef.current = false;
+      setDeviceDeletePending(false);
+    }
+  }, [device?.internalCode, router]);
+
   const handleImportBundleFile = useCallback(
     async (file: File) => {
       setImportBanner("import.json を取込中…");
@@ -333,7 +366,7 @@ export function FlowchartWorkspace({
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <ModuleNavPane
           devices={devices}
-          selectedDeviceId={selectedDeviceId}
+          selectedDeviceId={activeDeviceId}
           device={device}
           selectedModuleId={selectedModuleId}
           expandedUnitIds={expandedUnitIds}
@@ -343,12 +376,17 @@ export function FlowchartWorkspace({
           onToggleUnit={handleToggleUnit}
           onSelectModule={handleSelectModule}
           onRequestDeleteUnit={setUnitDeleteTargetId}
+          onRequestDeleteDevice={
+            device.canDelete && device.internalCode
+              ? () => setDeviceDeleteConfirmOpen(true)
+              : undefined
+          }
         />
         <FlowchartEditor
           key={
             selectedModuleId
               ? `${selectedModuleId}-${loadKey}`
-              : `${selectedDeviceId}:__none__`
+              : `${activeDeviceId}:__none__`
           }
           ref={editorRef}
           contextLabel={contextLabel}
@@ -376,6 +414,62 @@ export function FlowchartWorkspace({
           }
         />
       </div>
+
+      {deviceDeleteConfirmOpen && device ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !deviceDeletePending) {
+              setDeviceDeleteConfirmOpen(false);
+            }
+          }}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-device-title"
+            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+          >
+            <h2
+              id="delete-device-title"
+              className="text-base font-semibold text-slate-900"
+            >
+              装置を削除しますか？
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              <strong>{device.name}</strong>
+              {device.internalCode ? (
+                <>
+                  {" "}
+                  （社内番号 <strong>{device.internalCode}</strong>）
+                </>
+              ) : null}
+              と配下のユニット・動作・フロー表をすべて削除します。取り消せません。
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                autoFocus
+                disabled={deviceDeletePending}
+                onClick={() => setDeviceDeleteConfirmOpen(false)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                disabled={deviceDeletePending}
+                onClick={() => void handleConfirmDeleteDevice()}
+                data-testid="delete-device-confirm"
+                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                削除する
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {unitDeleteTarget ? (
         <div

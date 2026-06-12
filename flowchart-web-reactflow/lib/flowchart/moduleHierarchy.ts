@@ -24,6 +24,8 @@ export type Device = {
   units: FlowUnit[];
   /** import 時の登録者（devices.created_by） */
   createdBy?: string;
+  /** サーバーで算出した装置削除可否（クライアント表示用） */
+  canDelete?: boolean;
 };
 
 /** 永続化キー（localStorage · クラウド · IndexedDB 共通）— modules.id uuid */

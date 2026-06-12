@@ -27,6 +27,7 @@ type ModuleNavPaneProps = {
   onToggleUnit: (unitId: string) => void;
   onSelectModule: (moduleId: string) => void;
   onRequestDeleteUnit?: (unitId: string) => void;
+  onRequestDeleteDevice?: () => void;
 };
 
 function ModuleButton({
@@ -135,6 +136,7 @@ export function ModuleNavPane({
   onToggleUnit,
   onSelectModule,
   onRequestDeleteUnit,
+  onRequestDeleteDevice,
 }: ModuleNavPaneProps) {
   if (collapsed) {
     return (
@@ -169,7 +171,7 @@ export function ModuleNavPane({
         </button>
       </div>
 
-      <div className="border-b border-slate-200 px-3 py-2">
+      <div className="space-y-2 border-b border-slate-200 px-3 py-2">
         <label className="flex flex-col gap-1">
           <span className="text-xs font-medium text-slate-500">装置</span>
           <select
@@ -185,6 +187,17 @@ export function ModuleNavPane({
             ))}
           </select>
         </label>
+        {device.canDelete && onRequestDeleteDevice ? (
+          <button
+            type="button"
+            onClick={onRequestDeleteDevice}
+            data-testid="delete-device-request"
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-red-200 px-2 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="size-3.5" aria-hidden />
+            装置を削除…
+          </button>
+        ) : null}
       </div>
 
       <nav

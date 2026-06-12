@@ -1,3 +1,4 @@
+import { canDeleteDevice } from "@/lib/flowchart/deviceDeletePermissions";
 import { canDeleteUnit } from "@/lib/flowchart/unitDeletePermissions";
 import type { ProfileRole } from "@/lib/auth/types";
 
@@ -13,6 +14,7 @@ export function mapDevicesForClient(
     id: device.id,
     internalCode: device.internalCode,
     name: device.name,
+    canDelete: canDeleteDevice(role, userId, device),
     units: device.units.map((unit) => ({
       id: unit.id,
       label: unit.label,

@@ -43,4 +43,13 @@ describe("importBundleSchema", () => {
     const result = importBundleSchema.safeParse({ internal_code: "X" });
     expect(result.success).toBe(false);
   });
+
+  it("rejects oversized json text", () => {
+    const huge = " ".repeat(5 * 1024 * 1024 + 1);
+    const parsed = parseImportBundleJson(huge);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) {
+      expect(parsed.error).toMatch(/大きすぎます/);
+    }
+  });
 });

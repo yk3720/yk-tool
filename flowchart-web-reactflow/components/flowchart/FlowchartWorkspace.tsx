@@ -9,7 +9,10 @@ import { canEditFlowchart } from "@/lib/auth/roles";
 import type { ProfileRole } from "@/lib/auth/types";
 import { deleteUnitById } from "@/lib/flowchart/actions/deleteUnit";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
-import { canDeleteUnit } from "@/lib/flowchart/unitDeletePermissions";
+import {
+  statusBannerClassName,
+  statusBannerTone,
+} from "@/lib/flowchart/statusBanner";
 import {
   loadModuleDraft,
   persistModuleDraft,
@@ -32,7 +35,6 @@ import { ModuleNavPane } from "./ModuleNavPane";
 type Props = {
   role: ProfileRole;
   email: string;
-  userId?: string;
   authDisabled?: boolean;
   devices: readonly Device[];
 };
@@ -48,7 +50,6 @@ function expandedUnitsForDevice(
 export function FlowchartWorkspace({
   role,
   email,
-  userId,
   authDisabled,
   devices,
 }: Props) {
@@ -83,6 +84,7 @@ export function FlowchartWorkspace({
     null
   );
   const [unitDeletePending, setUnitDeletePending] = useState(false);
+  const unitDeleteInFlightRef = useRef(false);
 
   const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
@@ -220,18 +222,16 @@ export function FlowchartWorkspace({
     ? (device?.units.find((u) => u.id === unitDeleteTargetId) ?? null)
     : null;
 
-  const canDeleteUnitId = useCallback(
-    (unitId: string) => {
-      if (!device || authDisabled || !userId) return false;
-      const unit = device.units.find((u) => u.id === unitId);
-      if (!unit) return false;
-      return canDeleteUnit(role, userId, device, unit);
-    },
-    [device, authDisabled, userId, role]
-  );
+  useEffect(() => {
+    if (!importBanner) return;
+    if (statusBannerTone(importBanner) !== "success") return;
+    const timer = window.setTimeout(() => setImportBanner(""), 5000);
+    return () => window.clearTimeout(timer);
+  }, [importBanner]);
 
   const handleConfirmDeleteUnit = useCallback(async () => {
-    if (!unitDeleteTargetId) return;
+    if (!unitDeleteTargetId || unitDeleteInFlightRef.current) return;
+    unitDeleteInFlightRef.current = true;
     setUnitDeletePending(true);
     try {
       const result = await deleteUnitById(unitDeleteTargetId);
@@ -252,6 +252,7 @@ export function FlowchartWorkspace({
       setImportBanner("ユニットを削除しました");
       router.refresh();
     } finally {
+      unitDeleteInFlightRef.current = false;
       setUnitDeletePending(false);
     }
   }, [unitDeleteTargetId, selectedModuleId, device?.units, router]);
@@ -322,7 +323,10 @@ export function FlowchartWorkspace({
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <AppAuthBar email={email} role={role} showDevBanner={authDisabled} />
       {statusBanner ? (
-        <p className="border-b border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
+        <p
+          role={statusBannerTone(statusBanner) === "error" ? "alert" : "status"}
+          className={`px-3 py-1.5 text-xs ${statusBannerClassName(statusBannerTone(statusBanner))}`}
+        >
           {statusBanner}
         </p>
       ) : null}
@@ -338,7 +342,6 @@ export function FlowchartWorkspace({
           onSelectDevice={handleSelectDevice}
           onToggleUnit={handleToggleUnit}
           onSelectModule={handleSelectModule}
-          canDeleteUnit={canDeleteUnitId}
           onRequestDeleteUnit={setUnitDeleteTargetId}
         />
         <FlowchartEditor

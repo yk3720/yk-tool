@@ -26,7 +26,6 @@ type ModuleNavPaneProps = {
   onSelectDevice: (deviceId: string) => void;
   onToggleUnit: (unitId: string) => void;
   onSelectModule: (moduleId: string) => void;
-  canDeleteUnit?: (unitId: string) => boolean;
   onRequestDeleteUnit?: (unitId: string) => void;
 };
 
@@ -135,7 +134,6 @@ export function ModuleNavPane({
   onSelectDevice,
   onToggleUnit,
   onSelectModule,
-  canDeleteUnit,
   onRequestDeleteUnit,
 }: ModuleNavPaneProps) {
   if (collapsed) {
@@ -201,7 +199,7 @@ export function ModuleNavPane({
             selectedModuleId={selectedModuleId}
             onToggleUnit={() => onToggleUnit(unit.id)}
             onSelectModule={onSelectModule}
-            showDelete={canDeleteUnit?.(unit.id) ?? false}
+            showDelete={unit.canDelete === true}
             onRequestDelete={
               onRequestDeleteUnit
                 ? () => onRequestDeleteUnit(unit.id)

@@ -25,6 +25,9 @@ function mapRpcError(message: string): string {
   if (message.includes("editor_required")) {
     return "編集権限がありません";
   }
+  if (message.includes("import_existing_device_forbidden")) {
+    return "既存装置への取込は、装置の登録者または管理者のみ可能です";
+  }
   if (message.includes("module not found")) {
     return `構成とフローの整合性エラー: ${message}`;
   }
@@ -97,7 +100,7 @@ export async function importEquipmentBundle(
       };
     }
 
-    revalidatePath("/");
+    revalidatePath("/", "layout");
 
     return {
       ok: true,

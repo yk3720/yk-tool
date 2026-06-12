@@ -26,4 +26,12 @@ describe("canDeleteUnit", () => {
   it("denies viewer", () => {
     expect(canDeleteUnit("viewer", "unit-owner", device, unit)).toBe(false);
   });
+
+  it("denies editor when createdBy is absent (legacy rows)", () => {
+    expect(canDeleteUnit("editor", "anyone", {}, {})).toBe(false);
+  });
+
+  it("allows admin when createdBy is absent", () => {
+    expect(canDeleteUnit("admin", "anyone", {}, {})).toBe(true);
+  });
 });

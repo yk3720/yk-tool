@@ -1,12 +1,29 @@
 import { z } from "zod";
 
-const flowTableCell = z.union([z.string(), z.number(), z.null()]);
+import {
+  IMPORT_BUNDLE_MAX_FLOWS,
+  IMPORT_BUNDLE_MAX_LABEL_LEN,
+  IMPORT_BUNDLE_MAX_MODULES_PER_UNIT,
+  IMPORT_BUNDLE_MAX_TABLE_ROWS,
+  IMPORT_BUNDLE_MAX_UNITS,
+  IMPORT_BUNDLE_MAX_BYTES,
+} from "./importBundleLimits";
+
+const flowTableCell = z.union([
+  z.string().max(IMPORT_BUNDLE_MAX_LABEL_LEN),
+  z.number(),
+  z.null(),
+]);
+
+const boundedLabel = z.string().min(1).max(IMPORT_BUNDLE_MAX_LABEL_LEN);
 
 export const flowchartDocumentPayloadSchema = z.object({
   version: z.literal(1),
-  schema: z.string().optional(),
-  title: z.string().optional(),
-  table: z.array(z.array(flowTableCell)),
+  schema: z.string().max(IMPORT_BUNDLE_MAX_LABEL_LEN).optional(),
+  title: z.string().max(IMPORT_BUNDLE_MAX_LABEL_LEN).optional(),
+  table: z
+    .array(z.array(flowTableCell).max(10))
+    .max(IMPORT_BUNDLE_MAX_TABLE_ROWS),
   layout: z
     .object({
       width: z.number(),
@@ -17,32 +34,38 @@ export const flowchartDocumentPayloadSchema = z.object({
       baseTop: z.number(),
     })
     .optional(),
-  createdAt: z.string().optional(),
+  createdAt: z.string().max(64).optional(),
 });
 
 export const importBundleSchema = z.object({
-  internal_code: z.string().min(1),
-  display_name: z.string().min(1),
-  units: z.array(
-    z.object({
-      label: z.string().min(1),
-      sort_order: z.number().int().nonnegative(),
-      modules: z.array(
-        z.object({
-          label: z.string().min(1),
-          sort_order: z.number().int().nonnegative(),
-        })
-      ),
-    })
-  ),
-  flows: z.array(
-    z.object({
-      unit_label: z.string().min(1),
-      module_label: z.string().min(1),
-      title: z.string(),
-      payload: flowchartDocumentPayloadSchema,
-    })
-  ),
+  internal_code: boundedLabel,
+  display_name: boundedLabel,
+  units: z
+    .array(
+      z.object({
+        label: boundedLabel,
+        sort_order: z.number().int().nonnegative(),
+        modules: z
+          .array(
+            z.object({
+              label: boundedLabel,
+              sort_order: z.number().int().nonnegative(),
+            })
+          )
+          .max(IMPORT_BUNDLE_MAX_MODULES_PER_UNIT),
+      })
+    )
+    .max(IMPORT_BUNDLE_MAX_UNITS),
+  flows: z
+    .array(
+      z.object({
+        unit_label: boundedLabel,
+        module_label: boundedLabel,
+        title: z.string().max(IMPORT_BUNDLE_MAX_LABEL_LEN),
+        payload: flowchartDocumentPayloadSchema,
+      })
+    )
+    .max(IMPORT_BUNDLE_MAX_FLOWS),
 });
 
 export type ImportBundle = z.infer<typeof importBundleSchema>;
@@ -67,6 +90,14 @@ export type RpcImportBundle = {
 export function parseImportBundleJson(
   jsonText: string
 ): { ok: true; bundle: ImportBundle } | { ok: false; error: string } {
+  const byteLength = new TextEncoder().encode(jsonText).byteLength;
+  if (byteLength > IMPORT_BUNDLE_MAX_BYTES) {
+    return {
+      ok: false,
+      error: `import.json が大きすぎます（上限 ${IMPORT_BUNDLE_MAX_BYTES / (1024 * 1024)}MB）`,
+    };
+  }
+
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonText);

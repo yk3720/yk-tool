@@ -10,8 +10,10 @@ export type FlowUnit = {
   id: string;
   label: string;
   modules: FlowModule[];
-  /** import 時の登録者（units.created_by） */
+  /** import 時の登録者（units.created_by）— サーバー内部のみ。クライアントには渡さない */
   createdBy?: string;
+  /** サーバーで算出した削除可否（クライアント表示用） */
+  canDelete?: boolean;
 };
 
 export type Device = {

@@ -1,5 +1,6 @@
 import type { FlowchartDocument, FlowTableRow } from "./types";
 import { DEFAULT_LAYOUT } from "./types";
+import { flowchartDocumentPayloadSchema } from "./importBundleSchema";
 import {
   ensureNineColumnTable,
   inferTableLayout,
@@ -28,7 +29,6 @@ export function parseFlowchartDocument(jsonText: string): {
   doc: FlowchartDocument | null;
   errors: string[];
 } {
-  const errors: string[] = [];
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonText);
@@ -36,31 +36,25 @@ export function parseFlowchartDocument(jsonText: string): {
     return { doc: null, errors: ["JSON の形式が不正です"] };
   }
 
-  if (!parsed || typeof parsed !== "object") {
-    return { doc: null, errors: ["ルートはオブジェクトである必要があります"] };
+  const result = flowchartDocumentPayloadSchema.safeParse(parsed);
+  if (!result.success) {
+    return {
+      doc: null,
+      errors: result.error.issues.map((issue) => {
+        const path = issue.path.length > 0 ? `${issue.path.join(".")}: ` : "";
+        return `${path}${issue.message}`;
+      }),
+    };
   }
 
-  const obj = parsed as Record<string, unknown>;
-  if (obj.version !== 1) {
-    errors.push("version は 1 である必要があります");
-  }
-  if (!Array.isArray(obj.table)) {
-    errors.push("table 配列が必要です");
-  }
-  if (errors.length > 0) {
-    return { doc: null, errors };
-  }
-
+  const data = result.data;
   const doc: FlowchartDocument = {
     version: 1,
-    schema: typeof obj.schema === "string" ? obj.schema : undefined,
-    title: typeof obj.title === "string" ? obj.title : undefined,
-    table: obj.table as FlowTableRow[],
+    schema: data.schema,
+    title: data.title,
+    table: data.table as FlowTableRow[],
     layout: { ...DEFAULT_LAYOUT },
-    createdAt:
-      typeof obj.createdAt === "string"
-        ? obj.createdAt
-        : new Date().toISOString(),
+    createdAt: data.createdAt ?? new Date().toISOString(),
   };
 
   return { doc: normalizeFlowchartDocument(doc), errors: [] };

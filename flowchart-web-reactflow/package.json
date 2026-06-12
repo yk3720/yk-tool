@@ -19,6 +19,9 @@
     "excel:template": "python tools/excel_normalize/scripts/build_template.py",
     "excel:fixture": "python tools/excel_normalize/scripts/build_fixture.py",
     "excel:normalize": "python -m excel_normalize.cli tools/excel_normalize/fixtures/input-device-z00001.xlsx -o tools/excel_normalize/fixtures/import-z00001.json",
+    "excel:test001:build": "python tools/excel_normalize/scripts/build_test001.py",
+    "excel:test001:normalize": "python -m excel_normalize.cli tools/excel_normalize/fixtures/devices/TEST-001_試験装置/マスター.xlsx -o tools/excel_normalize/fixtures/devices/TEST-001_試験装置/import.json",
+    "excel:test001": "npm run excel:test001:build ; npm run excel:test001:normalize",
     "excel:test": "cd tools/excel_normalize && python -m pytest",
     "excel:lint": "cd tools/excel_normalize && python -m ruff check . && python -m ruff format --check .",
     "excel:mypy": "cd tools/excel_normalize && python -m mypy excel_normalize"

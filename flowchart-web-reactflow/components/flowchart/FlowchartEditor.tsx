@@ -517,12 +517,17 @@ export const FlowchartEditor = forwardRef<
         refreshWarnings(parsed.table);
       }
       runGenerate(text, { persist: true });
+      if (workspaceMode && !moduleId) {
+        setSamplePreviewActive(true);
+      }
     },
     [
       notifyUserContentOverride,
       clearModuleSamplePreview,
       refreshWarnings,
       runGenerate,
+      workspaceMode,
+      moduleId,
     ]
   );
 

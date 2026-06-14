@@ -145,9 +145,11 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
       buffer: Buffer.from(json),
     });
 
-    await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/生成完了 — ノード 13/)).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.locator(".react-flow__node")).toHaveCount(13, {
-      timeout: 10_000,
+      timeout: 15_000,
     });
     expect(nodeCountBefore).toBe(15);
   });

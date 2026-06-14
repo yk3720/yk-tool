@@ -239,6 +239,59 @@ select proname from pg_proc where proname = 'rpc_delete_module';
 
 ---
 
+## 12. 本番（Vercel Production）— 011/012/013 適用（#13）
+
+**現状（2026-06-14）:** Vercel **Production** も **Preview / ローカル** も、同一 Supabase プロジェクト `flowchart-dev`（`jnywuetpkbzjdmcqghoh`）を向いている。  
+**別本番 DB は未作成** — §9〜§11 を dev に適用済なら、**DB 側は本番も同時に反映済み**の可能性が高い。
+
+### 12-1. 事前確認（必ず最初に Run）
+
+[SQL Editor](https://supabase.com/dashboard/project/jnywuetpkbzjdmcqghoh/sql/new) で実行:
+
+```sql
+-- 011
+select proname from pg_proc where proname = 'rpc_reset_flow_content';
+select column_name from information_schema.columns
+where table_schema = 'public' and table_name = 'flow_documents' and column_name = 'created_by';
+
+-- 012
+select count(*) as equipment_codes_table from information_schema.tables
+where table_schema = 'public' and table_name = 'equipment_codes';
+
+-- 013
+select proname from pg_proc where proname = 'rpc_delete_module';
+```
+
+| 結果                                       | 意味              | 次                                     |
+| ------------------------------------------ | ----------------- | -------------------------------------- |
+| 011 未適用（RPC なし / `created_by` なし） | §9 の 011 を Run  | 検証後 012 → 013                       |
+| 011 OK · `equipment_codes_table = 1`       | §10 の 012 を Run | 検証後 013                             |
+| 011·012 OK · `rpc_delete_module` なし      | §11 の 013 を Run | 検証 SQL                               |
+| **すべて OK**                              | DB 適用済         | **12-2 014 適用 → 12-3 本番 URL 確認** |
+
+### 12-2. admin クラウド保存（RLS · 014）
+
+**症状:** `new row violates row-level security policy for table "flow_documents"`  
+**原因:** M-3 で `admin` ロール追加後、`flow_documents` の INSERT/UPDATE ポリシーが `editor` のみのまま。  
+**対処:** **`014_flow_documents_rls_admin.sql` の全文** → **Run**（013 の後 · 1 回のみ）。
+
+### 12-3. 本番 URL 確認（https://flowchart-web-reactflow.vercel.app）
+
+ログイン後、次を 1 件ずつ:
+
+1. **クラウド保存** — 表編集 →「表を保存」（014 適用後 · admin でも OK）
+2. **フローリセット** — その他 →「フローを雛形にリセット…」
+3. **装置削除** — ナビ「装置を削除…」（テスト用装置で）
+4. **動作削除** — 左ナビ · 動作行のゴミ箱
+
+### 12-4. 将来 · 本番 Supabase を分離するとき
+
+1. 新プロジェクト作成 → migration 001 から **順番どおり** 再適用
+2. Vercel Production env の URL/Key を差し替え
+3. データ移行は別計画（本 Runbook 範囲外）
+
+---
+
 ## 6. 参照
 
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)

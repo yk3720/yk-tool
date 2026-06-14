@@ -8,6 +8,7 @@ import { canEditFlowchart } from "@/lib/auth/roles";
 
 import type { ProfileRole } from "@/lib/auth/types";
 import { deleteEquipmentByInternalCode } from "@/lib/flowchart/actions/deleteEquipment";
+import { deleteModuleById } from "@/lib/flowchart/actions/deleteModule";
 import { deleteUnitById } from "@/lib/flowchart/actions/deleteUnit";
 import { resetFlowContentByModuleId } from "@/lib/flowchart/actions/resetFlowContent";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
@@ -88,6 +89,11 @@ export function FlowchartWorkspace({
   );
   const [unitDeletePending, setUnitDeletePending] = useState(false);
   const unitDeleteInFlightRef = useRef(false);
+  const [moduleDeleteTargetId, setModuleDeleteTargetId] = useState<
+    string | null
+  >(null);
+  const [moduleDeletePending, setModuleDeletePending] = useState(false);
+  const moduleDeleteInFlightRef = useRef(false);
   const [deviceDeleteConfirmOpen, setDeviceDeleteConfirmOpen] = useState(false);
   const [deviceDeletePending, setDeviceDeletePending] = useState(false);
   const deviceDeleteInFlightRef = useRef(false);
@@ -238,6 +244,11 @@ export function FlowchartWorkspace({
     ? (device?.units.find((u) => u.id === unitDeleteTargetId) ?? null)
     : null;
 
+  const moduleDeleteTarget =
+    moduleDeleteTargetId && device
+      ? (findModule(device, moduleDeleteTargetId)?.module ?? null)
+      : null;
+
   useEffect(() => {
     if (!importBanner) return;
     if (statusBannerTone(importBanner) !== "success") return;
@@ -272,6 +283,29 @@ export function FlowchartWorkspace({
       setUnitDeletePending(false);
     }
   }, [unitDeleteTargetId, selectedModuleId, device?.units, router]);
+
+  const handleConfirmDeleteModule = useCallback(async () => {
+    if (!moduleDeleteTargetId || moduleDeleteInFlightRef.current) return;
+    moduleDeleteInFlightRef.current = true;
+    setModuleDeletePending(true);
+    try {
+      const result = await deleteModuleById(moduleDeleteTargetId);
+      if (!result.ok) {
+        setImportBanner(`削除失敗: ${result.error}`);
+        return;
+      }
+      if (selectedModuleId === moduleDeleteTargetId) {
+        setSelectedModuleId(null);
+        setInitialSnapshot(null);
+      }
+      setModuleDeleteTargetId(null);
+      setImportBanner("動作を削除しました");
+      router.refresh();
+    } finally {
+      moduleDeleteInFlightRef.current = false;
+      setModuleDeletePending(false);
+    }
+  }, [moduleDeleteTargetId, selectedModuleId, router]);
 
   const handleConfirmDeleteDevice = useCallback(async () => {
     const code = device?.internalCode?.trim();
@@ -410,6 +444,7 @@ export function FlowchartWorkspace({
           onToggleUnit={handleToggleUnit}
           onSelectModule={handleSelectModule}
           onRequestDeleteUnit={setUnitDeleteTargetId}
+          onRequestDeleteModule={setModuleDeleteTargetId}
           onRequestDeleteDevice={
             device.canDelete && device.internalCode
               ? () => setDeviceDeleteConfirmOpen(true)
@@ -551,6 +586,56 @@ export function FlowchartWorkspace({
                 disabled={unitDeletePending}
                 onClick={() => void handleConfirmDeleteUnit()}
                 data-testid="delete-unit-confirm"
+                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                削除する
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {moduleDeleteTarget ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !moduleDeletePending) {
+              setModuleDeleteTargetId(null);
+            }
+          }}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-module-title"
+            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+          >
+            <h2
+              id="delete-module-title"
+              className="text-base font-semibold text-slate-900"
+            >
+              動作を削除しますか？
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              <strong>{moduleDeleteTarget.label}</strong>
+              と紐づくフロー表を削除します。取り消せません。
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                autoFocus
+                disabled={moduleDeletePending}
+                onClick={() => setModuleDeleteTargetId(null)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                disabled={moduleDeletePending}
+                onClick={() => void handleConfirmDeleteModule()}
+                data-testid="delete-module-confirm"
                 className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 削除する

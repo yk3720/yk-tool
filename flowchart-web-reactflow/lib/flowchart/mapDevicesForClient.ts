@@ -1,5 +1,6 @@
 import { canDeleteDevice } from "@/lib/flowchart/deviceDeletePermissions";
 import { canResetFlowContent } from "@/lib/flowchart/flowResetPermissions";
+import { canDeleteModule } from "@/lib/flowchart/moduleDeletePermissions";
 import { canDeleteUnit } from "@/lib/flowchart/unitDeletePermissions";
 import type { ProfileRole } from "@/lib/auth/types";
 
@@ -34,6 +35,7 @@ export function mapDevicesForClient(
             hasFlow: serverMod.hasFlow ?? false,
             createdBy: serverMod.flowCreatedBy,
           }),
+          canDelete: canDeleteModule(role, userId, device, unit),
         };
       }),
       canDelete: canDeleteUnit(role, userId, device, unit),

@@ -223,6 +223,22 @@ select count(*) from public.devices;
 
 ---
 
+## 11. 013 — モジュール（動作）削除（#9d）
+
+**開発 Supabase のみ。** 前提: 012 適用済み。
+
+1. SQL Editor → **`supabase/migrations/013_module_delete_by_owner.sql` の全文** → **Run**
+2. 検証:
+
+```sql
+select proname from pg_proc where proname = 'rpc_delete_module';
+-- 期待: 1 行
+```
+
+**アプリ確認:** 自分が取込した装置を選択 → 左ナビの **動作行のゴミ箱** → 確認ダイアログ → 削除成功バナー。
+
+---
+
 ## 6. 参照
 
 - [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)

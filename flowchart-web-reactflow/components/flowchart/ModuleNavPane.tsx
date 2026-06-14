@@ -27,6 +27,7 @@ type ModuleNavPaneProps = {
   onToggleUnit: (unitId: string) => void;
   onSelectModule: (moduleId: string) => void;
   onRequestDeleteUnit?: (unitId: string) => void;
+  onRequestDeleteModule?: (moduleId: string) => void;
   onRequestDeleteDevice?: () => void;
 };
 
@@ -34,25 +35,43 @@ function ModuleButton({
   module,
   selected,
   onSelect,
+  showDelete,
+  onRequestDelete,
 }: {
   module: FlowModule;
   selected: boolean;
   onSelect: () => void;
+  showDelete: boolean;
+  onRequestDelete?: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-current={selected ? "page" : undefined}
-      className={cn(
-        "w-full rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-        selected
-          ? "bg-blue-100 font-medium text-blue-900"
-          : "text-slate-700 hover:bg-slate-100"
-      )}
-    >
-      {module.label}
-    </button>
+    <div className="flex items-center gap-0.5">
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-current={selected ? "page" : undefined}
+        className={cn(
+          "min-w-0 flex-1 rounded-md px-3 py-1.5 text-left text-sm transition-colors",
+          selected
+            ? "bg-blue-100 font-medium text-blue-900"
+            : "text-slate-700 hover:bg-slate-100"
+        )}
+      >
+        <span className="truncate">{module.label}</span>
+      </button>
+      {showDelete && onRequestDelete ? (
+        <button
+          type="button"
+          onClick={onRequestDelete}
+          data-testid={`delete-module-${module.id}`}
+          className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
+          title={`${module.label} を削除`}
+          aria-label={`${module.label} を削除`}
+        >
+          <Trash2 className="size-3.5" aria-hidden />
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -64,6 +83,7 @@ function UnitSection({
   onSelectModule,
   showDelete,
   onRequestDelete,
+  onRequestDeleteModule,
 }: {
   unit: FlowUnit;
   expanded: boolean;
@@ -72,6 +92,7 @@ function UnitSection({
   onSelectModule: (moduleId: string) => void;
   showDelete: boolean;
   onRequestDelete?: () => void;
+  onRequestDeleteModule?: (moduleId: string) => void;
 }) {
   return (
     <div className="flex flex-col gap-0.5">
@@ -116,6 +137,12 @@ function UnitSection({
               module={mod}
               selected={selectedModuleId === mod.id}
               onSelect={() => onSelectModule(mod.id)}
+              showDelete={mod.canDelete === true}
+              onRequestDelete={
+                onRequestDeleteModule
+                  ? () => onRequestDeleteModule(mod.id)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -136,6 +163,7 @@ export function ModuleNavPane({
   onToggleUnit,
   onSelectModule,
   onRequestDeleteUnit,
+  onRequestDeleteModule,
   onRequestDeleteDevice,
 }: ModuleNavPaneProps) {
   if (collapsed) {
@@ -218,6 +246,7 @@ export function ModuleNavPane({
                 ? () => onRequestDeleteUnit(unit.id)
                 : undefined
             }
+            onRequestDeleteModule={onRequestDeleteModule}
           />
         ))}
       </nav>

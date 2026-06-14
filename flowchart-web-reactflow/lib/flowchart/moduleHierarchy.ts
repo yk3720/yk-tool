@@ -6,6 +6,8 @@ export type FlowModule = {
   legacyKey?: string;
   /** サーバーで算出したフロー中身リセット可否（クライアント表示用） */
   canReset?: boolean;
+  /** サーバーで算出した削除可否（クライアント表示用） */
+  canDelete?: boolean;
 };
 
 export type FlowUnit = {

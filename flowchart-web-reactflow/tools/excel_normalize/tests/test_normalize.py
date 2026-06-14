@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "fixtures"
 TEMPLATES = ROOT / "templates"
 INPUT_XLSX = FIXTURES / "input-device-z00001.xlsx"
-TEMPLATE_XLSX = TEMPLATES / "入力用テンプレ_v0.1.xlsx"
+TEMPLATE_XLSX = TEMPLATES / "入力用テンプレ_v0.2.xlsx"
 
 
 @pytest.fixture(scope="session")
@@ -49,9 +49,12 @@ def test_template_normalizes(template_xlsx: Path) -> None:
     result = normalize_workbook(template_xlsx)
     bundle = result.bundle
 
-    assert bundle["internal_code"] == "Z00001"
+    assert bundle["internal_code"] == "NEW-001"
+    assert bundle["display_name"] == "（装置名）"
     assert len(bundle["units"]) == 2
     assert len(bundle["flows"]) == 4
+    unit_labels = {u["label"] for u in bundle["units"]}
+    assert unit_labels == {"供給ユニット", "加工ユニット"}
 
 
 def test_normalize_writes_json_snapshot(input_xlsx: Path, tmp_path: Path) -> None:

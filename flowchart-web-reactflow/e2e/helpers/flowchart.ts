@@ -4,6 +4,7 @@ export const EMPTY_MODULE_MSG = "モジュールを選択してください";
 
 export const DEVICE_PRESS_A_ID = "a0000001-0001-4001-8001-000000000001";
 export const DEVICE_PRESS_B_ID = "a0000001-0001-4001-8001-000000000002";
+export const MODULE_SUPPLY_FEED_A_ID = "c0000001-0001-4001-8001-000000001001";
 
 export function headerRegenerate(page: Page) {
   return page.locator("header").getByRole("button", { name: "再生成" });

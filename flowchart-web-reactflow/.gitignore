@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated demo seed (npm run seed:demo-devices)
+/supabase/scripts/seed_demo_devices_run.sql

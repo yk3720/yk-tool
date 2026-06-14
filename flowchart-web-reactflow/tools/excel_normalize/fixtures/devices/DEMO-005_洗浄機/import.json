@@ -1,0 +1,132 @@
+{
+  "internal_code": "DEMO-005",
+  "display_name": "洗浄機",
+  "units": [
+    {
+      "label": "前処理ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "投入",
+          "sort_order": 0
+        },
+        {
+          "label": "洗浄",
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "label": "後処理ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "乾燥",
+          "sort_order": 2
+        },
+        {
+          "label": "排出",
+          "sort_order": 3
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "前処理ユニット",
+      "module_label": "投入",
+      "title": "投入",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "投入",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "投入実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "前処理ユニット",
+      "module_label": "洗浄",
+      "title": "洗浄",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "洗浄",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "洗浄実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "後処理ユニット",
+      "module_label": "乾燥",
+      "title": "乾燥",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "乾燥",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "乾燥実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "後処理ユニット",
+      "module_label": "排出",
+      "title": "排出",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "排出",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "排出実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

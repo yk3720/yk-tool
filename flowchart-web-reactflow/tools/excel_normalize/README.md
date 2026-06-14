@@ -17,19 +17,32 @@ cd c:\yk-tool\flowchart-web-reactflow\tools\excel_normalize
 python -m pip install -e ".[dev]"
 ```
 
-## 作者向けテンプレ v0.1
+## 作者向けテンプレ v0.2（現在の標準構成）
 
-**配置:** [`templates/入力用テンプレ_v0.1.xlsx`](templates/入力用テンプレ_v0.1.xlsx)
+**配置:** [`templates/入力用テンプレ_v0.2.xlsx`](templates/入力用テンプレ_v0.2.xlsx)
 
-- 構成シート（4 列）+ 供給·収納ユニット · 各 2 動作（横並び Excel テーブル）
-- テーブル名: `{ユニット短名}_{動作名}`（例: `供給_取出`）
+- **構成:** 供給ユニット（取出 · 供給）+ 加工ユニット（プレス · 離脱）— DEMO-003 と同型
+- 構成シート（4 列）+ ユニットシート 2 枚 · 各 2 動作（横並び Excel テーブル）
+- テーブル名: `{ユニット短名}_{動作名}`（例: `供給_取出` · `加工_プレス`）
 - `_使い方` シートに記入ルール（正規化対象外）
-
-コピーして装置ごとに編集し、正規化 CLI で `import.json` を生成します。
 
 ```powershell
 python scripts/build_template.py
+# またはリポジトリルート: npm run excel:template
 ```
+
+### 新規装置フォルダを一括作成
+
+```powershell
+python scripts/scaffold_device.py Z00002 プレス機D --import-json
+# または: npm run excel:new-device -- Z00002 プレス機D
+```
+
+`fixtures/devices/Z00002_プレス機D/マスター.xlsx` と `archive/` ができます。
+
+## 作者向けテンプレ v0.1（旧 · 供給 + 収納）
+
+`workbook_builder.build_workbook()` — Z00001 fixture 用。新規装置は **v0.2** を使用。
 
 ## テスト用 fixture 生成
 

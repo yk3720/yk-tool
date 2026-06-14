@@ -66,7 +66,7 @@ function ModuleButton({
           data-testid={`delete-module-${module.id}`}
           className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
           title={`${module.label} を削除`}
-          aria-label={`${module.label} を削除`}
+          aria-label="削除"
         >
           <Trash2 className="size-3.5" aria-hidden />
         </button>
@@ -123,7 +123,7 @@ function UnitSection({
             data-testid={`delete-unit-${unit.id}`}
             className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
             title={`${unit.label} を削除`}
-            aria-label={`${unit.label} を削除`}
+            aria-label="削除"
           >
             <Trash2 className="size-3.5" aria-hidden />
           </button>

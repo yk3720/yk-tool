@@ -1,0 +1,104 @@
+{
+  "internal_code": "DEMO-008",
+  "display_name": "梱包ライン",
+  "units": [
+    {
+      "label": "仕分けユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "仕分",
+          "sort_order": 0
+        }
+      ]
+    },
+    {
+      "label": "梱包ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "梱包",
+          "sort_order": 1
+        },
+        {
+          "label": "シール",
+          "sort_order": 2
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "仕分けユニット",
+      "module_label": "仕分",
+      "title": "仕分",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "仕分",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "仕分実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "梱包ユニット",
+      "module_label": "梱包",
+      "title": "梱包",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "梱包",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "梱包実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "梱包ユニット",
+      "module_label": "シール",
+      "title": "シール",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "シール",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "シール実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

@@ -12,6 +12,13 @@ export type DeleteModuleResult =
   | { ok: true; moduleId: string }
   | { ok: false; error: string };
 
+function isModuleDeleteE2eStubEnabled(): boolean {
+  return (
+    process.env.PLAYWRIGHT_E2E === "1" &&
+    process.env.MODULE_DELETE_E2E_STUB === "1"
+  );
+}
+
 type ModuleRow = {
   id: string;
   label: string;
@@ -51,6 +58,10 @@ export async function deleteModuleById(
   const trimmed = moduleId.trim();
   if (!trimmed) {
     return { ok: false, error: "動作が指定されていません" };
+  }
+
+  if (isModuleDeleteE2eStubEnabled()) {
+    return { ok: true, moduleId: trimmed };
   }
 
   if (isAuthDisabled()) {

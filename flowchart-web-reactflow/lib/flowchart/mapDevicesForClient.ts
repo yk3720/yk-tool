@@ -51,8 +51,10 @@ export function mapDemoDevicesForClient(
 ): Device[] {
   const withFlowMeta = devices.map((device) => ({
     ...device,
+    ...(userId ? { createdBy: userId } : {}),
     units: device.units.map((unit) => ({
       ...unit,
+      ...(userId ? { createdBy: userId } : {}),
       modules: unit.modules.map(
         (mod): ServerModule => ({
           ...mod,

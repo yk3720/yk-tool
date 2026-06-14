@@ -1,0 +1,132 @@
+{
+  "internal_code": "DEMO-012",
+  "display_name": "保管システム",
+  "units": [
+    {
+      "label": "入庫ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "スキャン",
+          "sort_order": 0
+        },
+        {
+          "label": "格納",
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "label": "出庫ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "ピック",
+          "sort_order": 2
+        },
+        {
+          "label": "出荷",
+          "sort_order": 3
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "入庫ユニット",
+      "module_label": "スキャン",
+      "title": "スキャン",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "スキャン",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "スキャン実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "入庫ユニット",
+      "module_label": "格納",
+      "title": "格納",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "格納",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "格納実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "出庫ユニット",
+      "module_label": "ピック",
+      "title": "ピック",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "ピック",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "ピック実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "出庫ユニット",
+      "module_label": "出荷",
+      "title": "出荷",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "出荷",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "出荷実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

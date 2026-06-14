@@ -1,0 +1,104 @@
+{
+  "internal_code": "DEMO-006",
+  "display_name": "検査装置",
+  "units": [
+    {
+      "label": "供給ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "供給",
+          "sort_order": 0
+        }
+      ]
+    },
+    {
+      "label": "検査ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "外観",
+          "sort_order": 1
+        },
+        {
+          "label": "寸法",
+          "sort_order": 2
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "供給ユニット",
+      "module_label": "供給",
+      "title": "供給",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "供給",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "供給実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "検査ユニット",
+      "module_label": "外観",
+      "title": "外観",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "外観",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "外観実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "検査ユニット",
+      "module_label": "寸法",
+      "title": "寸法",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "寸法",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "寸法実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

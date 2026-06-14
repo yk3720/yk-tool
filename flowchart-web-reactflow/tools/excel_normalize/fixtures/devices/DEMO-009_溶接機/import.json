@@ -1,0 +1,104 @@
+{
+  "internal_code": "DEMO-009",
+  "display_name": "溶接機",
+  "units": [
+    {
+      "label": "固定ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "クランプ",
+          "sort_order": 0
+        }
+      ]
+    },
+    {
+      "label": "溶接ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "スポット",
+          "sort_order": 1
+        },
+        {
+          "label": "冷却",
+          "sort_order": 2
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "固定ユニット",
+      "module_label": "クランプ",
+      "title": "クランプ",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "クランプ",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "クランプ実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "溶接ユニット",
+      "module_label": "スポット",
+      "title": "スポット",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "スポット",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "スポット実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "溶接ユニット",
+      "module_label": "冷却",
+      "title": "冷却",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "冷却",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "冷却実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

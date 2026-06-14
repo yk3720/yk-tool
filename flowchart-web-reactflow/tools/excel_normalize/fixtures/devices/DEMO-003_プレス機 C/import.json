@@ -1,0 +1,132 @@
+{
+  "internal_code": "DEMO-003",
+  "display_name": "プレス機 C",
+  "units": [
+    {
+      "label": "供給ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "取出",
+          "sort_order": 0
+        },
+        {
+          "label": "供給",
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "label": "加工ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "プレス",
+          "sort_order": 2
+        },
+        {
+          "label": "離脱",
+          "sort_order": 3
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "供給ユニット",
+      "module_label": "取出",
+      "title": "取出",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "取出",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "ワーク取出", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "供給ユニット",
+      "module_label": "供給",
+      "title": "供給",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "供給",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "供給実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "加工ユニット",
+      "module_label": "プレス",
+      "title": "プレス",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "プレス",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "プレス実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "加工ユニット",
+      "module_label": "離脱",
+      "title": "離脱",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "離脱",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "離脱実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

@@ -34,6 +34,7 @@ export default defineConfig({
           PLAYWRIGHT_E2E: "1",
           IMPORT_E2E_STUB: "1",
           RESET_FLOW_E2E_STUB: "1",
+          MODULE_DELETE_E2E_STUB: "1",
         },
       },
 });

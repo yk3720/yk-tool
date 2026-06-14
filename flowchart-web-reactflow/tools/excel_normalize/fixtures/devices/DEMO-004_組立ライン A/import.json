@@ -1,0 +1,132 @@
+{
+  "internal_code": "DEMO-004",
+  "display_name": "組立ライン A",
+  "units": [
+    {
+      "label": "搬送ユニット",
+      "sort_order": 0,
+      "modules": [
+        {
+          "label": "受入",
+          "sort_order": 0
+        },
+        {
+          "label": "搬送",
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "label": "組立ユニット",
+      "sort_order": 1,
+      "modules": [
+        {
+          "label": "締付",
+          "sort_order": 2
+        },
+        {
+          "label": "検査",
+          "sort_order": 3
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "unit_label": "搬送ユニット",
+      "module_label": "受入",
+      "title": "受入",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "受入",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "受入実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "搬送ユニット",
+      "module_label": "搬送",
+      "title": "搬送",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "搬送",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "搬送実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "組立ユニット",
+      "module_label": "締付",
+      "title": "締付",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "締付",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "締付実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    },
+    {
+      "unit_label": "組立ユニット",
+      "module_label": "検査",
+      "title": "検査",
+      "payload": {
+        "version": 1,
+        "schema": "table-10col-v1",
+        "title": "検査",
+        "layout": {
+          "width": 160,
+          "heightMin": 60,
+          "gapV": 30,
+          "gapH": 100,
+          "baseLeft": 40,
+          "baseTop": 40
+        },
+        "table": [
+          ["10", "端子", "20", "", "1", "0", "開始", "", "", ""],
+          ["20", "処理", "30", "", "2", "0", "検査実行", "", "", ""],
+          ["30", "端子", "", "", "3", "0", "終了", "", "", ""]
+        ],
+        "createdAt": "2026-06-14T12:39:13.000Z"
+      }
+    }
+  ]
+}

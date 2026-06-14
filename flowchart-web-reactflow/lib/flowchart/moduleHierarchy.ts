@@ -4,6 +4,8 @@ export type FlowModule = {
   label: string;
   /** DB modules.legacy_key — 旧 localStorage / offline キー解決用 */
   legacyKey?: string;
+  /** サーバーで算出したフロー中身リセット可否（クライアント表示用） */
+  canReset?: boolean;
 };
 
 export type FlowUnit = {
@@ -18,7 +20,7 @@ export type FlowUnit = {
 
 export type Device = {
   id: string;
-  /** equipment_codes.internal_code — 旧 press-01 等の解決用 */
+  /** devices.internal_code — 社内番号（1 装置 = 1 コード · 012 で equipment_codes 統合） */
   internalCode?: string;
   name: string;
   units: FlowUnit[];

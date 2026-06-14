@@ -81,8 +81,7 @@ order by ordinal_position;
 `verify_db2.sql` と同内容。すべて **期待どおり** なら §4 完了。
 
 ```sql
--- 4 表 + seed
-select count(*) as equipment_codes from public.equipment_codes;          -- >= 2
+-- 012 適用後: 装置階層 3 表 + flow（equipment_codes 統合済み）
 select count(*) as devices from public.devices;                          -- >= 2
 select count(*) as units from public.units;                              -- >= 6
 select count(*) as modules from public.modules;                          -- >= 10
@@ -165,6 +164,62 @@ update public.profiles set role = 'admin' where lower(email) = lower('ykoba56@gm
 ```
 
 **アプリ確認:** 再ログイン → ヘッダー「管理」→ `/admin`
+
+---
+
+## 8. 010 — 装置登録者による削除（#9 スライス2）
+
+**開発 Supabase のみ。** 前提: 008 適用済み。
+
+1. [SQL Editor](https://supabase.com/dashboard/project/jnywuetpkbzjdmcqghoh/sql/new) → New query
+2. **`supabase/migrations/010_device_delete_by_owner.sql` の全文** を貼り付け → **Run**
+3. 検証:
+
+```sql
+select proname from pg_proc where proname = 'rpc_delete_equipment';
+-- 期待: 1 行
+```
+
+**アプリ確認:** 自分が取込した装置を選択 → ナビ「装置を削除…」
+
+---
+
+## 9. 011 — フロー中身リセット（#9 スライス3）
+
+**開発 Supabase のみ。** 前提: 010 適用済み（未適用なら先に §8）。
+
+1. SQL Editor → **`supabase/migrations/011_flow_reset_by_creator.sql` の全文** → **Run**
+2. 検証:
+
+```sql
+select proname from pg_proc where proname = 'rpc_reset_flow_content';
+select column_name from information_schema.columns
+where table_schema = 'public' and table_name = 'flow_documents' and column_name = 'created_by';
+-- 期待: RPC 1 行 · created_by 列あり
+```
+
+**アプリ確認:** 自分が作成したフローを選択 → その他 →「フローを雛形にリセット…」
+
+---
+
+## 10. 012 — equipment_codes を devices に統合
+
+**開発 Supabase のみ。** 前提: 011 適用済み · grill 2026-06-14（運用前統合）。
+
+1. SQL Editor → **`supabase/migrations/012_merge_equipment_codes_into_devices.sql` の全文** → **Run**
+2. 検証:
+
+```sql
+-- equipment_codes テーブルが無い
+select count(*) from information_schema.tables
+where table_schema = 'public' and table_name = 'equipment_codes';
+-- 期待: 0
+
+select count(*) from public.devices;
+-- 期待: >= 2（従来どおり）
+```
+
+**アプリ確認:** import.json 取込 · 装置削除 · フローリセットが従来どおり動くこと。
 
 ---
 

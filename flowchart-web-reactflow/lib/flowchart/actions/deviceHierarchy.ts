@@ -10,11 +10,16 @@ export type DeviceHierarchyResult =
   | { ok: true; devices: Device[] }
   | { ok: false; error: string };
 
+type DbFlowDocumentRow = {
+  created_by: string | null;
+};
+
 type DbModuleRow = {
   id: string;
   label: string;
   sort_order: number;
   legacy_key: string | null;
+  flow_documents: DbFlowDocumentRow[] | DbFlowDocumentRow | null;
 };
 
 type DbUnitRow = {
@@ -50,11 +55,25 @@ function mapDbDevices(rows: DbDeviceRow[]): Device[] {
           ...(u.created_by ? { createdBy: u.created_by } : {}),
           modules: [...(u.modules ?? [])]
             .sort((a, b) => a.sort_order - b.sort_order)
-            .map((m) => ({
-              id: m.id,
-              label: m.label,
-              legacyKey: m.legacy_key ?? undefined,
-            })),
+            .map((m) => {
+              const flowRows = Array.isArray(m.flow_documents)
+                ? m.flow_documents
+                : m.flow_documents
+                  ? [m.flow_documents]
+                  : [];
+              const flowRow = flowRows[0];
+              return {
+                id: m.id,
+                label: m.label,
+                legacyKey: m.legacy_key ?? undefined,
+                ...(flowRow
+                  ? {
+                      hasFlow: true as const,
+                      flowCreatedBy: flowRow.created_by ?? undefined,
+                    }
+                  : { hasFlow: false as const }),
+              };
+            }),
         })),
     }));
 }
@@ -85,7 +104,10 @@ export async function fetchDeviceHierarchy(): Promise<DeviceHierarchyResult> {
             id,
             label,
             sort_order,
-            legacy_key
+            legacy_key,
+            flow_documents (
+              created_by
+            )
           )
         )
       `

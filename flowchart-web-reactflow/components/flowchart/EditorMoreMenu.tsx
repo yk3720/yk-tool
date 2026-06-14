@@ -31,6 +31,9 @@ type EditorMoreMenuProps = {
     disabledTitle?: string;
     onSelectFile: (file: File) => void;
   };
+  resetFlow?: {
+    onRequestReset: () => void;
+  };
 };
 
 function MenuItem({
@@ -110,6 +113,7 @@ export function EditorMoreMenu({
   onExportSvg,
   onClearDraft,
   importBundle,
+  resetFlow,
 }: EditorMoreMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -244,6 +248,18 @@ export function EditorMoreMenu({
                   e.target.value = "";
                 }}
               />
+            </>
+          ) : null}
+
+          {!readOnly && workspaceMode && moduleSelected && resetFlow ? (
+            <>
+              <MenuSection label="フロー" />
+              <MenuItem
+                destructive
+                onClick={() => closeAnd(resetFlow.onRequestReset)}
+              >
+                フローを雛形にリセット…
+              </MenuItem>
             </>
           ) : null}
 

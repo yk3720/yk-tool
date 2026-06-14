@@ -9,6 +9,7 @@ import { canEditFlowchart } from "@/lib/auth/roles";
 import type { ProfileRole } from "@/lib/auth/types";
 import { deleteEquipmentByInternalCode } from "@/lib/flowchart/actions/deleteEquipment";
 import { deleteUnitById } from "@/lib/flowchart/actions/deleteUnit";
+import { resetFlowContentByModuleId } from "@/lib/flowchart/actions/resetFlowContent";
 import { importEquipmentBundle } from "@/lib/flowchart/actions/importEquipmentBundle";
 import {
   statusBannerClassName,
@@ -29,6 +30,7 @@ import {
   getOfflineModuleCache,
   setOfflineModulePinned,
 } from "@/lib/flowchart/offlineFlowCache";
+import { getStarterFlowSnapshot } from "@/lib/flowchart/starterFlowSnapshot";
 
 import { FlowchartEditor, type FlowchartEditorHandle } from "./FlowchartEditor";
 import { ModuleNavPane } from "./ModuleNavPane";
@@ -89,6 +91,9 @@ export function FlowchartWorkspace({
   const [deviceDeleteConfirmOpen, setDeviceDeleteConfirmOpen] = useState(false);
   const [deviceDeletePending, setDeviceDeletePending] = useState(false);
   const deviceDeleteInFlightRef = useRef(false);
+  const [flowResetConfirmOpen, setFlowResetConfirmOpen] = useState(false);
+  const [flowResetPending, setFlowResetPending] = useState(false);
+  const flowResetInFlightRef = useRef(false);
 
   const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
@@ -290,6 +295,35 @@ export function FlowchartWorkspace({
     }
   }, [device?.internalCode, router]);
 
+  const handleConfirmResetFlow = useCallback(async () => {
+    if (!selectedModuleId || flowResetInFlightRef.current) return;
+    flowResetInFlightRef.current = true;
+    setFlowResetPending(true);
+    try {
+      const result = await resetFlowContentByModuleId(selectedModuleId);
+      if (!result.ok) {
+        setImportBanner(`リセット失敗: ${result.error}`);
+        return;
+      }
+      const starter = getStarterFlowSnapshot();
+      userContentOverrideRef.current = false;
+      setFlowResetConfirmOpen(false);
+      setInitialSnapshot(starter);
+      setLoadSource("cloud");
+      setLoadKey((k) => k + 1);
+      if (moduleInfo && device) {
+        await persistModuleDraft(moduleInfo.module, device, starter, {
+          saveToCloud: false,
+        });
+      }
+      setImportBanner("フローを雛形にリセットしました");
+      router.refresh();
+    } finally {
+      flowResetInFlightRef.current = false;
+      setFlowResetPending(false);
+    }
+  }, [selectedModuleId, moduleInfo, device, router]);
+
   const handleImportBundleFile = useCallback(
     async (file: File) => {
       setImportBanner("import.json を取込中…");
@@ -412,6 +446,11 @@ export function FlowchartWorkspace({
                 }
               : undefined
           }
+          resetFlow={
+            isEditor && moduleInfo?.module.canReset
+              ? { onRequestReset: () => setFlowResetConfirmOpen(true) }
+              : undefined
+          }
         />
       </div>
 
@@ -515,6 +554,57 @@ export function FlowchartWorkspace({
                 className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 削除する
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {flowResetConfirmOpen && moduleInfo ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !flowResetPending) {
+              setFlowResetConfirmOpen(false);
+            }
+          }}
+        >
+          <div
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="reset-flow-title"
+            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+          >
+            <h2
+              id="reset-flow-title"
+              className="text-base font-semibold text-slate-900"
+            >
+              フローを雛形にリセットしますか？
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              <strong>{moduleInfo.module.label}</strong>
+              の表・図を「雛形:
+              はじめから」に戻します。クラウド上の保存内容も上書きされます。取り消せません。
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                autoFocus
+                disabled={flowResetPending}
+                onClick={() => setFlowResetConfirmOpen(false)}
+                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                disabled={flowResetPending}
+                onClick={() => void handleConfirmResetFlow()}
+                data-testid="reset-flow-confirm"
+                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                リセットする
               </button>
             </div>
           </div>

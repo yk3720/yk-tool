@@ -123,6 +123,9 @@ export type FlowchartEditorProps = {
     disabledTitle?: string;
     onSelectFile: (file: File) => void;
   };
+  resetFlow?: {
+    onRequestReset: () => void;
+  };
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
@@ -189,6 +192,7 @@ export const FlowchartEditor = forwardRef<
     onInvalidatePendingModuleLoad,
     pinOffline,
     importBundle,
+    resetFlow,
   } = props;
 
   const skipSnapshotHydrationRef = useRef(false);
@@ -756,6 +760,7 @@ export const FlowchartEditor = forwardRef<
         onExportSvg={() => void handleExportSvg()}
         onClearDraft={handleClearDraft}
         importBundle={importBundle}
+        resetFlow={resetFlow}
       />
 
       {moduleSamplePreviewActive && moduleSelected && !readOnly ? (

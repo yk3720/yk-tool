@@ -5,7 +5,7 @@ import type { ProfileRole } from "@/lib/auth/types";
 
 import type { Device, FlowModule } from "./moduleHierarchy";
 
-type ServerModule = FlowModule & {
+export type ServerModule = FlowModule & {
   hasFlow?: boolean;
   flowCreatedBy?: string;
 };
@@ -39,4 +39,26 @@ export function mapDevicesForClient(
       canDelete: canDeleteUnit(role, userId, device, unit),
     })),
   }));
+}
+
+/** AUTH_DISABLED デモ装置 — 全モジュールに hasFlow を付与し canReset 等を算出 */
+export function mapDemoDevicesForClient(
+  devices: Device[],
+  role: ProfileRole,
+  userId: string | undefined
+): Device[] {
+  const withFlowMeta = devices.map((device) => ({
+    ...device,
+    units: device.units.map((unit) => ({
+      ...unit,
+      modules: unit.modules.map(
+        (mod): ServerModule => ({
+          ...mod,
+          hasFlow: true,
+          flowCreatedBy: userId,
+        })
+      ),
+    })),
+  }));
+  return mapDevicesForClient(withFlowMeta, role, userId);
 }

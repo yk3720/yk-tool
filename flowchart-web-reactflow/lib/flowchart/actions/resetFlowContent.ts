@@ -14,6 +14,13 @@ export type ResetFlowContentResult =
   | { ok: true; moduleId: string }
   | { ok: false; error: string };
 
+function isResetFlowE2eStubEnabled(): boolean {
+  return (
+    process.env.PLAYWRIGHT_E2E === "1" &&
+    process.env.RESET_FLOW_E2E_STUB === "1"
+  );
+}
+
 function mapRpcError(message: string): string {
   if (message.includes("not_authenticated")) {
     return "ログインが必要です";
@@ -42,6 +49,10 @@ export async function resetFlowContentByModuleId(
   const trimmed = moduleId.trim();
   if (!trimmed || !isModuleUuid(trimmed)) {
     return { ok: false, error: "動作が指定されていません" };
+  }
+
+  if (isResetFlowE2eStubEnabled()) {
+    return { ok: true, moduleId: trimmed };
   }
 
   if (isAuthDisabled()) {

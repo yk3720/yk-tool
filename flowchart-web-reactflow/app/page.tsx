@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/auth/session";
 import { FlowchartWorkspace } from "@/components/flowchart/FlowchartWorkspace";
 import { fetchDeviceHierarchy } from "@/lib/flowchart/actions/deviceHierarchy";
-import { mapDevicesForClient } from "@/lib/flowchart/mapDevicesForClient";
+import {
+  mapDemoDevicesForClient,
+  mapDevicesForClient,
+} from "@/lib/flowchart/mapDevicesForClient";
 import { DEMO_DEVICES } from "@/lib/flowchart/moduleHierarchy";
 
 export default async function HomePage() {
@@ -27,7 +30,11 @@ export default async function HomePage() {
     redirect("/login");
   }
 
-  let devices = DEMO_DEVICES;
+  let devices = mapDemoDevicesForClient(
+    DEMO_DEVICES,
+    context.role,
+    context.userId
+  );
   if (state.kind === "allowed") {
     const hierarchy = await fetchDeviceHierarchy();
     if (hierarchy.ok) {

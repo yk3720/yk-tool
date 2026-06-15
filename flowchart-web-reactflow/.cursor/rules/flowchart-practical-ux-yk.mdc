@@ -7,7 +7,8 @@ alwaysApply: false
 # 実用版 UX — flowchart-web-reactflow
 
 **L1 SSOT:** `c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md` **§5.6**  
-**機能削除:** 同 §5.5 · `ui-simplification-yk.mdc`
+**機能削除:** 同 §5.5 · `ui-simplification-yk.mdc`  
+**操作部品 class · workspace 比率:** `REACTFLOW_RULES` §5.6-2a · `flowchartUiClasses.ts`
 
 ## 触る前に確認
 

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   DEMO_DEVICE_PRESS_A,
   DEMO_DEVICE_PRESS_B,
+  excludeModulesFromDevices,
+  hasModuleInDevices,
   moduleStorageKey,
   resolveModuleDraftKeys,
 } from "./moduleHierarchy";
@@ -35,5 +37,15 @@ describe("moduleHierarchy", () => {
       0
     );
     expect(count).toBe(5);
+  });
+
+  it("excludeModulesFromDevices removes module from nav tree", () => {
+    const removedId = DEMO_DEVICE_PRESS_A.units[0]!.modules[0]!.id;
+    const filtered = excludeModulesFromDevices(
+      [DEMO_DEVICE_PRESS_A],
+      new Set([removedId])
+    );
+    expect(hasModuleInDevices(filtered, removedId)).toBe(false);
+    expect(filtered[0]!.units[0]!.modules).toHaveLength(1);
   });
 });

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { fcBtnSecondary } from "./flowchartUiClasses";
+
 export type SampleOption = {
   key: string;
   label: string;
@@ -149,7 +151,7 @@ export function EditorMoreMenu({
         aria-expanded={open}
         aria-haspopup="menu"
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+        className={cn(fcBtnSecondary, "inline-flex items-center gap-1")}
       >
         その他
         <ChevronDown

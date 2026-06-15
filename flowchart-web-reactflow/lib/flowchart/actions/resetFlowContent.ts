@@ -8,6 +8,7 @@ import { canResetFlowContent } from "@/lib/flowchart/flowResetPermissions";
 import { getStarterFlowSnapshot } from "@/lib/flowchart/starterFlowSnapshot";
 import { isModuleUuid } from "@/lib/flowchart/moduleUuid";
 import { isAuthDisabled } from "@/lib/supabase/env";
+import { isPlaywrightActionStubEnabled } from "@/lib/supabase/e2eStub";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type ResetFlowContentResult =
@@ -15,10 +16,7 @@ export type ResetFlowContentResult =
   | { ok: false; error: string };
 
 function isResetFlowE2eStubEnabled(): boolean {
-  return (
-    process.env.PLAYWRIGHT_E2E === "1" &&
-    process.env.RESET_FLOW_E2E_STUB === "1"
-  );
+  return isPlaywrightActionStubEnabled("RESET_FLOW_E2E_STUB");
 }
 
 function mapRpcError(message: string): string {

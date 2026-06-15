@@ -275,6 +275,15 @@ select proname from pg_proc where proname = 'rpc_delete_module';
 **原因:** M-3 で `admin` ロール追加後、`flow_documents` の INSERT/UPDATE ポリシーが `editor` のみのまま。  
 **対処:** **`014_flow_documents_rls_admin.sql` の全文** → **Run**（013 の後 · 1 回のみ）。
 
+### 12-2b. フロー所有者 RLS · import 上書き制限（015）— **スキップ可**
+
+**015 は 016 で上書き。** 015 を Run 済みでも **016 を Run** すればよい。015 未適用なら **016 のみ** Run。
+
+### 12-2c. 共同編集（RLS · 016 · 運用確定 2026-06-15）
+
+**方針:** editor は **他人のフロー中身も編集可**（クラウド保存 · import 再取込）。**削除**（動作削除 · 雛形リセット · 装置/ユニット削除）は従来どおり所有者/admin のみ。  
+**対処:** **`016_flow_documents_collaborative_edit.sql` の全文** → **Run**（014 または 015 の後 · 1 回のみ）。
+
 ### 12-3. 本番 URL 確認（https://flowchart-web-reactflow.vercel.app）
 
 ログイン後、次を 1 件ずつ:

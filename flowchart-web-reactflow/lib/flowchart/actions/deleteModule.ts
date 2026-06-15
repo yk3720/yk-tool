@@ -6,6 +6,7 @@ import { canEditFlowchart } from "@/lib/auth/roles";
 import { getAuthState } from "@/lib/auth/session";
 import { canDeleteModule } from "@/lib/flowchart/moduleDeletePermissions";
 import { isAuthDisabled } from "@/lib/supabase/env";
+import { isPlaywrightActionStubEnabled } from "@/lib/supabase/e2eStub";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type DeleteModuleResult =
@@ -13,10 +14,7 @@ export type DeleteModuleResult =
   | { ok: false; error: string };
 
 function isModuleDeleteE2eStubEnabled(): boolean {
-  return (
-    process.env.PLAYWRIGHT_E2E === "1" &&
-    process.env.MODULE_DELETE_E2E_STUB === "1"
-  );
+  return isPlaywrightActionStubEnabled("MODULE_DELETE_E2E_STUB");
 }
 
 type ModuleRow = {

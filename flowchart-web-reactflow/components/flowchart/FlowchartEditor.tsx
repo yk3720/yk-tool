@@ -35,11 +35,19 @@ import {
   WARNING_BANNER_HINT,
 } from "@/lib/flowchart/validationMeta";
 import { isModuleContentDirty } from "@/lib/flowchart/moduleContentDirty";
+import { cn } from "@/lib/utils";
 import { captureFlowPng } from "./exportPng";
 import { captureFlowSvg } from "./exportSvg";
 import { ConfirmReplaceDialog } from "./ConfirmReplaceDialog";
 import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
+import {
+  FC_WORKSPACE_MAIN_GRID,
+  fcBtnAccent,
+  fcBtnPrimary,
+  fcBtnSecondary,
+  fcMobileTabBase,
+} from "./flowchartUiClasses";
 import { FlowColorLegend } from "./FlowColorLegend";
 import { CsvPastePanel } from "./CsvPastePanel";
 import { FlowTableEditor, type FlowTableEditorHandle } from "./FlowTableEditor";
@@ -129,6 +137,10 @@ export type FlowchartEditorProps = {
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
+const EMPTY_MODULE_NAV_HINT =
+  "← 左のナビでユニットを展開し、動作を選んでください";
+const REGENERATE_HINT =
+  "表を編集したあとは「再生成」でプレビューを更新します。";
 const EMPTY_TABLE_MESSAGE = "Excel から取込むか、表を入力してください";
 
 function resolveInitialState(props: FlowchartEditorProps): {
@@ -716,11 +728,12 @@ export const FlowchartEditor = forwardRef<
         type="button"
         onClick={handleRegenerate}
         disabled={!showEditorPanes || readOnly}
-        className={`rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40 ${
+        className={cn(
+          fcBtnPrimary,
           isStale && showEditorPanes && !readOnly
             ? "ring-2 ring-amber-400 ring-offset-1"
             : ""
-        }`}
+        )}
       >
         再生成
       </button>
@@ -730,14 +743,14 @@ export const FlowchartEditor = forwardRef<
           <button
             type="button"
             onClick={handleSaveJson}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+            className={fcBtnSecondary}
           >
             表を保存
           </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+            className={fcBtnSecondary}
           >
             表を読込
           </button>
@@ -774,7 +787,7 @@ export const FlowchartEditor = forwardRef<
             type="button"
             data-testid="apply-sample-preview"
             onClick={handleApplyPreviewToModule}
-            className="rounded-md border border-blue-300 bg-blue-50 px-3 py-1.5 text-sm font-medium text-blue-800 hover:bg-blue-100"
+            className={fcBtnAccent}
           >
             モジュールに適用
           </button>
@@ -782,7 +795,7 @@ export const FlowchartEditor = forwardRef<
             type="button"
             data-testid="cancel-sample-preview"
             onClick={handleCancelModulePreview}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
+            className={fcBtnSecondary}
           >
             プレビューを終了
           </button>
@@ -880,11 +893,12 @@ export const FlowchartEditor = forwardRef<
           role="tab"
           aria-selected={paneView === "table"}
           onClick={() => setPaneView("table")}
-          className={`rounded px-3 py-1 font-medium ${
+          className={cn(
+            fcMobileTabBase,
             paneView === "table"
               ? "bg-slate-800 text-white"
               : "text-slate-600 hover:bg-slate-50"
-          }`}
+          )}
         >
           表
         </button>
@@ -893,11 +907,12 @@ export const FlowchartEditor = forwardRef<
           role="tab"
           aria-selected={paneView === "canvas"}
           onClick={() => setPaneView("canvas")}
-          className={`rounded px-3 py-1 font-medium ${
+          className={cn(
+            fcMobileTabBase,
             paneView === "canvas"
               ? "bg-slate-800 text-white"
               : "text-slate-600 hover:bg-slate-50"
-          }`}
+          )}
         >
           図
         </button>
@@ -908,12 +923,18 @@ export const FlowchartEditor = forwardRef<
   const tablePaneBody = !showEditorPanes ? (
     <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
       <p>{EMPTY_MODULE_MESSAGE}</p>
+      {workspaceMode ? (
+        <p className="text-xs text-slate-500">{EMPTY_MODULE_NAV_HINT}</p>
+      ) : null}
       <p className="text-xs text-slate-400">
         または上の「サンプルを選択」から表と図を表示できます
       </p>
     </div>
   ) : (
     <>
+      {!readOnly ? (
+        <p className="text-xs text-slate-500">{REGENERATE_HINT}</p>
+      ) : null}
       {!readOnly ? (
         <CsvPastePanel
           onApply={handleCsvApply}
@@ -950,6 +971,9 @@ export const FlowchartEditor = forwardRef<
           }
         >
           <p>{EMPTY_MODULE_MESSAGE}</p>
+          {workspaceMode ? (
+            <p className="text-xs text-slate-500">{EMPTY_MODULE_NAV_HINT}</p>
+          ) : null}
           <p className="text-xs text-slate-400">
             または上の「サンプルを選択」から表と図を表示できます
           </p>
@@ -1014,7 +1038,9 @@ export const FlowchartEditor = forwardRef<
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         {replaceConfirmDialog}
         {mobilePaneTabs}
-        <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
+        <main
+          className={cn("grid min-h-0 flex-1 gap-0", FC_WORKSPACE_MAIN_GRID)}
+        >
           <section
             className={`flex min-h-0 min-w-0 flex-col border-r border-slate-200 ${
               paneView === "canvas" ? "hidden lg:flex" : "flex"
@@ -1113,7 +1139,7 @@ export const FlowchartEditor = forwardRef<
       {errorBanner}
       {warningBanner}
 
-      <main className="grid min-h-0 flex-1 gap-0 lg:grid-cols-[2fr_3fr]">
+      <main className={cn("grid min-h-0 flex-1 gap-0", FC_WORKSPACE_MAIN_GRID)}>
         <section className="flex min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4">
           <h2 className="text-sm font-medium text-slate-700">表</h2>
           {tablePaneBody}

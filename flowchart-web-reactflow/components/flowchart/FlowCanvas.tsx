@@ -10,14 +10,9 @@ import {
   type Node,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-} from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
 import type { FlowNodeData } from "@/lib/flowchart/toReactFlow";
+import { fcFitViewOptions } from "./flowchartUiClasses";
 import { flowEdgeTypes, flowNodeTypes } from "./flowTypes";
 
 export type FlowCanvasHandle = {
@@ -37,23 +32,24 @@ function FlowCanvasInner(
   ref: React.Ref<FlowCanvasHandle>
 ) {
   const { fitView } = useReactFlow();
+  const nodeCount = nodes.length;
 
   useImperativeHandle(
     ref,
     () => ({
       fitView: () => {
-        void fitView({ padding: 0.2, duration: 200 });
+        void fitView(fcFitViewOptions(nodeCount));
       },
       getExportElement: () =>
         document.querySelector("[data-flowchart-export-root]"),
     }),
-    [fitView]
+    [fitView, nodeCount]
   );
 
   useEffect(() => {
     if (nodes.length > 0) {
       const t = window.setTimeout(() => {
-        void fitView({ padding: 0.2, duration: 200 });
+        void fitView(fcFitViewOptions(nodes.length));
       }, 50);
       return () => window.clearTimeout(t);
     }

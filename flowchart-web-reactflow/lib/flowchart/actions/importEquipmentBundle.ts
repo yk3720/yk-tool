@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { parseImportBundleJson } from "@/lib/flowchart/importBundleSchema";
 import { prepareImportBundleForRpc } from "@/lib/flowchart/prepareImportBundle";
 import { isAuthDisabled } from "@/lib/supabase/env";
+import { isPlaywrightActionStubEnabled } from "@/lib/supabase/e2eStub";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { requireEditor } from "./flowDocumentsAuth";
@@ -35,9 +36,7 @@ function mapRpcError(message: string): string {
 }
 
 function isImportE2eStubEnabled(): boolean {
-  return (
-    process.env.PLAYWRIGHT_E2E === "1" && process.env.IMPORT_E2E_STUB === "1"
-  );
+  return isPlaywrightActionStubEnabled("IMPORT_E2E_STUB");
 }
 
 export async function importEquipmentBundle(

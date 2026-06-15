@@ -23,8 +23,10 @@ import {
 import type { ModuleSnapshot } from "@/lib/flowchart/moduleDraftRepository";
 import type { Device } from "@/lib/flowchart/moduleHierarchy";
 import {
+  excludeModulesFromDevices,
   findDevice,
   findModule,
+  hasModuleInDevices,
   moduleStorageKey,
 } from "@/lib/flowchart/moduleHierarchy";
 import {
@@ -35,6 +37,7 @@ import { getStarterFlowSnapshot } from "@/lib/flowchart/starterFlowSnapshot";
 
 import { FlowchartEditor, type FlowchartEditorHandle } from "./FlowchartEditor";
 import { ModuleNavPane } from "./ModuleNavPane";
+import { fcBtnCancel, fcBtnDanger, fcStatusBanner } from "./flowchartUiClasses";
 
 type Props = {
   role: ProfileRole;
@@ -100,18 +103,44 @@ export function FlowchartWorkspace({
   const [flowResetConfirmOpen, setFlowResetConfirmOpen] = useState(false);
   const [flowResetPending, setFlowResetPending] = useState(false);
   const flowResetInFlightRef = useRef(false);
+  /** 削除成功直後のナビ反映（refresh 完了前 · E2E スタブ時もサーバーと一致） */
+  const [optimisticRemovedModuleIds, setOptimisticRemovedModuleIds] = useState(
+    () => new Set<string>()
+  );
 
   const isEditor = canEditFlowchart(role);
   const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
+  /** サーバー反映済みの ID は楽観セットから外す（effect 内 setState 回避） */
+  const activeOptimisticRemovedModuleIds = useMemo(() => {
+    if (optimisticRemovedModuleIds.size === 0)
+      return optimisticRemovedModuleIds;
+    let changed = false;
+    const next = new Set<string>();
+    for (const id of optimisticRemovedModuleIds) {
+      if (hasModuleInDevices(devices, id)) {
+        next.add(id);
+      } else {
+        changed = true;
+      }
+    }
+    return changed ? next : optimisticRemovedModuleIds;
+  }, [devices, optimisticRemovedModuleIds]);
+
+  const visibleDevices = useMemo(
+    () => excludeModulesFromDevices(devices, activeOptimisticRemovedModuleIds),
+    [devices, activeOptimisticRemovedModuleIds]
+  );
+
   const activeDeviceId = useMemo(() => {
-    if (devices.some((d) => d.id === selectedDeviceId)) {
+    if (visibleDevices.some((d) => d.id === selectedDeviceId)) {
       return selectedDeviceId;
     }
-    return devices[0]?.id ?? "";
-  }, [devices, selectedDeviceId]);
+    return visibleDevices[0]?.id ?? "";
+  }, [visibleDevices, selectedDeviceId]);
 
-  const device = findDevice(devices, activeDeviceId) ?? devices[0];
+  const device =
+    findDevice(visibleDevices, activeDeviceId) ?? visibleDevices[0];
 
   const moduleInfo =
     selectedModuleId && device ? findModule(device, selectedModuleId) : null;
@@ -221,10 +250,10 @@ export function FlowchartWorkspace({
       setLoadSource("");
       setOfflineCachedAt(null);
       setPinned(false);
-      setExpandedUnitIds(expandedUnitsForDevice(devices, deviceId));
+      setExpandedUnitIds(expandedUnitsForDevice(visibleDevices, deviceId));
       setLoadKey((k) => k + 1);
     },
-    [persistCurrentModule, selectedDeviceId, devices]
+    [persistCurrentModule, selectedDeviceId, visibleDevices]
   );
 
   useEffect(() => {
@@ -298,6 +327,11 @@ export function FlowchartWorkspace({
         setSelectedModuleId(null);
         setInitialSnapshot(null);
       }
+      setOptimisticRemovedModuleIds((prev) => {
+        const next = new Set(prev);
+        next.add(moduleDeleteTargetId);
+        return next;
+      });
       setModuleDeleteTargetId(null);
       setImportBanner("動作を削除しました");
       router.refresh();
@@ -426,14 +460,14 @@ export function FlowchartWorkspace({
       {statusBanner ? (
         <p
           role={statusBannerTone(statusBanner) === "error" ? "alert" : "status"}
-          className={`px-3 py-1.5 text-xs ${statusBannerClassName(statusBannerTone(statusBanner))}`}
+          className={`${fcStatusBanner} ${statusBannerClassName(statusBannerTone(statusBanner))}`}
         >
           {statusBanner}
         </p>
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <ModuleNavPane
-          devices={devices}
+          devices={visibleDevices}
           selectedDeviceId={activeDeviceId}
           device={device}
           selectedModuleId={selectedModuleId}
@@ -527,7 +561,7 @@ export function FlowchartWorkspace({
                 autoFocus
                 disabled={deviceDeletePending}
                 onClick={() => setDeviceDeleteConfirmOpen(false)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className={fcBtnCancel}
               >
                 キャンセル
               </button>
@@ -536,7 +570,7 @@ export function FlowchartWorkspace({
                 disabled={deviceDeletePending}
                 onClick={() => void handleConfirmDeleteDevice()}
                 data-testid="delete-device-confirm"
-                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className={fcBtnDanger}
               >
                 削除する
               </button>
@@ -577,7 +611,7 @@ export function FlowchartWorkspace({
                 autoFocus
                 disabled={unitDeletePending}
                 onClick={() => setUnitDeleteTargetId(null)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className={fcBtnCancel}
               >
                 キャンセル
               </button>
@@ -586,7 +620,7 @@ export function FlowchartWorkspace({
                 disabled={unitDeletePending}
                 onClick={() => void handleConfirmDeleteUnit()}
                 data-testid="delete-unit-confirm"
-                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className={fcBtnDanger}
               >
                 削除する
               </button>
@@ -627,7 +661,7 @@ export function FlowchartWorkspace({
                 autoFocus
                 disabled={moduleDeletePending}
                 onClick={() => setModuleDeleteTargetId(null)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className={fcBtnCancel}
               >
                 キャンセル
               </button>
@@ -636,7 +670,7 @@ export function FlowchartWorkspace({
                 disabled={moduleDeletePending}
                 onClick={() => void handleConfirmDeleteModule()}
                 data-testid="delete-module-confirm"
-                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className={fcBtnDanger}
               >
                 削除する
               </button>
@@ -678,7 +712,7 @@ export function FlowchartWorkspace({
                 autoFocus
                 disabled={flowResetPending}
                 onClick={() => setFlowResetConfirmOpen(false)}
-                className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50 disabled:opacity-50"
+                className={fcBtnCancel}
               >
                 キャンセル
               </button>
@@ -687,7 +721,7 @@ export function FlowchartWorkspace({
                 disabled={flowResetPending}
                 onClick={() => void handleConfirmResetFlow()}
                 data-testid="reset-flow-confirm"
-                className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                className={fcBtnDanger}
               >
                 リセットする
               </button>

@@ -1,5 +1,7 @@
 "use client";
 
+import { fcBtnCancel, fcBtnDanger } from "./flowchartUiClasses";
+
 type Props = {
   open: boolean;
   title: string;
@@ -49,15 +51,11 @@ export function ConfirmReplaceDialog({
             type="button"
             autoFocus
             onClick={onCancel}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className={fcBtnCancel}
           >
             キャンセル
           </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
-          >
+          <button type="button" onClick={onConfirm} className={fcBtnDanger}>
             {confirmLabel}
           </button>
         </div>

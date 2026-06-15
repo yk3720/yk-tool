@@ -183,6 +183,32 @@ export function findModuleInDevices(
   return null;
 }
 
+export function hasModuleInDevices(
+  devices: readonly Device[],
+  moduleId: string
+): boolean {
+  return findModuleInDevices(devices, moduleId) !== null;
+}
+
+/** 削除直後のナビ反映用 — 指定モジュールを除外した装置ツリーを返す */
+export function excludeModulesFromDevices(
+  devices: readonly Device[],
+  excludedModuleIds: ReadonlySet<string>
+): Device[] {
+  if (excludedModuleIds.size === 0) {
+    return [...devices];
+  }
+  return devices.map((device) => ({
+    ...device,
+    units: device.units
+      .map((unit) => ({
+        ...unit,
+        modules: unit.modules.filter((m) => !excludedModuleIds.has(m.id)),
+      }))
+      .filter((unit) => unit.modules.length > 0),
+  }));
+}
+
 /** 読込用 — uuid 優先 · 旧 text キーへフォールバック */
 export function resolveModuleDraftKeys(
   module: FlowModule,

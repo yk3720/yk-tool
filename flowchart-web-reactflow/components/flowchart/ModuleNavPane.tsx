@@ -15,6 +15,14 @@ import type {
 } from "@/lib/flowchart/moduleHierarchy";
 import { cn } from "@/lib/utils";
 
+import {
+  fcBtnDangerOutline,
+  fcNavModuleBtn,
+  fcNavModuleBtnState,
+  fcNavSelect,
+  fcNavUnitToggle,
+} from "./flowchartUiClasses";
+
 type ModuleNavPaneProps = {
   devices: readonly Device[];
   selectedDeviceId: string;
@@ -50,12 +58,7 @@ function ModuleButton({
         type="button"
         onClick={onSelect}
         aria-current={selected ? "page" : undefined}
-        className={cn(
-          "min-w-0 flex-1 rounded-md px-3 py-1.5 text-left text-sm transition-colors",
-          selected
-            ? "bg-blue-100 font-medium text-blue-900"
-            : "text-slate-700 hover:bg-slate-100"
-        )}
+        className={cn(fcNavModuleBtn, fcNavModuleBtnState(selected))}
       >
         <span className="truncate">{module.label}</span>
       </button>
@@ -101,7 +104,7 @@ function UnitSection({
           type="button"
           onClick={onToggleUnit}
           aria-expanded={expanded}
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-sm font-medium text-slate-800 hover:bg-slate-100"
+          className={fcNavUnitToggle}
         >
           {expanded ? (
             <ChevronDown
@@ -205,7 +208,7 @@ export function ModuleNavPane({
           <select
             value={selectedDeviceId}
             onChange={(e) => onSelectDevice(e.target.value)}
-            className="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-800"
+            className={fcNavSelect}
             aria-label="装置を選択"
           >
             {devices.map((d) => (
@@ -220,7 +223,10 @@ export function ModuleNavPane({
             type="button"
             onClick={onRequestDeleteDevice}
             data-testid="delete-device-request"
-            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-red-200 px-2 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50"
+            className={cn(
+              fcBtnDangerOutline,
+              "flex w-full items-center justify-center gap-1.5"
+            )}
           >
             <Trash2 className="size-3.5" aria-hidden />
             装置を削除…

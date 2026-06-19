@@ -34,9 +34,7 @@ test.describe("サンプル表示（モジュール未選択）", () => {
     await expect(page.getByText(/生成完了/)).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(EMPTY_MODULE_MSG)).toHaveCount(0);
     await expect(
-      page
-        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first()
+      page.getByText(/例をプレビュー中（未保存）/).first()
     ).toBeVisible();
     await expect(page.locator("tbody tr")).not.toHaveCount(0);
     await expect(page.locator(".react-flow__node")).toHaveCount(15, {
@@ -81,9 +79,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
       page.getByRole("heading", { name: "プレビュー" })
     ).toBeVisible();
     await expect(
-      page
-        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first()
+      page.getByText(/例をプレビュー中（未保存）/).first()
     ).toBeVisible();
   });
 
@@ -203,9 +199,7 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
 
   test("B-4: サンプルプレビュー時のモード表示", async ({ page }) => {
     await expect(
-      page
-        .getByText("サンプル表示（左でモジュールを選ぶと保存できます）")
-        .first()
+      page.getByText(/例をプレビュー中（未保存）/).first()
     ).toBeVisible();
     await expect(headerRegenerate(page)).toBeEnabled();
   });

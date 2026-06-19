@@ -4,6 +4,29 @@
 
 **SSOT:** `c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/02_spec/Excel取込_正規化パイプライン.md`
 
+## 作者 Excel の置き場所
+
+**決定:** 2026-06-19 — 装置ごとの手書き xlsx は **`fixtures/devices/`** 以下に置く（`templates/` は空テンプレのみ · `yk-document/` は本アプリの取込 SSOT 外）。
+
+| 種別               | パス（リポジトリルートから）                                                    |
+| ------------------ | ------------------------------------------------------------------------------- |
+| **装置ルート**     | `tools/excel_normalize/fixtures/devices/{社内番号}_{装置名}/`                   |
+| **装置一式の正本** | 上記 / `マスター.xlsx`                                                          |
+| **正規化出力**     | 上記 / `import.json`                                                            |
+| **1 動作の試行**   | 上記 / `_scratch/{動作名}.xlsx`（1 シート · 10 列 · Web 表タブの Excel 取込用） |
+| **旧版退避**       | 上記 / `archive/`                                                               |
+| **空テンプレ**     | `tools/excel_normalize/templates/入力用テンプレ_v0.2.xlsx`                      |
+
+**現在の実装置（手書き作業）:** `A0001_塗布装置/` — 一覧は [`fixtures/devices/README.md`](fixtures/devices/README.md)
+
+```text
+c:/yk-tool/flowchart-web-reactflow/tools/excel_normalize/fixtures/devices/A0001_塗布装置/
+  マスター.xlsx
+  import.json
+  _scratch/          ← 1 動作試行用（例: 取出.xlsx）
+  archive/
+```
+
 ## 前提
 
 - Python 3.10+

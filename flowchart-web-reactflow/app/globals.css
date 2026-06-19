@@ -46,6 +46,43 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* フロー編集 chrome（Layer C）— SSOT: docs/design-system.md */
+  --color-flow-accent: var(--flow-accent);
+  --color-flow-accent-hover: var(--flow-accent-hover);
+  --color-flow-accent-emphasis: var(--flow-accent-emphasis);
+  --color-flow-accent-muted: var(--flow-accent-muted);
+  --color-flow-accent-muted-border: var(--flow-accent-muted-border);
+  --color-flow-accent-muted-text: var(--flow-accent-muted-text);
+  --color-flow-accent-selected-bg: var(--flow-accent-selected-bg);
+  --color-flow-accent-selected-text: var(--flow-accent-selected-text);
+  --color-flow-danger: var(--flow-danger);
+  --color-flow-danger-hover: var(--flow-danger-hover);
+  --color-flow-danger-muted: var(--flow-danger-muted);
+  --color-flow-danger-border: var(--flow-danger-border);
+  --color-flow-danger-text: var(--flow-danger-text);
+  --color-flow-danger-text-emphasis: var(--flow-danger-text-emphasis);
+  --color-flow-surface: var(--flow-surface);
+  --color-flow-surface-muted: var(--flow-surface-muted);
+  --color-flow-surface-subtle: var(--flow-surface-subtle);
+  --color-flow-border: var(--flow-border);
+  --color-flow-border-strong: var(--flow-border-strong);
+  --color-flow-border-input: var(--flow-border-input);
+  --color-flow-text: var(--flow-text);
+  --color-flow-text-body: var(--flow-text-body);
+  --color-flow-text-muted: var(--flow-text-muted);
+  --color-flow-text-subtle: var(--flow-text-subtle);
+  --color-flow-warning: var(--flow-warning);
+  --color-flow-warning-emphasis: var(--flow-warning-emphasis);
+  --color-flow-warning-bg: var(--flow-warning-bg);
+  --color-flow-warning-border: var(--flow-warning-border);
+  --color-flow-warning-border-strong: var(--flow-warning-border-strong);
+  --color-flow-warning-text: var(--flow-warning-text);
+  --color-flow-warning-text-subtle: var(--flow-warning-text-subtle);
+  --color-flow-warning-ring: var(--flow-warning-ring);
+  --color-flow-nav-active: var(--flow-nav-active);
+  --color-flow-success-bg: var(--flow-success-bg);
+  --color-flow-success-border: var(--flow-success-border);
+  --color-flow-success-text: var(--flow-success-text);
 }
 
 /* React Flow: エッジ・ノード枠がクリップされないように */
@@ -92,6 +129,43 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* flowchart 操作 UI（tailwind blue/slate/red/amber 相当 · テーマ切替なし） */
+  --flow-accent: #2563eb;
+  --flow-accent-hover: #1d4ed8;
+  --flow-accent-emphasis: #1e40af;
+  --flow-accent-muted: #eff6ff;
+  --flow-accent-muted-border: #93c5fd;
+  --flow-accent-muted-text: #1e40af;
+  --flow-accent-selected-bg: #dbeafe;
+  --flow-accent-selected-text: #1e3a8a;
+  --flow-danger: #dc2626;
+  --flow-danger-hover: #b91c1c;
+  --flow-danger-muted: #fef2f2;
+  --flow-danger-border: #fecaca;
+  --flow-danger-text: #991b1b;
+  --flow-danger-text-emphasis: #450a0a;
+  --flow-surface: #ffffff;
+  --flow-surface-muted: #f8fafc;
+  --flow-surface-subtle: #f1f5f9;
+  --flow-border: #e2e8f0;
+  --flow-border-strong: #cbd5e1;
+  --flow-border-input: #cbd5e1;
+  --flow-text: #0f172a;
+  --flow-text-body: #334155;
+  --flow-text-muted: #64748b;
+  --flow-text-subtle: #94a3b8;
+  --flow-warning: #d97706;
+  --flow-warning-emphasis: #b45309;
+  --flow-warning-bg: #fffbeb;
+  --flow-warning-border: #fde68a;
+  --flow-warning-border-strong: #fcd34d;
+  --flow-warning-text: #78350f;
+  --flow-warning-text-subtle: #92400e;
+  --flow-warning-ring: #fbbf24;
+  --flow-nav-active: #1e293b;
+  --flow-success-bg: #f0fdf4;
+  --flow-success-border: #bbf7d0;
+  --flow-success-text: #14532d;
 }
 
 .dark {

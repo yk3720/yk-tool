@@ -37,7 +37,17 @@ import { getStarterFlowSnapshot } from "@/lib/flowchart/starterFlowSnapshot";
 
 import { FlowchartEditor, type FlowchartEditorHandle } from "./FlowchartEditor";
 import { ModuleNavPane } from "./ModuleNavPane";
-import { fcBtnCancel, fcBtnDanger, fcStatusBanner } from "./flowchartUiClasses";
+import {
+  fcBtnCancel,
+  fcBtnDanger,
+  fcDialogBody,
+  fcDialogOverlay,
+  fcDialogPanel,
+  fcDialogTitle,
+  fcStatusBanner,
+  fcWorkspaceLoading,
+  fcWorkspaceShell,
+} from "./flowchartUiClasses";
 
 type Props = {
   role: ProfileRole;
@@ -215,6 +225,7 @@ export function FlowchartWorkspace({
   const resetModuleLoadState = useCallback(() => {
     userContentOverrideRef.current = false;
     loadGenerationRef.current += 1;
+    setLoadingModule(false);
     setInitialSnapshot(null);
     setLoadSource("");
     setOfflineCachedAt(null);
@@ -244,6 +255,7 @@ export function FlowchartWorkspace({
       persistCurrentModule();
       userContentOverrideRef.current = false;
       loadGenerationRef.current += 1;
+      setLoadingModule(false);
       setSelectedDeviceId(deviceId);
       setSelectedModuleId(null);
       setInitialSnapshot(null);
@@ -447,15 +459,11 @@ export function FlowchartWorkspace({
   }
 
   if (!device) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white text-slate-700">
-        装置データがありません
-      </div>
-    );
+    return <div className={fcWorkspaceLoading}>装置データがありません</div>;
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+    <div className={fcWorkspaceShell}>
       <AppAuthBar email={email} role={role} showDevBanner={authDisabled} />
       {statusBanner ? (
         <p
@@ -520,12 +528,13 @@ export function FlowchartWorkspace({
               ? { onRequestReset: () => setFlowResetConfirmOpen(true) }
               : undefined
           }
+          moduleLoading={loadingModule && Boolean(selectedModuleId)}
         />
       </div>
 
       {deviceDeleteConfirmOpen && device ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className={fcDialogOverlay}
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget && !deviceDeletePending) {
@@ -537,15 +546,12 @@ export function FlowchartWorkspace({
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="delete-device-title"
-            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+            className={fcDialogPanel}
           >
-            <h2
-              id="delete-device-title"
-              className="text-base font-semibold text-slate-900"
-            >
+            <h2 id="delete-device-title" className={fcDialogTitle}>
               装置を削除しますか？
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className={fcDialogBody}>
               <strong>{device.name}</strong>
               {device.internalCode ? (
                 <>
@@ -581,7 +587,7 @@ export function FlowchartWorkspace({
 
       {unitDeleteTarget ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className={fcDialogOverlay}
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget && !unitDeletePending) {
@@ -593,15 +599,12 @@ export function FlowchartWorkspace({
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="delete-unit-title"
-            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+            className={fcDialogPanel}
           >
-            <h2
-              id="delete-unit-title"
-              className="text-base font-semibold text-slate-900"
-            >
+            <h2 id="delete-unit-title" className={fcDialogTitle}>
               ユニットを削除しますか？
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className={fcDialogBody}>
               <strong>{unitDeleteTarget.label}</strong>
               と配下の動作・フロー表をすべて削除します。取り消せません。
             </p>
@@ -631,7 +634,7 @@ export function FlowchartWorkspace({
 
       {moduleDeleteTarget ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className={fcDialogOverlay}
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget && !moduleDeletePending) {
@@ -643,15 +646,12 @@ export function FlowchartWorkspace({
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="delete-module-title"
-            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+            className={fcDialogPanel}
           >
-            <h2
-              id="delete-module-title"
-              className="text-base font-semibold text-slate-900"
-            >
+            <h2 id="delete-module-title" className={fcDialogTitle}>
               動作を削除しますか？
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className={fcDialogBody}>
               <strong>{moduleDeleteTarget.label}</strong>
               と紐づくフロー表を削除します。取り消せません。
             </p>
@@ -681,7 +681,7 @@ export function FlowchartWorkspace({
 
       {flowResetConfirmOpen && moduleInfo ? (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className={fcDialogOverlay}
           role="presentation"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget && !flowResetPending) {
@@ -693,15 +693,12 @@ export function FlowchartWorkspace({
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="reset-flow-title"
-            className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+            className={fcDialogPanel}
           >
-            <h2
-              id="reset-flow-title"
-              className="text-base font-semibold text-slate-900"
-            >
+            <h2 id="reset-flow-title" className={fcDialogTitle}>
               フローを雛形にリセットしますか？
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className={fcDialogBody}>
               <strong>{moduleInfo.module.label}</strong>
               の表・図を「雛形:
               はじめから」に戻します。クラウド上の保存内容も上書きされます。取り消せません。

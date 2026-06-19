@@ -14,7 +14,28 @@ import {
 } from "@/lib/flowchart/tableColumns";
 import { COLOR_HINT_SELECT_OPTIONS } from "@/lib/flowchart/flowColors";
 import type { FlowTableRow } from "@/lib/flowchart/types";
+import { cn } from "@/lib/utils";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import {
+  fcTableAddRowBtn,
+  fcTableCell,
+  fcTableCellIndex,
+  fcTableCellInput,
+  fcTableCellInputMono,
+  fcTableDeleteBtn,
+  fcTableHead,
+  fcTableHeadCell,
+  fcTableHeadCellAction,
+  fcTableHeadCellIndex,
+  fcTableHeadHelpMark,
+  fcTableHelpDetails,
+  fcTableHelpSummary,
+  fcTableMeta,
+  fcTableRow,
+  fcTableRowError,
+  fcTableScroll,
+  fcTable,
+} from "./flowchartUiClasses";
 
 export type FlowTableEditorHandle = {
   scrollToRow: (rowIndex: number) => void;
@@ -103,10 +124,8 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
 
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-2">
-        <details className="rounded-md border border-slate-200 bg-slate-50/90 px-2 py-1 text-xs text-slate-600">
-          <summary className="cursor-pointer font-medium text-slate-700">
-            列の意味（ヘルプ）
-          </summary>
+        <details className={fcTableHelpDetails}>
+          <summary className={fcTableHelpSummary}>列の意味（ヘルプ）</summary>
           {colCount >= 8 ? (
             <ul className="mt-1 list-inside list-disc space-y-0.5">
               {getHelpEntries(colCount, tableSchema).map(({ header, help }) => (
@@ -125,47 +144,30 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
 
         <div className="flex flex-wrap items-center gap-2">
           {!readOnly ? (
-            <button
-              type="button"
-              onClick={addRow}
-              className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium hover:bg-slate-50"
-            >
+            <button type="button" onClick={addRow} className={fcTableAddRowBtn}>
               行を追加
             </button>
           ) : null}
-          <span className="text-xs text-slate-500">
+          <span className={fcTableMeta}>
             {table.length} 行 · {colCount} 列
           </span>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="min-h-0 flex-1 overflow-auto rounded-md border border-slate-300"
-        >
-          <table className="w-full min-w-[640px] border-collapse text-xs">
-            <thead className="sticky top-0 z-10 bg-slate-100">
+        <div ref={scrollRef} className={fcTableScroll}>
+          <table className={fcTable}>
+            <thead className={fcTableHead}>
               <tr>
-                <th className="w-10 border-b border-slate-200 px-1 py-1.5 text-center font-medium text-slate-600">
-                  #
-                </th>
+                <th className={fcTableHeadCellIndex}>#</th>
                 {headers.map((h) => {
                   const help = getColumnHelp(h, colCount);
                   return (
-                    <th
-                      key={h}
-                      className="border-b border-slate-200 px-2 py-1.5 text-left font-medium text-slate-700"
-                      title={help}
-                    >
+                    <th key={h} className={fcTableHeadCell} title={help}>
                       {h}
-                      {help && (
-                        <span className="ml-0.5 font-normal text-slate-400">
-                          ?
-                        </span>
-                      )}
+                      {help && <span className={fcTableHeadHelpMark}>?</span>}
                     </th>
                   );
                 })}
-                <th className="w-14 border-b border-slate-200 px-1 py-1.5" />
+                <th className={fcTableHeadCellAction} />
               </tr>
             </thead>
             <tbody>
@@ -178,20 +180,11 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                       rowRefs.current[rowIndex] = el;
                     }}
                     data-row-index={rowIndex}
-                    className={`odd:bg-white even:bg-slate-50/80 hover:bg-blue-50/40 ${
-                      hasError
-                        ? "bg-red-100/90 ring-1 ring-inset ring-red-300"
-                        : ""
-                    }`}
+                    className={cn(fcTableRow, hasError && fcTableRowError)}
                   >
-                    <td className="border-b border-slate-100 px-1 py-0.5 text-center text-slate-400">
-                      {rowIndex + 1}
-                    </td>
+                    <td className={fcTableCellIndex}>{rowIndex + 1}</td>
                     {headers.map((h, colIndex) => (
-                      <td
-                        key={colIndex}
-                        className="border-b border-slate-100 px-0.5 py-0.5"
-                      >
+                      <td key={colIndex} className={fcTableCell}>
                         {isSelectColumn(colIndex) ? (
                           <select
                             value={
@@ -203,7 +196,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                               updateCell(rowIndex, colIndex, e.target.value)
                             }
                             disabled={readOnly}
-                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 disabled:cursor-default disabled:opacity-90"
+                            className={fcTableCellInput}
                             aria-label={`行${rowIndex + 1} ${h}`}
                           >
                             {(isColorTableColumn(colIndex, colCount)
@@ -229,19 +222,19 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                               updateCell(rowIndex, colIndex, e.target.value)
                             }
                             readOnly={readOnly}
-                            className="w-full rounded border-0 bg-transparent px-1.5 py-1 font-mono text-xs focus:bg-white focus:ring-1 focus:ring-blue-500 read-only:cursor-default read-only:opacity-90"
+                            className={fcTableCellInputMono}
                             aria-label={`行${rowIndex + 1} ${h}`}
                           />
                         )}
                       </td>
                     ))}
-                    <td className="border-b border-slate-100 px-1 py-0.5 text-center">
+                    <td className={fcTableCellIndex}>
                       {!readOnly ? (
                         <button
                           type="button"
                           onClick={() => deleteRow(rowIndex)}
                           disabled={table.length <= 1}
-                          className="rounded px-1 py-0.5 text-xs text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-30"
+                          className={fcTableDeleteBtn}
                           title="行を削除"
                         >
                           削除

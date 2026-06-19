@@ -13,10 +13,10 @@ export function statusBannerTone(message: string): StatusBannerTone {
 export function statusBannerClassName(tone: StatusBannerTone): string {
   switch (tone) {
     case "success":
-      return "border-b border-green-200 bg-green-50 text-green-900";
+      return "border-b border-flow-success-border bg-flow-success-bg text-flow-success-text";
     case "error":
-      return "border-b border-red-200 bg-red-50 text-red-900";
+      return "border-b bg-flow-danger-muted text-flow-danger-text";
     default:
-      return "border-b border-amber-100 bg-amber-50 text-amber-900";
+      return "border-b bg-flow-warning-bg text-flow-warning-text";
   }
 }

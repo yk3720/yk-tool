@@ -5,7 +5,16 @@ import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { fcBtnSecondary } from "./flowchartUiClasses";
+import {
+  fcBtnSecondary,
+  fcMenuChevron,
+  fcMenuDivider,
+  fcMenuDropdown,
+  fcMenuItem,
+  fcMenuItemDanger,
+  fcMenuSectionHint,
+  fcMenuSectionTitle,
+} from "./flowchartUiClasses";
 
 export type SampleOption = {
   key: string;
@@ -60,9 +69,8 @@ function MenuItem({
       onClick={onClick}
       className={cn(
         "w-full px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-        destructive
-          ? "text-red-700 hover:bg-red-50"
-          : "text-slate-800 hover:bg-slate-100"
+        destructive ? fcMenuItemDanger : fcMenuItem,
+        "flex gap-0"
       )}
     >
       {children}
@@ -82,18 +90,10 @@ function MenuSection({
   return (
     <>
       {!isFirst ? (
-        <div
-          className="my-1 border-t border-slate-200"
-          role="separator"
-          aria-hidden
-        />
+        <div className={fcMenuDivider} role="separator" aria-hidden />
       ) : null}
-      <p className="px-3 pb-0.5 pt-1.5 text-xs font-semibold text-slate-600">
-        {label}
-      </p>
-      {hint ? (
-        <p className="px-3 pb-1 text-xs leading-snug text-slate-500">{hint}</p>
-      ) : null}
+      <p className={fcMenuSectionTitle}>{label}</p>
+      {hint ? <p className={fcMenuSectionHint}>{hint}</p> : null}
     </>
   );
 }
@@ -155,20 +155,13 @@ export function EditorMoreMenu({
       >
         その他
         <ChevronDown
-          className={cn(
-            "size-4 text-slate-500 transition-transform",
-            open && "rotate-180"
-          )}
+          className={cn(fcMenuChevron, open && "rotate-180")}
           aria-hidden
         />
       </button>
 
       {open ? (
-        <div
-          role="menu"
-          aria-label="その他の操作"
-          className="absolute right-0 top-full z-30 mt-1 min-w-[16rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg"
-        >
+        <div role="menu" aria-label="その他の操作" className={fcMenuDropdown}>
           {!readOnly ? (
             <>
               <MenuSection label="始め方" hint={starterHint} isFirst />

@@ -1,6 +1,13 @@
 "use client";
 
-import { fcBtnCancel, fcBtnDanger } from "./flowchartUiClasses";
+import {
+  fcBtnCancel,
+  fcBtnDanger,
+  fcDialogBody,
+  fcDialogOverlay,
+  fcDialogPanel,
+  fcDialogTitle,
+} from "./flowchartUiClasses";
 
 type Props = {
   open: boolean;
@@ -24,7 +31,7 @@ export function ConfirmReplaceDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className={fcDialogOverlay}
       role="presentation"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onCancel();
@@ -35,15 +42,12 @@ export function ConfirmReplaceDialog({
         aria-modal="true"
         aria-labelledby="confirm-replace-title"
         aria-describedby="confirm-replace-desc"
-        className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-5 shadow-xl"
+        className={fcDialogPanel}
       >
-        <h2
-          id="confirm-replace-title"
-          className="text-base font-semibold text-slate-900"
-        >
+        <h2 id="confirm-replace-title" className={fcDialogTitle}>
           {title}
         </h2>
-        <p id="confirm-replace-desc" className="mt-2 text-sm text-slate-600">
+        <p id="confirm-replace-desc" className={fcDialogBody}>
           {description}
         </p>
         <div className="mt-5 flex flex-wrap justify-end gap-2">

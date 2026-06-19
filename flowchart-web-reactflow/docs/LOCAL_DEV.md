@@ -27,6 +27,7 @@
 
 ```text
 http://localhost:3000/login
+http://localhost:3000/dev/style   # スタイルガイド見本（開発のみ · 本番 404）
 ```
 
 | やらない                                         | 理由                             |
@@ -68,4 +69,4 @@ http://localhost:3000/login
 
 - [README.md §起動](../README.md)
 - 企画 [AGENTS.md](c:/yk-memo/00.ai-driven-school/個人テーマ_フローチャートアプリ/AGENTS.md) — ローカル確認
-- Cursor 内部ブラウザ問題: [Forum — localhost in external browser](https://forum.cursor.com/t/how-to-restore-follow-link-functionality-with-external-browser/144525)
+- [design-system.md](./design-system.md) — スタイルガイド索引

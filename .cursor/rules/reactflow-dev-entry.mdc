@@ -19,6 +19,7 @@ alwaysApply: false
 - `components/flowchart` の React 一般 → `creating-react-yk` · `REACT_RULES`
 - shadcn 導入・`components/ui/**` · `components.json` → **`shadcn-dev-entry.mdc`**（`yk-skill`）· `creating-shadcn-yk` · `SHADCN_UI_RULES` §13
 - **UI 整理（機能削除）** → `flowchart-web-reactflow/.cursor/rules/ui-simplification-yk.mdc` · `REACTFLOW_RULES` §5.5
+- **操作 UI / スタイル変更** → `flowchart-web-reactflow/docs/design-system.md` · `REACTFLOW_RULES` §5.6-2a · ROUTER tag `chrome-ui`
 - **実用版 UX** → `flowchart-web-reactflow/.cursor/rules/flowchart-practical-ux-yk.mdc` · `REACTFLOW_RULES` §5.6
 - `.mmd` → `creating-mermaid-yk`（本入口非使用）
 - 完了報告: `REACTFLOW_RULES.md` §6〜§7 + **読んだ refs**

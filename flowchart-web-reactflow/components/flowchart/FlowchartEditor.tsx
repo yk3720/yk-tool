@@ -43,10 +43,37 @@ import { EditorMoreMenu } from "./EditorMoreMenu";
 import { FlowCanvas, type FlowCanvasHandle } from "./FlowCanvas";
 import {
   FC_WORKSPACE_MAIN_GRID,
+  fcBadgeAccent,
+  fcBadgeMuted,
+  fcBorderB,
+  fcBorderR,
   fcBtnAccent,
   fcBtnPrimary,
   fcBtnSecondary,
-  fcMobileTabBase,
+  fcEmptyHint,
+  fcEmptyHintSubtle,
+  fcEmptyState,
+  fcEmptyStateLg,
+  fcEmptyStateMd,
+  fcErrorBanner,
+  fcErrorBannerLink,
+  fcLink,
+  fcMobileTabActive,
+  fcMobileTabGroup,
+  fcMobileTabIdle,
+  fcPaneHeader,
+  fcSectionTitle,
+  fcStaleCallout,
+  fcStaleOverlay,
+  fcStaleRing,
+  fcStaleRingInset,
+  fcStatusDraftHint,
+  fcStatusStaleLabel,
+  fcStatusText,
+  fcWarningBanner,
+  fcWarningBannerHint,
+  fcWarningBannerLink,
+  fcModuleLoadingOverlay,
 } from "./flowchartUiClasses";
 import { FlowColorLegend } from "./FlowColorLegend";
 import { CsvPastePanel } from "./CsvPastePanel";
@@ -134,6 +161,8 @@ export type FlowchartEditorProps = {
   resetFlow?: {
     onRequestReset: () => void;
   };
+  /** ワークスペース: モジュール読込中は表・プレビューを覆う */
+  moduleLoading?: boolean;
 };
 
 const EMPTY_MODULE_MESSAGE = "モジュールを選択してください";
@@ -141,6 +170,8 @@ const EMPTY_MODULE_NAV_HINT =
   "← 左のナビでユニットを展開し、動作を選んでください";
 const REGENERATE_HINT =
   "表を編集したあとは「再生成」でプレビューを更新します。";
+const EMPTY_SAMPLE_HINT =
+  "または「その他」→「サンプル（例）」から表と図を表示できます";
 const EMPTY_TABLE_MESSAGE = "Excel から取込むか、表を入力してください";
 
 function resolveInitialState(props: FlowchartEditorProps): {
@@ -162,8 +193,8 @@ function resolveInitialState(props: FlowchartEditorProps): {
       doc,
       jsonText: text,
       committedJson: text,
-      nodes: snap.nodes,
-      edges: snap.edges,
+      nodes: [],
+      edges: [],
     };
   }
   if (props.workspaceMode && props.moduleId) {
@@ -205,6 +236,7 @@ export const FlowchartEditor = forwardRef<
     pinOffline,
     importBundle,
     resetFlow,
+    moduleLoading = false,
   } = props;
 
   const skipSnapshotHydrationRef = useRef(false);
@@ -457,11 +489,21 @@ export const FlowchartEditor = forwardRef<
         setModuleSamplePreviewActive(true);
         loadDocument(SAMPLES[key], { persist: false });
       } else {
+        if (!samplePreviewActive && !moduleSamplePreviewActive) {
+          stashForPreviewRestore();
+        }
         setSamplePreviewActive(true);
         loadDocument(SAMPLES[key], { persist: false });
       }
     },
-    [workspaceMode, moduleId, stashForPreviewRestore, notifyUserContentOverride]
+    [
+      workspaceMode,
+      moduleId,
+      stashForPreviewRestore,
+      notifyUserContentOverride,
+      samplePreviewActive,
+      moduleSamplePreviewActive,
+    ]
   );
 
   const handlePreviewSample = useCallback(
@@ -506,16 +548,16 @@ export const FlowchartEditor = forwardRef<
       setDoc(restore.doc);
       setJsonText(restore.jsonText);
       setCommittedJson(restore.committedJson);
-      setNodes(restore.nodes);
-      setEdges(restore.edges);
       userTouchedRef.current = restore.userTouched;
       setParseErrors([]);
       setGenErrors([]);
       refreshWarnings(restore.doc.table);
+      runGenerate(restore.jsonText, { persist: false });
       setStatus("プレビューを終了しました");
     }
     clearModuleSamplePreview();
-  }, [refreshWarnings, clearModuleSamplePreview]);
+    setSamplePreviewActive(false);
+  }, [refreshWarnings, clearModuleSamplePreview, runGenerate]);
 
   const executeImportText = useCallback(
     (text: string) => {
@@ -597,6 +639,7 @@ export const FlowchartEditor = forwardRef<
     }
     if (parsed) downloadJson(parsed);
     else downloadJson(doc);
+    setStatus("JSON をダウンロードしました");
   };
 
   const handleImportFile = (file: File) => {
@@ -651,7 +694,10 @@ export const FlowchartEditor = forwardRef<
       setStatus("SVG: 先に「再生成」してください");
       return;
     }
-    if (nodes.length === 0) return;
+    if (nodes.length === 0) {
+      setStatus("SVG: 先に再生成してプレビューを表示してください");
+      return;
+    }
     canvasRef.current?.fitView();
     await new Promise((r) => setTimeout(r, 300));
     const el = canvasRef.current?.getExportElement();
@@ -683,10 +729,12 @@ export const FlowchartEditor = forwardRef<
     showEditorPanes && readOnly
       ? "閲覧者モード（プレビュー・PNG/SVG のみ）"
       : showEditorPanes && moduleSamplePreviewActive
-        ? "例をプレビュー中（未保存）"
-        : showEditorPanes && !moduleSelected
-          ? "サンプル表示（左でモジュールを選ぶと保存できます）"
-          : null;
+        ? "例をプレビュー中（未保存）—「プレビューを終了」で戻れます"
+        : showEditorPanes && samplePreviewActive
+          ? "例をプレビュー中（未保存）—「プレビューを終了」で戻れます"
+          : showEditorPanes && !moduleSelected
+            ? "サンプル表示（左でモジュールを選ぶと保存できます）"
+            : null;
 
   const confirmDialog = (() => {
     if (!pendingConfirm) return null;
@@ -730,9 +778,7 @@ export const FlowchartEditor = forwardRef<
         disabled={!showEditorPanes || readOnly}
         className={cn(
           fcBtnPrimary,
-          isStale && showEditorPanes && !readOnly
-            ? "ring-2 ring-amber-400 ring-offset-1"
-            : ""
+          isStale && showEditorPanes && !readOnly ? fcStaleRing : ""
         )}
       >
         再生成
@@ -745,7 +791,7 @@ export const FlowchartEditor = forwardRef<
             onClick={handleSaveJson}
             className={fcBtnSecondary}
           >
-            表を保存
+            JSON をダウンロード
           </button>
           <button
             type="button"
@@ -781,16 +827,20 @@ export const FlowchartEditor = forwardRef<
         resetFlow={resetFlow}
       />
 
-      {moduleSamplePreviewActive && moduleSelected && !readOnly ? (
+      {((moduleSamplePreviewActive && moduleSelected) ||
+        (samplePreviewActive && workspaceMode)) &&
+      !readOnly ? (
         <>
-          <button
-            type="button"
-            data-testid="apply-sample-preview"
-            onClick={handleApplyPreviewToModule}
-            className={fcBtnAccent}
-          >
-            モジュールに適用
-          </button>
+          {moduleSamplePreviewActive && moduleSelected ? (
+            <button
+              type="button"
+              data-testid="apply-sample-preview"
+              onClick={handleApplyPreviewToModule}
+              className={fcBtnAccent}
+            >
+              モジュールに適用
+            </button>
+          ) : null}
           <button
             type="button"
             data-testid="cancel-sample-preview"
@@ -820,37 +870,32 @@ export const FlowchartEditor = forwardRef<
     <p
       className={
         workspaceMode
-          ? "max-w-md text-right text-xs text-slate-600"
+          ? cn("max-w-md text-right text-xs", fcStatusText)
           : "max-w-md text-right text-sm lg:max-w-xl"
       }
       role="status"
       aria-live="polite"
     >
       {isStale && (
-        <span className="mr-2 font-medium text-amber-600">
-          プレビューは古い —
-        </span>
+        <span className={fcStatusStaleLabel}>プレビューは古い —</span>
       )}
-      <span className="text-slate-600">{status}</span>
+      <span className={fcStatusText}>{status}</span>
       {!workspaceMode ? (
-        <span className="ml-2 text-xs text-slate-400">（下書き自動保存）</span>
+        <span className={fcStatusDraftHint}>（下書き自動保存）</span>
       ) : null}
     </p>
   );
 
   const errorBanner =
     allErrors.length > 0 ? (
-      <div
-        className="border-b border-red-200 bg-red-50 px-4 py-2 text-sm text-red-800"
-        role="alert"
-      >
+      <div className={fcErrorBanner} role="alert">
         <ul className="list-inside list-disc">
           {allErrors.map((err) => (
             <li key={err}>
               <button
                 type="button"
                 onClick={() => jumpToError(err)}
-                className="text-left underline hover:text-red-950"
+                className={fcErrorBannerLink}
               >
                 {err}
               </button>
@@ -862,16 +907,16 @@ export const FlowchartEditor = forwardRef<
 
   const warningBanner =
     warnings.length > 0 && allErrors.length === 0 ? (
-      <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900">
+      <div className={fcWarningBanner}>
         <p className="font-medium">確認（警告）</p>
-        <p className="mt-0.5 text-xs text-amber-800">{WARNING_BANNER_HINT}</p>
+        <p className={fcWarningBannerHint}>{WARNING_BANNER_HINT}</p>
         <ul className="mt-1 list-inside list-disc">
           {warnings.map((w) => (
             <li key={w}>
               <button
                 type="button"
                 onClick={() => jumpToError(w)}
-                className="underline"
+                className={fcWarningBannerLink}
               >
                 {w}
               </button>
@@ -882,9 +927,9 @@ export const FlowchartEditor = forwardRef<
     ) : null;
 
   const mobilePaneTabs = workspaceMode ? (
-    <div className="flex shrink-0 border-b border-slate-200 px-4 py-2 lg:hidden">
+    <div className={cn("flex shrink-0", fcBorderB, "px-4 py-2 lg:hidden")}>
       <div
-        className="inline-flex rounded-md border border-slate-300 p-0.5 text-xs"
+        className={fcMobileTabGroup}
         role="tablist"
         aria-label="表とプレビュー"
       >
@@ -894,10 +939,7 @@ export const FlowchartEditor = forwardRef<
           aria-selected={paneView === "table"}
           onClick={() => setPaneView("table")}
           className={cn(
-            fcMobileTabBase,
-            paneView === "table"
-              ? "bg-slate-800 text-white"
-              : "text-slate-600 hover:bg-slate-50"
+            paneView === "table" ? fcMobileTabActive : fcMobileTabIdle
           )}
         >
           表
@@ -908,10 +950,7 @@ export const FlowchartEditor = forwardRef<
           aria-selected={paneView === "canvas"}
           onClick={() => setPaneView("canvas")}
           className={cn(
-            fcMobileTabBase,
-            paneView === "canvas"
-              ? "bg-slate-800 text-white"
-              : "text-slate-600 hover:bg-slate-50"
+            paneView === "canvas" ? fcMobileTabActive : fcMobileTabIdle
           )}
         >
           図
@@ -921,20 +960,16 @@ export const FlowchartEditor = forwardRef<
   ) : null;
 
   const tablePaneBody = !showEditorPanes ? (
-    <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+    <div className={fcEmptyState}>
       <p>{EMPTY_MODULE_MESSAGE}</p>
       {workspaceMode ? (
-        <p className="text-xs text-slate-500">{EMPTY_MODULE_NAV_HINT}</p>
+        <p className={fcEmptyHint}>{EMPTY_MODULE_NAV_HINT}</p>
       ) : null}
-      <p className="text-xs text-slate-400">
-        または上の「サンプルを選択」から表と図を表示できます
-      </p>
+      <p className={fcEmptyHintSubtle}>{EMPTY_SAMPLE_HINT}</p>
     </div>
   ) : (
     <>
-      {!readOnly ? (
-        <p className="text-xs text-slate-500">{REGENERATE_HINT}</p>
-      ) : null}
+      {!readOnly ? <p className={fcEmptyHint}>{REGENERATE_HINT}</p> : null}
       {!readOnly ? (
         <CsvPastePanel
           onApply={handleCsvApply}
@@ -954,29 +989,20 @@ export const FlowchartEditor = forwardRef<
 
   const renderPreviewCanvas = (fullBleed: boolean) => {
     const wrapClass = fullBleed
-      ? `relative flex min-h-[280px] flex-1 flex-col lg:min-h-0 ${
-          isStale ? "ring-2 ring-inset ring-amber-400" : ""
-        }`
-      : `relative min-h-[420px] flex-1 ${
-          isStale ? "rounded-lg ring-2 ring-amber-400 ring-offset-1" : ""
-        }`;
+      ? cn(
+          "relative flex min-h-[280px] flex-1 flex-col lg:min-h-0",
+          isStale && fcStaleRingInset
+        )
+      : cn("relative min-h-[420px] flex-1", isStale && fcStaleRing);
 
     if (!showEditorPanes) {
       return (
-        <div
-          className={
-            fullBleed
-              ? "flex min-h-[280px] flex-1 flex-col items-center justify-center gap-2 border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500 lg:min-h-0 lg:border-0 lg:border-l"
-              : "flex min-h-[420px] flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500"
-          }
-        >
+        <div className={fullBleed ? fcEmptyStateLg : fcEmptyStateMd}>
           <p>{EMPTY_MODULE_MESSAGE}</p>
           {workspaceMode ? (
-            <p className="text-xs text-slate-500">{EMPTY_MODULE_NAV_HINT}</p>
+            <p className={fcEmptyHint}>{EMPTY_MODULE_NAV_HINT}</p>
           ) : null}
-          <p className="text-xs text-slate-400">
-            または上の「サンプルを選択」から表と図を表示できます
-          </p>
+          <p className={fcEmptyHintSubtle}>{EMPTY_SAMPLE_HINT}</p>
         </div>
       );
     }
@@ -991,13 +1017,13 @@ export const FlowchartEditor = forwardRef<
           />
           {showColorLegend ? <FlowColorLegend /> : null}
           {isStale && (
-            <div className="pointer-events-none absolute inset-0 flex items-start justify-center bg-amber-50/70 p-4">
-              <p className="pointer-events-auto max-w-md rounded-md border border-amber-300 bg-white px-3 py-2 text-center text-sm text-amber-900 shadow-sm">
+            <div className={fcStaleOverlay}>
+              <p className={fcStaleCallout}>
                 入力が変更されています。{" "}
                 <button
                   type="button"
                   onClick={() => headerRegenerateRef.current?.click()}
-                  className="font-medium text-blue-600 underline hover:text-blue-800"
+                  className={fcLink}
                 >
                   再生成
                 </button>
@@ -1012,8 +1038,8 @@ export const FlowchartEditor = forwardRef<
       <div
         className={
           fullBleed
-            ? "flex min-h-[280px] flex-1 items-center justify-center border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500 lg:min-h-0 lg:border-0 lg:border-l"
-            : "flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-sm text-slate-500"
+            ? cn(fcEmptyStateLg, "items-center justify-center text-center")
+            : fcEmptyStateMd
         }
       >
         {EMPTY_TABLE_MESSAGE}
@@ -1035,37 +1061,36 @@ export const FlowchartEditor = forwardRef<
 
   if (workspaceMode) {
     return (
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
         {replaceConfirmDialog}
         {mobilePaneTabs}
         <main
           className={cn("grid min-h-0 flex-1 gap-0", FC_WORKSPACE_MAIN_GRID)}
         >
           <section
-            className={`flex min-h-0 min-w-0 flex-col border-r border-slate-200 ${
-              paneView === "canvas" ? "hidden lg:flex" : "flex"
-            }`}
+            className={cn("flex min-h-0 min-w-0 flex-col", fcBorderR, {
+              "hidden lg:flex": paneView === "canvas",
+              flex: paneView !== "canvas",
+            })}
           >
-            <header className="shrink-0 border-b border-slate-200 px-4 py-2">
+            <header className={fcPaneHeader}>
               <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="text-base font-semibold tracking-tight">
                       Flowchart Web
                     </h1>
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                      実用版
-                    </span>
+                    <span className={fcBadgeAccent}>実用版</span>
                   </div>
                   {contextLabel ? (
-                    <p className="text-sm text-slate-600">
-                      <span className="font-medium text-slate-800">
+                    <p className={cn("text-sm", fcStatusText)}>
+                      <span className="font-medium text-flow-text-body">
                         {contextLabel}
                       </span>
                     </p>
                   ) : null}
                   {previewModeHint ? (
-                    <p className="text-xs text-slate-500">{previewModeHint}</p>
+                    <p className={fcEmptyHint}>{previewModeHint}</p>
                   ) : null}
                 </div>
                 {statusLine}
@@ -1077,9 +1102,7 @@ export const FlowchartEditor = forwardRef<
             {errorBanner}
             {warningBanner}
             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-4">
-              <h2 className="shrink-0 text-sm font-medium text-slate-700">
-                表
-              </h2>
+              <h2 className={cn("shrink-0", fcSectionTitle)}>表</h2>
               {tablePaneBody}
             </div>
           </section>
@@ -1089,12 +1112,16 @@ export const FlowchartEditor = forwardRef<
               paneView === "table" ? "hidden lg:flex" : "flex"
             }`}
           >
-            <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-slate-200 px-4 py-2 lg:hidden">
-              <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
+            <div
+              className={cn(
+                "flex shrink-0 flex-wrap items-center gap-2",
+                fcBorderB,
+                "px-4 py-2 lg:hidden"
+              )}
+            >
+              <h2 className={fcSectionTitle}>プレビュー</h2>
               {previewModeHint ? (
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                  {previewModeHint}
-                </span>
+                <span className={fcBadgeMuted}>{previewModeHint}</span>
               ) : null}
             </div>
             <h2 className="sr-only">プレビュー</h2>
@@ -1103,6 +1130,17 @@ export const FlowchartEditor = forwardRef<
             </div>
           </section>
         </main>
+        {moduleLoading ? (
+          <div
+            className={fcModuleLoadingOverlay}
+            data-testid="module-loading-overlay"
+            role="status"
+            aria-live="polite"
+            aria-busy="true"
+          >
+            モジュールを読み込み中…
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -1110,20 +1148,18 @@ export const FlowchartEditor = forwardRef<
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       {replaceConfirmDialog}
-      <header className="border-b border-slate-200 px-4 py-3">
+      <header className={cn(fcBorderB, "px-4 py-3")}>
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
           <div className="flex min-w-0 flex-col gap-0.5">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-semibold tracking-tight">
                 Flowchart Web
               </h1>
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                実用版
-              </span>
+              <span className={fcBadgeAccent}>実用版</span>
             </div>
             {contextLabel ? (
-              <p className="text-sm text-slate-600">
-                <span className="font-medium text-slate-800">
+              <p className={cn("text-sm", fcStatusText)}>
+                <span className="font-medium text-flow-text-body">
                   {contextLabel}
                 </span>
               </p>
@@ -1140,18 +1176,18 @@ export const FlowchartEditor = forwardRef<
       {warningBanner}
 
       <main className={cn("grid min-h-0 flex-1 gap-0", FC_WORKSPACE_MAIN_GRID)}>
-        <section className="flex min-h-[320px] flex-col gap-2 border-r border-slate-200 p-4">
-          <h2 className="text-sm font-medium text-slate-700">表</h2>
+        <section
+          className={cn("flex min-h-[320px] flex-col gap-2 p-4", fcBorderR)}
+        >
+          <h2 className={fcSectionTitle}>表</h2>
           {tablePaneBody}
         </section>
 
         <section className="flex min-h-[320px] flex-col gap-2 p-4">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-sm font-medium text-slate-700">プレビュー</h2>
+            <h2 className={fcSectionTitle}>プレビュー</h2>
             {previewModeHint ? (
-              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                {previewModeHint}
-              </span>
+              <span className={fcBadgeMuted}>{previewModeHint}</span>
             ) : null}
           </div>
           {renderPreviewCanvas(false)}

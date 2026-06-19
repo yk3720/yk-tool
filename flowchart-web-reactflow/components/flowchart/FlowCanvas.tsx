@@ -12,7 +12,11 @@ import {
 import "@xyflow/react/dist/style.css";
 import { forwardRef, useEffect, useImperativeHandle, useMemo } from "react";
 import type { FlowNodeData } from "@/lib/flowchart/toReactFlow";
-import { fcFitViewOptions } from "./flowchartUiClasses";
+import {
+  fcFitViewOptions,
+  fcPreviewCanvasLg,
+  fcPreviewCanvasMd,
+} from "./flowchartUiClasses";
 import { flowEdgeTypes, flowNodeTypes } from "./flowTypes";
 
 export type FlowCanvasHandle = {
@@ -65,11 +69,7 @@ function FlowCanvasInner(
   return (
     <div
       data-flowchart-export-root
-      className={
-        fillContainer
-          ? "h-full min-h-[280px] w-full bg-slate-50 lg:min-h-0 lg:border-0 lg:border-l lg:border-slate-200"
-          : "h-full min-h-[420px] w-full rounded-lg border border-slate-200 bg-slate-50"
-      }
+      className={fillContainer ? fcPreviewCanvasLg : fcPreviewCanvasMd}
     >
       <ReactFlow
         nodes={nodes}
@@ -86,7 +86,7 @@ function FlowCanvasInner(
         zoomOnScroll
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={16} size={1} color="#e2e8f0" />
+        <Background gap={16} size={1} color="var(--flow-border)" />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>

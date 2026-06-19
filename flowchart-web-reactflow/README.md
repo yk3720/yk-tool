@@ -58,19 +58,23 @@ npm run test:e2e # Playwright（Cursor 内部ブラウザ設定と無関係）
 - [x] 表 JSON 編集（内部）+ 表 UI + 再生成（自動レイアウト）
 - [x] 5 種ノード（端子・処理・判断・入出力・手動入力）
 - [x] Yes/No ラベル付きエッジ
-- [x] 表を保存 / 表を読込（JSON）
+- [x] JSON をダウンロード / 表を読込（JSON）
 - [x] 画像を保存（PNG）
 - [x] 「プレビューは古い」表示
 - [x] P0 UX: stale 時 PNG ブロック、表編集→再生成、エラー時プレビュー維持、閲覧専用表示
 
 ## ディレクトリ
 
-| パス                    | 内容                       |
-| ----------------------- | -------------------------- |
-| `lib/flowchart/`        | ドメイン層（React 非依存） |
-| `fixtures/`             | サンプル JSON              |
-| `components/flowchart/` | UI（client）               |
-| `docs/adr/`             | ADR（yk-memo と同期）      |
+| パス                    | 内容                                |
+| ----------------------- | ----------------------------------- |
+| `lib/flowchart/`        | ドメイン層（React 非依存）          |
+| `fixtures/`             | サンプル JSON                       |
+| `components/flowchart/` | UI（client）                        |
+| `docs/adr/`             | ADR（yk-memo と同期）               |
+| `docs/design-system.md` | **スタイルガイド索引（入口 SSOT）** |
+
+列の意味: `docs/列の意味.md`  
+スタイル・UI の正本索引: [docs/design-system.md](./docs/design-system.md)
 
 ## DB-1（ADR-013 · Supabase）
 
@@ -88,4 +92,5 @@ npm run test:e2e # Playwright（Cursor 内部ブラウザ設定と無関係）
 - [x] エラー行ハイライト・ジャンプ・警告表示
 - [x] 表 UI のみ（テーマ/サイズ/JSON タブは削除 · レイアウト・色は固定）
 
-列の意味: `docs/列の意味.md`
+スタイル・UI 索引: [docs/design-system.md](./docs/design-system.md) · 列の意味: [docs/列の意味.md](./docs/列の意味.md)  
+開発時スタイル見本: `http://localhost:3000/dev/style`（本番 404）

@@ -17,9 +17,19 @@ import { cn } from "@/lib/utils";
 
 import {
   fcBtnDangerOutline,
+  fcNavAside,
+  fcNavAsideCollapsed,
+  fcBorderB,
+  fcNavChevron,
+  fcNavCollapseBtn,
+  fcNavDeleteBtn,
+  fcNavHeader,
+  fcNavIconBtn,
+  fcNavLabel,
   fcNavModuleBtn,
   fcNavModuleBtnState,
   fcNavSelect,
+  fcNavTitle,
   fcNavUnitToggle,
 } from "./flowchartUiClasses";
 
@@ -67,7 +77,7 @@ function ModuleButton({
           type="button"
           onClick={onRequestDelete}
           data-testid={`delete-module-${module.id}`}
-          className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
+          className={fcNavDeleteBtn}
           title={`${module.label} を削除`}
           aria-label="削除"
         >
@@ -107,15 +117,9 @@ function UnitSection({
           className={fcNavUnitToggle}
         >
           {expanded ? (
-            <ChevronDown
-              className="size-4 shrink-0 text-slate-500"
-              aria-hidden
-            />
+            <ChevronDown className={fcNavChevron} aria-hidden />
           ) : (
-            <ChevronRight
-              className="size-4 shrink-0 text-slate-500"
-              aria-hidden
-            />
+            <ChevronRight className={fcNavChevron} aria-hidden />
           )}
           <span className="truncate">{unit.label}</span>
         </button>
@@ -124,7 +128,7 @@ function UnitSection({
             type="button"
             onClick={onRequestDelete}
             data-testid={`delete-unit-${unit.id}`}
-            className="shrink-0 rounded-md p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-700"
+            className={fcNavDeleteBtn}
             title={`${unit.label} を削除`}
             aria-label="削除"
           >
@@ -171,11 +175,11 @@ export function ModuleNavPane({
 }: ModuleNavPaneProps) {
   if (collapsed) {
     return (
-      <aside className="flex w-12 shrink-0 flex-col items-center border-r border-slate-200 bg-slate-50 py-3">
+      <aside className={fcNavAsideCollapsed}>
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className="rounded-md p-2 text-slate-600 hover:bg-slate-200"
+          className={fcNavCollapseBtn}
           title="ナビを開く"
           aria-label="ナビを開く"
         >
@@ -186,15 +190,13 @@ export function ModuleNavPane({
   }
 
   return (
-    <aside className="flex w-full shrink-0 flex-col border-r border-slate-200 bg-slate-50 lg:w-[min(20%,240px)] lg:min-w-[180px]">
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2">
-        <h2 className="truncate text-sm font-semibold text-slate-800">
-          フロー
-        </h2>
+    <aside className={fcNavAside}>
+      <div className={fcNavHeader}>
+        <h2 className={fcNavTitle}>フロー</h2>
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className="rounded-md p-1.5 text-slate-500 hover:bg-slate-200 lg:hidden"
+          className={fcNavIconBtn}
           title="ナビを閉じる"
           aria-label="ナビを閉じる"
         >
@@ -202,9 +204,9 @@ export function ModuleNavPane({
         </button>
       </div>
 
-      <div className="space-y-2 border-b border-slate-200 px-3 py-2">
+      <div className={cn("space-y-2", fcBorderB, "px-3 py-2")}>
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-slate-500">装置</span>
+          <span className={fcNavLabel}>装置</span>
           <select
             value={selectedDeviceId}
             onChange={(e) => onSelectDevice(e.target.value)}

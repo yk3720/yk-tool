@@ -5,15 +5,11 @@ import {
   parsePasteCellValue,
 } from "./pasteTableCells";
 import { normalizeRow } from "./tableColumns";
+import type { FlowTableRow } from "./types";
 
 const COL = 10;
 
-function row(
-  id: number,
-  text1 = "",
-  text2 = "",
-  text3 = ""
-): (string | number)[] {
+function row(id: number, text1 = "", text2 = "", text3 = ""): FlowTableRow {
   return normalizeRow([id, "処理", "", "", 1, 0, text1, text2, text3, ""], COL);
 }
 

@@ -35,15 +35,11 @@ import {
 } from "@/lib/flowchart/offlineFlowCache";
 import { getStarterFlowSnapshot } from "@/lib/flowchart/starterFlowSnapshot";
 
+import { FlowAlertDialog } from "./FlowAlertDialog";
 import { FlowchartEditor, type FlowchartEditorHandle } from "./FlowchartEditor";
 import { ModuleNavPane } from "./ModuleNavPane";
 import {
-  fcBtnCancel,
-  fcBtnDanger,
   fcDialogBody,
-  fcDialogOverlay,
-  fcDialogPanel,
-  fcDialogTitle,
   fcStatusBanner,
   fcWorkspaceLoading,
   fcWorkspaceShell,
@@ -533,198 +529,90 @@ export function FlowchartWorkspace({
       </div>
 
       {deviceDeleteConfirmOpen && device ? (
-        <div
-          className={fcDialogOverlay}
-          role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !deviceDeletePending) {
-              setDeviceDeleteConfirmOpen(false);
-            }
-          }}
+        <FlowAlertDialog
+          open
+          titleId="delete-device-title"
+          title="装置を削除しますか？"
+          confirmLabel="削除する"
+          confirmTestId="delete-device-confirm"
+          cancelDisabled={deviceDeletePending}
+          confirmDisabled={deviceDeletePending}
+          overlayDismiss={!deviceDeletePending}
+          onCancel={() => setDeviceDeleteConfirmOpen(false)}
+          onConfirm={() => void handleConfirmDeleteDevice()}
         >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-device-title"
-            className={fcDialogPanel}
-          >
-            <h2 id="delete-device-title" className={fcDialogTitle}>
-              装置を削除しますか？
-            </h2>
-            <p className={fcDialogBody}>
-              <strong>{device.name}</strong>
-              {device.internalCode ? (
-                <>
-                  {" "}
-                  （社内番号 <strong>{device.internalCode}</strong>）
-                </>
-              ) : null}
-              と配下のユニット・動作・フロー表をすべて削除します。取り消せません。
-            </p>
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                autoFocus
-                disabled={deviceDeletePending}
-                onClick={() => setDeviceDeleteConfirmOpen(false)}
-                className={fcBtnCancel}
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={deviceDeletePending}
-                onClick={() => void handleConfirmDeleteDevice()}
-                data-testid="delete-device-confirm"
-                className={fcBtnDanger}
-              >
-                削除する
-              </button>
-            </div>
-          </div>
-        </div>
+          <p className={fcDialogBody}>
+            <strong>{device.name}</strong>
+            {device.internalCode ? (
+              <>
+                {" "}
+                （社内番号 <strong>{device.internalCode}</strong>）
+              </>
+            ) : null}
+            と配下のユニット・動作・フロー表をすべて削除します。取り消せません。
+          </p>
+        </FlowAlertDialog>
       ) : null}
 
       {unitDeleteTarget ? (
-        <div
-          className={fcDialogOverlay}
-          role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !unitDeletePending) {
-              setUnitDeleteTargetId(null);
-            }
-          }}
+        <FlowAlertDialog
+          open
+          titleId="delete-unit-title"
+          title="ユニットを削除しますか？"
+          confirmLabel="削除する"
+          confirmTestId="delete-unit-confirm"
+          cancelDisabled={unitDeletePending}
+          confirmDisabled={unitDeletePending}
+          overlayDismiss={!unitDeletePending}
+          onCancel={() => setUnitDeleteTargetId(null)}
+          onConfirm={() => void handleConfirmDeleteUnit()}
         >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-unit-title"
-            className={fcDialogPanel}
-          >
-            <h2 id="delete-unit-title" className={fcDialogTitle}>
-              ユニットを削除しますか？
-            </h2>
-            <p className={fcDialogBody}>
-              <strong>{unitDeleteTarget.label}</strong>
-              と配下の動作・フロー表をすべて削除します。取り消せません。
-            </p>
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                autoFocus
-                disabled={unitDeletePending}
-                onClick={() => setUnitDeleteTargetId(null)}
-                className={fcBtnCancel}
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={unitDeletePending}
-                onClick={() => void handleConfirmDeleteUnit()}
-                data-testid="delete-unit-confirm"
-                className={fcBtnDanger}
-              >
-                削除する
-              </button>
-            </div>
-          </div>
-        </div>
+          <p className={fcDialogBody}>
+            <strong>{unitDeleteTarget.label}</strong>
+            と配下の動作・フロー表をすべて削除します。取り消せません。
+          </p>
+        </FlowAlertDialog>
       ) : null}
 
       {moduleDeleteTarget ? (
-        <div
-          className={fcDialogOverlay}
-          role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !moduleDeletePending) {
-              setModuleDeleteTargetId(null);
-            }
-          }}
+        <FlowAlertDialog
+          open
+          titleId="delete-module-title"
+          title="動作を削除しますか？"
+          confirmLabel="削除する"
+          confirmTestId="delete-module-confirm"
+          cancelDisabled={moduleDeletePending}
+          confirmDisabled={moduleDeletePending}
+          overlayDismiss={!moduleDeletePending}
+          onCancel={() => setModuleDeleteTargetId(null)}
+          onConfirm={() => void handleConfirmDeleteModule()}
         >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="delete-module-title"
-            className={fcDialogPanel}
-          >
-            <h2 id="delete-module-title" className={fcDialogTitle}>
-              動作を削除しますか？
-            </h2>
-            <p className={fcDialogBody}>
-              <strong>{moduleDeleteTarget.label}</strong>
-              と紐づくフロー表を削除します。取り消せません。
-            </p>
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                autoFocus
-                disabled={moduleDeletePending}
-                onClick={() => setModuleDeleteTargetId(null)}
-                className={fcBtnCancel}
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={moduleDeletePending}
-                onClick={() => void handleConfirmDeleteModule()}
-                data-testid="delete-module-confirm"
-                className={fcBtnDanger}
-              >
-                削除する
-              </button>
-            </div>
-          </div>
-        </div>
+          <p className={fcDialogBody}>
+            <strong>{moduleDeleteTarget.label}</strong>
+            と紐づくフロー表を削除します。取り消せません。
+          </p>
+        </FlowAlertDialog>
       ) : null}
 
       {flowResetConfirmOpen && moduleInfo ? (
-        <div
-          className={fcDialogOverlay}
-          role="presentation"
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget && !flowResetPending) {
-              setFlowResetConfirmOpen(false);
-            }
-          }}
+        <FlowAlertDialog
+          open
+          titleId="reset-flow-title"
+          title="フローを雛形にリセットしますか？"
+          confirmLabel="リセットする"
+          confirmTestId="reset-flow-confirm"
+          cancelDisabled={flowResetPending}
+          confirmDisabled={flowResetPending}
+          overlayDismiss={!flowResetPending}
+          onCancel={() => setFlowResetConfirmOpen(false)}
+          onConfirm={() => void handleConfirmResetFlow()}
         >
-          <div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="reset-flow-title"
-            className={fcDialogPanel}
-          >
-            <h2 id="reset-flow-title" className={fcDialogTitle}>
-              フローを雛形にリセットしますか？
-            </h2>
-            <p className={fcDialogBody}>
-              <strong>{moduleInfo.module.label}</strong>
-              の表・図を「雛形:
-              はじめから」に戻します。クラウド上の保存内容も上書きされます。取り消せません。
-            </p>
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              <button
-                type="button"
-                autoFocus
-                disabled={flowResetPending}
-                onClick={() => setFlowResetConfirmOpen(false)}
-                className={fcBtnCancel}
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={flowResetPending}
-                onClick={() => void handleConfirmResetFlow()}
-                data-testid="reset-flow-confirm"
-                className={fcBtnDanger}
-              >
-                リセットする
-              </button>
-            </div>
-          </div>
-        </div>
+          <p className={fcDialogBody}>
+            <strong>{moduleInfo.module.label}</strong>
+            の表・図を「雛形:
+            はじめから」に戻します。クラウド上の保存内容も上書きされます。取り消せません。
+          </p>
+        </FlowAlertDialog>
       ) : null}
     </div>
   );

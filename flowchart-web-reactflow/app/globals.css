@@ -166,6 +166,10 @@
   --flow-success-bg: #f0fdf4;
   --flow-success-border: #bbf7d0;
   --flow-success-text: #14532d;
+  /* a11y（A11Y_RULES §3 · flowchart chrome） */
+  --a11y-target-min: 24px;
+  --a11y-focus-outline-width: 3px;
+  --a11y-focus-outline-offset: 2px;
 }
 
 .dark {

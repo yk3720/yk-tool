@@ -1,7 +1,15 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -54,7 +62,7 @@ function MenuItem({
   title,
   onClick,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   disabled?: boolean;
   destructive?: boolean;
   title?: string;
@@ -66,12 +74,9 @@ function MenuItem({
       role="menuitem"
       disabled={disabled}
       title={disabled ? title : undefined}
+      aria-disabled={disabled ? true : undefined}
       onClick={onClick}
-      className={cn(
-        "w-full px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-        destructive ? fcMenuItemDanger : fcMenuItem,
-        "flex gap-0"
-      )}
+      className={cn(destructive ? fcMenuItemDanger : fcMenuItem, "flex gap-0")}
     >
       {children}
     </button>
@@ -98,6 +103,15 @@ function MenuSection({
   );
 }
 
+function getEnabledMenuItems(menu: HTMLElement | null): HTMLButtonElement[] {
+  if (!menu) return [];
+  return Array.from(
+    menu.querySelectorAll<HTMLButtonElement>(
+      '[role="menuitem"]:not([disabled])'
+    )
+  );
+}
+
 export function EditorMoreMenu({
   readOnly,
   workspaceMode,
@@ -119,21 +133,103 @@ export function EditorMoreMenu({
 }: EditorMoreMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
+  const menuId = useId();
+
+  const closeMenu = useCallback((returnFocus = true) => {
+    setOpen(false);
+    if (returnFocus) {
+      triggerRef.current?.focus();
+    }
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {
       if (rootRef.current?.contains(event.target as Node)) return;
-      setOpen(false);
+      closeMenu(false);
     };
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [open, closeMenu]);
+
+  useEffect(() => {
+    if (!open) return;
+    const first = getEnabledMenuItems(menuRef.current)[0];
+    first?.focus();
   }, [open]);
+
+  const focusMenuItem = useCallback((index: number) => {
+    const items = getEnabledMenuItems(menuRef.current);
+    if (items.length === 0) return;
+    const next = ((index % items.length) + items.length) % items.length;
+    items[next]?.focus();
+  }, []);
+
+  const handleMenuKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      const items = getEnabledMenuItems(menuRef.current);
+      const currentIndex = items.findIndex(
+        (el) => el === document.activeElement
+      );
+
+      switch (e.key) {
+        case "Escape":
+          e.preventDefault();
+          closeMenu();
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          focusMenuItem(currentIndex < 0 ? 0 : currentIndex + 1);
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          focusMenuItem(currentIndex < 0 ? items.length - 1 : currentIndex - 1);
+          break;
+        case "Home":
+          e.preventDefault();
+          focusMenuItem(0);
+          break;
+        case "End":
+          e.preventDefault();
+          focusMenuItem(items.length - 1);
+          break;
+        case "Tab":
+          closeMenu(false);
+          break;
+        default:
+          break;
+      }
+    },
+    [closeMenu, focusMenuItem]
+  );
+
+  const handleTriggerKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+        if (
+          !open &&
+          (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ")
+        ) {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+          }
+          setOpen(true);
+        }
+      }
+      if (e.key === "Escape" && open) {
+        e.preventDefault();
+        closeMenu();
+      }
+    },
+    [open, closeMenu]
+  );
 
   const closeAnd = (fn: () => void) => {
     fn();
-    setOpen(false);
+    closeMenu();
   };
 
   const starterHint = moduleSelected
@@ -147,10 +243,13 @@ export function EditorMoreMenu({
   return (
     <div className="relative" ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
+        onKeyDown={handleTriggerKeyDown}
         className={cn(fcBtnSecondary, "inline-flex items-center gap-1")}
       >
         その他
@@ -161,7 +260,14 @@ export function EditorMoreMenu({
       </button>
 
       {open ? (
-        <div role="menu" aria-label="その他の操作" className={fcMenuDropdown}>
+        <div
+          ref={menuRef}
+          id={menuId}
+          role="menu"
+          aria-label="その他の操作"
+          className={fcMenuDropdown}
+          onKeyDown={handleMenuKeyDown}
+        >
           {!readOnly ? (
             <>
               <MenuSection label="始め方" hint={starterHint} isFirst />
@@ -218,14 +324,13 @@ export function EditorMoreMenu({
               <MenuSection label="装置取込" isFirst={readOnly} />
               <MenuItem
                 disabled={importBundle.disabled}
+                title={importBundle.disabledTitle}
                 onClick={() => {
                   if (importBundle.disabled) return;
                   importInputRef.current?.click();
                 }}
               >
-                <span title={importBundle.disabledTitle ?? undefined}>
-                  import.json を取込…
-                </span>
+                import.json を取込…
               </MenuItem>
               <input
                 ref={importInputRef}
@@ -264,9 +369,10 @@ export function EditorMoreMenu({
               <MenuItem
                 destructive
                 disabled={clearDraftDisabled}
+                title={clearDraftTitle}
                 onClick={() => closeAnd(onClearDraft)}
               >
-                <span title={clearDraftTitle}>下書きを削除</span>
+                下書きを削除
               </MenuItem>
             </>
           ) : null}

@@ -82,7 +82,7 @@ export function SortableCandidateRow({
           {...listeners}
           aria-label={`${cand.name} の並び替え`}
           className={cn(
-            "flex size-5 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground",
+            "flex size-6 shrink-0 cursor-grab items-center justify-center rounded text-muted-foreground",
             "opacity-0 transition-opacity group-focus-within/candidate:opacity-100 group-hover/candidate:opacity-100",
             "hover:text-foreground active:cursor-grabbing",
             "outline-none focus-visible:opacity-100 focus-visible:ring-3 focus-visible:ring-ring/50",

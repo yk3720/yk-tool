@@ -164,7 +164,7 @@ export function AxisScoreRow({
           <button
             type="button"
             onClick={onReset}
-            className="ml-1 inline-flex size-5 items-center justify-center rounded text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="ml-1 inline-flex size-6 items-center justify-center rounded text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
             aria-label={`${label} の評価をリセット`}
           >
             <X className="size-3" />

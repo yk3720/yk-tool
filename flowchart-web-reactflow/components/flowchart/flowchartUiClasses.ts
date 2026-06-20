@@ -13,10 +13,23 @@ export const fcBorderB = "border-b border-flow-border";
 export const fcBorderR = "border-r border-flow-border";
 export const fcBorderStrong = "border-flow-border-strong";
 
+/* ── アクセシビリティ（A11Y_RULES §4 · flowchartUiClasses SSOT） ── */
+
+/** WCAG 2.4.7 — chrome 共通フォーカスリング */
+export const fcFocusRing =
+  "outline-none focus-visible:outline-3 focus-visible:outline-flow-accent focus-visible:outline-offset-2";
+
+/** WCAG 2.5.8 — 最小タップ領域 24px（`min-h-6` / `min-w-6`） */
+export const fcTargetMin =
+  "inline-flex min-h-6 min-w-6 items-center justify-center";
+
 /* ── ボタン ── */
 
-export const fcBtn =
-  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+export const fcBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
+  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+);
 
 export const fcBtnPrimary = cn(
   fcBtn,
@@ -52,6 +65,8 @@ export const fcBtnCompactPrimary = cn(
 );
 
 export const fcBtnCompactSecondary = cn(
+  fcFocusRing,
+  fcTargetMin,
   "cursor-pointer rounded-md border border-flow-border-input bg-flow-surface px-2.5 py-1 text-xs font-medium text-flow-text-body hover:bg-flow-surface-subtle"
 );
 
@@ -92,11 +107,15 @@ export const fcErrorBanner = cn(
   "bg-flow-danger-muted px-4 py-2 text-sm text-flow-danger-text"
 );
 
-export const fcErrorBannerLink =
-  "text-left underline hover:text-flow-danger-text-emphasis";
+export const fcErrorBannerLink = cn(
+  fcFocusRing,
+  "text-left underline hover:text-flow-danger-text-emphasis"
+);
 
-export const fcWarningBannerLink =
-  "text-left underline hover:text-flow-warning-text-emphasis";
+export const fcWarningBannerLink = cn(
+  fcFocusRing,
+  "text-left underline hover:text-flow-warning-text-emphasis"
+);
 
 export const fcStatusBannerSuccess = cn(
   fcBorderB,
@@ -128,10 +147,14 @@ export const fcAuthBarRoleBadge =
   "ml-2 rounded bg-flow-surface-subtle px-1.5 py-0.5 font-medium text-flow-text-body";
 
 export const fcAuthBarAdminLink = cn(
+  fcFocusRing,
+  fcTargetMin,
   "rounded border border-flow-border-strong px-2 py-1 hover:bg-flow-surface"
 );
 
 export const fcAuthBarSignOutBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "rounded border border-flow-border-strong px-2 py-1 hover:bg-flow-surface"
 );
 
@@ -150,8 +173,10 @@ export const fcStaleCallout = cn(
 
 /* ── リンク・バッジ ── */
 
-export const fcLink =
-  "font-medium text-flow-accent underline hover:text-flow-accent-emphasis";
+export const fcLink = cn(
+  fcFocusRing,
+  "font-medium text-flow-accent underline hover:text-flow-accent-emphasis"
+);
 
 export const fcBadgeAccent =
   "rounded-full bg-flow-accent-selected-bg px-2 py-0.5 text-xs font-medium text-flow-accent-muted-text";
@@ -161,15 +186,21 @@ export const fcBadgeMuted =
 
 /* ── モバイルタブ ── */
 
-export const fcMobileTabBase =
-  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
+export const fcMobileTabBase = cn(
+  fcFocusRing,
+  fcTargetMin,
+  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
+);
 
 export const fcMobileTabGroup = cn(
   "inline-flex rounded-md border border-flow-border-strong p-0.5 text-xs"
 );
 
-export const fcMobileTabActive =
-  "rounded-md bg-flow-nav-active px-3 py-1.5 text-white";
+export const fcMobileTabActive = cn(
+  fcFocusRing,
+  fcTargetMin,
+  "rounded-md bg-flow-nav-active px-3 py-1.5 text-white"
+);
 
 export const fcMobileTabIdle = cn(
   fcMobileTabBase,
@@ -179,14 +210,19 @@ export const fcMobileTabIdle = cn(
 /* ── 左ナビ ── */
 
 export const fcNavSelect = cn(
+  fcFocusRing,
   "w-full rounded-md border border-flow-border-strong bg-flow-surface px-3 py-1.5 text-sm text-flow-text-body"
 );
 
 export const fcNavUnitToggle = cn(
+  fcFocusRing,
+  fcTargetMin,
   "flex min-w-0 flex-1 items-center gap-1.5 rounded-md px-3 py-1.5 text-left text-sm font-medium text-flow-text-body hover:bg-flow-surface-subtle"
 );
 
 export const fcNavModuleBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "min-w-0 flex-1 rounded-md px-3 py-1.5 text-left text-sm transition-colors"
 );
 
@@ -211,14 +247,20 @@ export const fcNavHeader = cn(
 export const fcNavTitle = "truncate text-sm font-semibold text-flow-text-body";
 
 export const fcNavIconBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "rounded-md p-1.5 text-flow-text-muted hover:bg-flow-surface-subtle lg:hidden"
 );
 
 export const fcNavCollapseBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "rounded-md p-2 text-flow-text-muted hover:bg-flow-surface-subtle"
 );
 
 export const fcNavDeleteBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "shrink-0 rounded-md p-1.5 text-flow-text-subtle hover:bg-flow-danger-muted hover:text-flow-danger-text"
 );
 
@@ -233,10 +275,14 @@ export const fcMenuDropdown = cn(
 );
 
 export const fcMenuItem = cn(
+  fcFocusRing,
+  fcTargetMin,
   "flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-flow-text-body hover:bg-flow-surface-subtle"
 );
 
 export const fcMenuItemDanger = cn(
+  fcFocusRing,
+  fcTargetMin,
   "flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-flow-danger-text hover:bg-flow-danger-muted"
 );
 
@@ -271,6 +317,9 @@ export const fcPreviewCanvasLg = cn(
 export const fcPreviewCanvasMd = cn(
   "h-full min-h-[420px] w-full rounded-lg border border-flow-border bg-flow-surface-muted"
 );
+
+/** プレビュー canvas — keyboard pan/zoom フォーカス面 */
+export const fcCanvasA11y = cn("relative outline-none", fcFocusRing);
 
 export const fcEmptyState = cn(
   "flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-flow-border-strong bg-flow-surface-muted p-6 text-center text-sm text-flow-text-muted"
@@ -309,17 +358,21 @@ export const fcTableHelpDetails = cn(
   "rounded-md border border-flow-border bg-flow-surface-muted/90 px-2 py-1 text-xs text-flow-text-muted"
 );
 
-export const fcTableHelpSummary =
-  "cursor-pointer font-medium text-flow-text-body";
+export const fcTableHelpSummary = cn(
+  fcFocusRing,
+  "cursor-pointer font-medium text-flow-text-body"
+);
 
 export const fcTableAddRowBtn = cn(
+  fcFocusRing,
+  fcTargetMin,
   "rounded-md border border-flow-border-strong px-2.5 py-1 text-xs font-medium hover:bg-flow-surface-muted"
 );
 
 export const fcTableMeta = "text-xs text-flow-text-muted";
 
 export const fcTableScroll = cn(
-  "min-h-0 flex-1 overflow-auto rounded-md border border-flow-border-strong"
+  "min-h-0 flex-1 overflow-auto scroll-pt-10 rounded-md border border-flow-border-strong"
 );
 
 export const fcTable = "w-full min-w-[640px] border-collapse text-xs";
@@ -335,10 +388,10 @@ export const fcTableHeadCellIndex = cn(
 );
 
 export const fcTableHeadCellAction = cn(
-  "w-14 border-b border-flow-border px-1 py-1.5"
+  "w-16 border-b border-flow-border px-1 py-1.5"
 );
 
-export const fcTableHeadHelpMark = "ml-0.5 font-normal text-flow-text-subtle";
+export const fcTableHeadHelpMark = "ml-0.5 font-normal text-flow-text-muted";
 
 export const fcTableRow =
   "odd:bg-flow-surface even:bg-flow-surface-muted/80 hover:bg-flow-accent-muted/40";
@@ -350,17 +403,20 @@ export const fcTableCell = "border-b border-flow-border/60 px-0.5 py-0.5";
 
 export const fcTableCellIndex = cn(
   fcTableCell,
-  "px-1 text-center text-flow-text-subtle"
+  "px-1 text-center text-flow-text-muted"
 );
 
 export const fcTableCellInput = cn(
-  "w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-flow-surface focus:ring-1 focus:ring-flow-accent disabled:cursor-default disabled:opacity-90"
+  fcFocusRing,
+  "scroll-mt-10 w-full rounded border-0 bg-transparent px-1.5 py-1 text-xs focus:bg-flow-surface disabled:cursor-default disabled:opacity-90"
 );
 
 export const fcTableCellInputMono = cn(fcTableCellInput, "font-mono");
 
 export const fcTableDeleteBtn = cn(
-  "rounded px-1 py-0.5 text-xs text-flow-danger hover:bg-flow-danger-muted disabled:cursor-not-allowed disabled:opacity-30"
+  fcFocusRing,
+  fcTargetMin,
+  "rounded px-1 text-xs text-flow-danger hover:bg-flow-danger-muted disabled:cursor-not-allowed disabled:opacity-30"
 );
 
 /* ── プレビュー凡例（キャンバス上の chrome） ── */

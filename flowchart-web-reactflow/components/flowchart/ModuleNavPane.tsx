@@ -7,6 +7,7 @@ import {
   PanelLeftOpen,
   Trash2,
 } from "lucide-react";
+import { useCallback, useRef, type KeyboardEvent } from "react";
 
 import type {
   Device,
@@ -49,6 +50,15 @@ type ModuleNavPaneProps = {
   onRequestDeleteDevice?: () => void;
 };
 
+function getNavFocusables(nav: HTMLElement | null): HTMLElement[] {
+  if (!nav) return [];
+  return Array.from(
+    nav.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    )
+  );
+}
+
 function ModuleButton({
   module,
   selected,
@@ -79,7 +89,7 @@ function ModuleButton({
           data-testid={`delete-module-${module.id}`}
           className={fcNavDeleteBtn}
           title={`${module.label} を削除`}
-          aria-label="削除"
+          aria-label={`${module.label} を削除`}
         >
           <Trash2 className="size-3.5" aria-hidden />
         </button>
@@ -114,6 +124,8 @@ function UnitSection({
           type="button"
           onClick={onToggleUnit}
           aria-expanded={expanded}
+          data-unit-toggle
+          data-unit-id={unit.id}
           className={fcNavUnitToggle}
         >
           {expanded ? (
@@ -130,7 +142,7 @@ function UnitSection({
             data-testid={`delete-unit-${unit.id}`}
             className={fcNavDeleteBtn}
             title={`${unit.label} を削除`}
-            aria-label="削除"
+            aria-label={`${unit.label} を削除`}
           >
             <Trash2 className="size-3.5" aria-hidden />
           </button>
@@ -173,6 +185,66 @@ export function ModuleNavPane({
   onRequestDeleteModule,
   onRequestDeleteDevice,
 }: ModuleNavPaneProps) {
+  const navRef = useRef<HTMLElement>(null);
+
+  const handleNavKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      const focusables = getNavFocusables(navRef.current);
+      const current = document.activeElement as HTMLElement;
+      const currentIndex = focusables.indexOf(current);
+      const unitToggle = current.closest<HTMLElement>("[data-unit-toggle]");
+
+      if (unitToggle && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
+        const unitId = unitToggle.getAttribute("data-unit-id");
+        const expanded = unitToggle.getAttribute("aria-expanded") === "true";
+        if (unitId) {
+          if (e.key === "ArrowRight" && !expanded) {
+            e.preventDefault();
+            onToggleUnit(unitId);
+            return;
+          }
+          if (e.key === "ArrowLeft" && expanded) {
+            e.preventDefault();
+            onToggleUnit(unitId);
+            return;
+          }
+        }
+      }
+
+      switch (e.key) {
+        case "ArrowDown":
+          e.preventDefault();
+          if (currentIndex < 0) {
+            focusables[0]?.focus();
+          } else {
+            focusables[(currentIndex + 1) % focusables.length]?.focus();
+          }
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          if (currentIndex < 0) {
+            focusables[focusables.length - 1]?.focus();
+          } else {
+            focusables[
+              (currentIndex - 1 + focusables.length) % focusables.length
+            ]?.focus();
+          }
+          break;
+        case "Home":
+          e.preventDefault();
+          focusables[0]?.focus();
+          break;
+        case "End":
+          e.preventDefault();
+          focusables[focusables.length - 1]?.focus();
+          break;
+        default:
+          break;
+      }
+    },
+    [onToggleUnit]
+  );
+
   if (collapsed) {
     return (
       <aside className={fcNavAsideCollapsed}>
@@ -237,8 +309,10 @@ export function ModuleNavPane({
       </div>
 
       <nav
+        ref={navRef}
         className="flex flex-1 flex-col gap-1 overflow-y-auto p-2"
         aria-label="ユニットと動作"
+        onKeyDown={handleNavKeyDown}
       >
         {device.units.map((unit) => (
           <UnitSection

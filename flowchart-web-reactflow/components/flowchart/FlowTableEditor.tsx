@@ -235,6 +235,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                           onClick={() => deleteRow(rowIndex)}
                           disabled={table.length <= 1}
                           className={fcTableDeleteBtn}
+                          aria-label={`行${rowIndex + 1}を削除`}
                           title="行を削除"
                         >
                           削除

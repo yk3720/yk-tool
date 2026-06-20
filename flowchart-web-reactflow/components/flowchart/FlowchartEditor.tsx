@@ -9,6 +9,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
 } from "react";
 import sampleCurry from "@/fixtures/sample-curry.json";
 import sampleMorning from "@/fixtures/sample-morning.json";
@@ -129,6 +130,11 @@ function isDemoSampleKey(key: string): key is DemoSampleKey {
 }
 
 type PaneView = "table" | "canvas";
+
+const MOBILE_TAB_TABLE_ID = "flowchart-pane-tab-table";
+const MOBILE_TAB_CANVAS_ID = "flowchart-pane-tab-canvas";
+const MOBILE_PANEL_TABLE_ID = "flowchart-pane-panel-table";
+const MOBILE_PANEL_CANVAS_ID = "flowchart-pane-panel-canvas";
 
 export type FlowchartEditorSnapshot = {
   jsonText: string;
@@ -722,6 +728,19 @@ export const FlowchartEditor = forwardRef<
     }
   };
 
+  const handleMobileTabKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setPaneView("canvas");
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setPaneView("table");
+      }
+    },
+    []
+  );
+
   const canExport = !isStale && nodes.length > 0;
   const allErrors = [...parseErrors, ...genErrors];
 
@@ -932,11 +951,14 @@ export const FlowchartEditor = forwardRef<
         className={fcMobileTabGroup}
         role="tablist"
         aria-label="表とプレビュー"
+        onKeyDown={handleMobileTabKeyDown}
       >
         <button
           type="button"
+          id={MOBILE_TAB_TABLE_ID}
           role="tab"
           aria-selected={paneView === "table"}
+          aria-controls={MOBILE_PANEL_TABLE_ID}
           onClick={() => setPaneView("table")}
           className={cn(
             paneView === "table" ? fcMobileTabActive : fcMobileTabIdle
@@ -946,8 +968,10 @@ export const FlowchartEditor = forwardRef<
         </button>
         <button
           type="button"
+          id={MOBILE_TAB_CANVAS_ID}
           role="tab"
           aria-selected={paneView === "canvas"}
+          aria-controls={MOBILE_PANEL_CANVAS_ID}
           onClick={() => setPaneView("canvas")}
           className={cn(
             paneView === "canvas" ? fcMobileTabActive : fcMobileTabIdle
@@ -1068,6 +1092,9 @@ export const FlowchartEditor = forwardRef<
           className={cn("grid min-h-0 flex-1 gap-0", FC_WORKSPACE_MAIN_GRID)}
         >
           <section
+            id={MOBILE_PANEL_TABLE_ID}
+            role="tabpanel"
+            aria-labelledby={MOBILE_TAB_TABLE_ID}
             className={cn("flex min-h-0 min-w-0 flex-col", fcBorderR, {
               "hidden lg:flex": paneView === "canvas",
               flex: paneView !== "canvas",
@@ -1108,6 +1135,9 @@ export const FlowchartEditor = forwardRef<
           </section>
 
           <section
+            id={MOBILE_PANEL_CANVAS_ID}
+            role="tabpanel"
+            aria-labelledby={MOBILE_TAB_CANVAS_ID}
             className={`flex min-h-0 min-w-0 flex-col ${
               paneView === "table" ? "hidden lg:flex" : "flex"
             }`}

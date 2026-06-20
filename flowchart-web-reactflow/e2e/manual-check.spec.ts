@@ -13,6 +13,7 @@ import {
   openMoreMenu,
   openPreviewWithSample,
 } from "./helpers/flowchart";
+import { analyzeA11y, assertAxeGate } from "./helpers/a11y";
 
 const FIXTURE_SIMPLE_YES = path.join(
   process.cwd(),
@@ -202,5 +203,10 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
       page.getByText(/例をプレビュー中（未保存）/).first()
     ).toBeVisible();
     await expect(headerRegenerate(page)).toBeEnabled();
+  });
+
+  test("axe: サンプルプレビュー chrome（serious gate）", async ({ page }) => {
+    const results = await analyzeA11y(page);
+    assertAxeGate(results);
   });
 });

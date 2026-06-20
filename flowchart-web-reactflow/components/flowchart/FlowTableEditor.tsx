@@ -6,13 +6,17 @@ import {
   getHeaders,
   getHelpEntries,
   isColorTableColumn,
-  isNumericTableColumn,
   normalizeRow,
   resolveColumnCount,
   SHAPE_TYPE_OPTIONS,
   suggestNextId,
 } from "@/lib/flowchart/tableColumns";
 import { COLOR_HINT_SELECT_OPTIONS } from "@/lib/flowchart/flowColors";
+import {
+  applyPartialPaste,
+  parseClipboardGrid,
+  parsePasteCellValue,
+} from "@/lib/flowchart/pasteTableCells";
 import type { FlowTableRow } from "@/lib/flowchart/types";
 import { cn } from "@/lib/utils";
 import { forwardRef, useImperativeHandle, useRef } from "react";
@@ -55,24 +59,6 @@ function cellToString(value: unknown): string {
   return String(value);
 }
 
-function parseCellValue(
-  colIndex: number,
-  colCount: number,
-  raw: string
-): string | number {
-  if (!isNumericTableColumn(colIndex, colCount)) return raw;
-  if (colIndex === 0) {
-    const trimmed = raw.trim();
-    if (trimmed === "") return "";
-    const n = Number(trimmed);
-    return Number.isFinite(n) ? n : trimmed;
-  }
-  const trimmed = raw.trim();
-  if (trimmed === "") return 0;
-  const n = Number(trimmed);
-  return Number.isFinite(n) ? Math.trunc(n) : 0;
-}
-
 export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
   function FlowTableEditor(
     { table, onChange, errorRowIndices, readOnly, tableSchema },
@@ -82,6 +68,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
     const headers = getHeaders(colCount, tableSchema);
     const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const focusCellRef = useRef<{ row: number; col: number } | null>(null);
 
     useImperativeHandle(ref, () => ({
       scrollToRow: (rowIndex: number) => {
@@ -100,7 +87,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
       const next = table.map((row, ri) => {
         if (ri !== rowIndex) return normalizeRow(row, colCount);
         const cells = normalizeRow(row, colCount);
-        cells[colIndex] = parseCellValue(colIndex, colCount, raw);
+        cells[colIndex] = parsePasteCellValue(colIndex, colCount, raw);
         return cells;
       });
       updateTable(next);
@@ -122,6 +109,24 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
     const isSelectColumn = (colIndex: number) =>
       isShapeColumn(colIndex) || isColorTableColumn(colIndex, colCount);
 
+    const handlePaste = (e: React.ClipboardEvent) => {
+      if (readOnly) return;
+      const text = e.clipboardData.getData("text/plain");
+      const grid = parseClipboardGrid(text);
+      if (grid.length === 0) return;
+
+      e.preventDefault();
+      const startRow = focusCellRef.current?.row ?? 0;
+      const startCol = focusCellRef.current?.col ?? 0;
+      updateTable(applyPartialPaste(table, startRow, startCol, grid, colCount));
+    };
+
+    const bindCellFocus = (rowIndex: number, colIndex: number) => ({
+      onFocus: () => {
+        focusCellRef.current = { row: rowIndex, col: colIndex };
+      },
+    });
+
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <details className={fcTableHelpDetails}>
@@ -140,6 +145,12 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
               分岐には接続先(右)が必要です。
             </p>
           )}
+          {!readOnly ? (
+            <p className="mt-2 text-flow-text-muted">
+              Excel からコピーした範囲は、貼り付け先のセルを選んで Ctrl+V
+              で部分貼り付けできます。
+            </p>
+          ) : null}
         </details>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -153,7 +164,11 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
           </span>
         </div>
 
-        <div ref={scrollRef} className={fcTableScroll}>
+        <div
+          ref={scrollRef}
+          className={fcTableScroll}
+          onPasteCapture={handlePaste}
+        >
           <table className={fcTable}>
             <thead className={fcTableHead}>
               <tr>
@@ -198,6 +213,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                             disabled={readOnly}
                             className={fcTableCellInput}
                             aria-label={`行${rowIndex + 1} ${h}`}
+                            {...bindCellFocus(rowIndex, colIndex)}
                           >
                             {(isColorTableColumn(colIndex, colCount)
                               ? COLOR_HINT_SELECT_OPTIONS
@@ -224,6 +240,7 @@ export const FlowTableEditor = forwardRef<FlowTableEditorHandle, Props>(
                             readOnly={readOnly}
                             className={fcTableCellInputMono}
                             aria-label={`行${rowIndex + 1} ${h}`}
+                            {...bindCellFocus(rowIndex, colIndex)}
                           />
                         )}
                       </td>

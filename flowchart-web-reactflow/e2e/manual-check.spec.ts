@@ -198,6 +198,28 @@ test.describe("M2 AC + P0 UX 手動確認（自動化）", () => {
     await expect(page.getByText("同期テストラベル")).toBeVisible();
   });
 
+  test("表: Excel 範囲の部分貼り付け", async ({ page }) => {
+    await openPreviewWithSample(page);
+    const anchor = page.getByLabel("行2 Text1");
+    await anchor.click();
+
+    await page.evaluate(() => {
+      const text = "貼付A\t貼付B\n行3A\t";
+      const dt = new DataTransfer();
+      dt.setData("text/plain", text);
+      const event = new ClipboardEvent("paste", {
+        clipboardData: dt,
+        bubbles: true,
+        cancelable: true,
+      });
+      document.activeElement?.dispatchEvent(event);
+    });
+
+    await expect(page.getByLabel("行2 Text1")).toHaveValue("貼付A");
+    await expect(page.getByLabel("行2 Text2")).toHaveValue("貼付B");
+    await expect(page.getByLabel("行3 Text1")).toHaveValue("行3A");
+  });
+
   test("B-4: サンプルプレビュー時のモード表示", async ({ page }) => {
     await expect(
       page.getByText(/例をプレビュー中（未保存）/).first()

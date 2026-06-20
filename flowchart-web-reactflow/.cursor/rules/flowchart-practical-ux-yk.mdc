@@ -17,7 +17,7 @@ alwaysApply: false
 |------|------------|----------|
 | Nav | 装置→ユニット→動作 · `moduleDraftKey` | 装置名をヘッダーに二重表示 |
 | **装置一括取込** | **その他 → import.json を取込…**（editor · workspace）· **Python 正規化済み JSON のみ** | Web で入力用 xlsx を直接パース · 構成行削除の DB 自動 prune |
-| 表（10列） | 段·列·Text1–3·**色**（最右列 · 狭いペインでは**表エリア横スクロール**） | 色列を 9 列 UI に畳む |
+| 表（10列） | 段·列·Text1–3·**色**（最右列 · 狭いペインでは**表エリア横スクロール**）· **部分貼り付け**（セル選択 → Ctrl+V · 起点から右・下 · 行不足時は行追加） | 色列を 9 列 UI に畳む · 部分貼り付けで全表置換（それは CsvPastePanel） |
 | ツールバー | 再生成/表保存/表読込を常時 · 他はその他メニュー（**始め方 / サンプル（例） / 出力 / 装置取込 / 下書き** · `MenuSection`） | ヘッダーにボタン乱立 |
 | レイアウト D | workspace: ツールバーは**表ペイン** · プレビュー列は縦 full-bleed（`fillContainer`） | 全幅ヘッダーがプレビュー上に載る |
 | 見た目 | `DEFAULT_LAYOUT` · `flowColors` 固定 · **操作 chrome は `fcBtn*` / `fcTable*`（`flowchartUiClasses.ts`）** · 枠太さは `VISUAL_DESIGN_RULES` §2（2px）· 斜め図形は SVG stroke · 表 ID バッジはプレビューのみ | テーマ/サイズ preset 復活 · `clip-path`+border · chrome に Tailwind 色直書き · export にデバッグ UI |
@@ -35,7 +35,10 @@ alwaysApply: false
 | `tools/excel_normalize/` | 入力用 xlsx → import.json（**正規化 SSOT · pytest**） |
 | `tools/excel_normalize/fixtures/devices/README.md` | **作者 Excel 置き場 SSOT** · `{社内番号}_{装置名}/` · 現行 `A0001_塗布装置/` |
 | `components/flowchart/flowchartUiClasses.ts` | 操作 UI class 正本（`fcBtn*` · `fcTable*` · `fcColorLegend*` · バナー） |
-| `components/flowchart/FlowTableEditor.tsx` | 10 列表編集 · **`fcTable*`** |
+| `components/flowchart/FlowTableEditor.tsx` | 10 列表編集 · **`fcTable*`** · **部分貼り付け**（`onPasteCapture` · `focusCellRef`） |
+| `lib/flowchart/pasteTableCells.ts` | 表内部分貼り付け — `parseClipboardGrid` · `applyPartialPaste`（ヘッダー判定なし） |
+| `lib/flowchart/parseCsv.ts` | **全表**貼り付け — `parseCsvPaste`（6 列以上 · 1 行目ヘッダー判定）· `CsvPastePanel` 用 |
+| `components/flowchart/CsvPastePanel.tsx` | 全表置換（テキストエリア · Excel ファイル） |
 | `app/dev/style/` | 開発用スタイルカタログ · `http://localhost:3000/dev/style`（本番 404） |
 | `docs/design-system.md` | **スタイルガイド索引（入口 SSOT）** · レイヤー A〜E · Phase 1–2 完了 |
 | `tools/excel_normalize/templates/入力用テンプレ_v0.2.xlsx` | 空テンプレ v0.2（供給+加工）· 再生成 `npm run excel:template` · 新規 `npm run excel:new-device` |

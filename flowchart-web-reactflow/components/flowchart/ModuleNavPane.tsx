@@ -9,10 +9,11 @@ import {
 } from "lucide-react";
 import { useCallback, useRef, type KeyboardEvent } from "react";
 
-import type {
-  Device,
-  FlowModule,
-  FlowUnit,
+import {
+  formatDeviceSelectLabel,
+  type Device,
+  type FlowModule,
+  type FlowUnit,
 } from "@/lib/flowchart/moduleHierarchy";
 import { cn } from "@/lib/utils";
 
@@ -287,7 +288,7 @@ export function ModuleNavPane({
           >
             {devices.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {formatDeviceSelectLabel(d)}
               </option>
             ))}
           </select>

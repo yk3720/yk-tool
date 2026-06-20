@@ -1,3 +1,5 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
 import * as XLSX from "xlsx";
 import { describe, expect, it } from "vitest";
 import {
@@ -5,6 +7,11 @@ import {
   parseExcelBuffer,
   pickFlowchartSheetName,
 } from "./parseExcel";
+
+const A0001_SCRATCH_XLSX = path.join(
+  process.cwd(),
+  "tools/excel_normalize/fixtures/devices/A0001_塗布装置/_scratch/取出.xlsx"
+);
 
 function buildWorkbookBuffer(
   sheets: Record<string, (string | number)[][]>
@@ -61,5 +68,17 @@ describe("parseExcelBuffer", () => {
     expect(pickFlowchartSheetName(XLSX.read(buffer, { type: "array" }))).toBe(
       "Sheet2"
     );
+  });
+
+  it("reads A0001 _scratch/取出.xlsx (10列 · 3行)", () => {
+    if (!fs.existsSync(A0001_SCRATCH_XLSX)) {
+      throw new Error("fixture missing — run: npm run excel:a0001:scratch");
+    }
+    const buffer = fs.readFileSync(A0001_SCRATCH_XLSX).buffer;
+    const { table, errors, sheetName } = parseExcelBuffer(buffer);
+    expect(errors).toHaveLength(0);
+    expect(sheetName).toBe("表");
+    expect(table).toHaveLength(3);
+    expect(table[1][6]).toBe("ワーク取出");
   });
 });

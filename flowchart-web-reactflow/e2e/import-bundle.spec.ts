@@ -13,6 +13,11 @@ const IMPORT_FIXTURE = path.join(
   "tools/excel_normalize/fixtures/import-z00001.json"
 );
 
+const A0001_IMPORT = path.join(
+  process.cwd(),
+  "tools/excel_normalize/fixtures/devices/A0001_塗布装置/import.json"
+);
+
 test.describe("import.json 装置一括取込", () => {
   test.beforeEach(async ({ page }) => {
     await ensureWorkspaceLoaded(page);
@@ -45,6 +50,23 @@ test.describe("import.json 装置一括取込", () => {
     await expect(page.getByText("取込完了: Z00001（フロー 4 件）")).toBeVisible(
       { timeout: 15_000 }
     );
+  });
+
+  test("A0001 import.json で取込成功バナーが表示される", async ({ page }) => {
+    test.skip(
+      !fs.existsSync(A0001_IMPORT),
+      "npm run excel:a0001:build で import.json を生成してください"
+    );
+
+    const json = fs.readFileSync(A0001_IMPORT, "utf-8");
+    await importBundleJsonFile(page, {
+      name: "import.json",
+      buffer: Buffer.from(json),
+    });
+
+    await expect(page.getByText("取込完了: A0001（フロー 4 件）")).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("不正な JSON では取込失敗バナーが表示される", async ({ page }) => {

@@ -52,7 +52,6 @@ import {
   fcBtnPrimary,
   fcBtnSecondary,
   fcEmptyHint,
-  fcEmptyHintSubtle,
   fcEmptyState,
   fcEmptyStateLg,
   fcEmptyStateMd,
@@ -989,7 +988,7 @@ export const FlowchartEditor = forwardRef<
       {workspaceMode ? (
         <p className={fcEmptyHint}>{EMPTY_MODULE_NAV_HINT}</p>
       ) : null}
-      <p className={fcEmptyHintSubtle}>{EMPTY_SAMPLE_HINT}</p>
+      <p className={fcEmptyHint}>{EMPTY_SAMPLE_HINT}</p>
     </div>
   ) : (
     <>
@@ -1026,7 +1025,7 @@ export const FlowchartEditor = forwardRef<
           {workspaceMode ? (
             <p className={fcEmptyHint}>{EMPTY_MODULE_NAV_HINT}</p>
           ) : null}
-          <p className={fcEmptyHintSubtle}>{EMPTY_SAMPLE_HINT}</p>
+          <p className={fcEmptyHint}>{EMPTY_SAMPLE_HINT}</p>
         </div>
       );
     }

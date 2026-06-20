@@ -14,6 +14,7 @@ FIXTURES = ROOT / "fixtures"
 TEMPLATES = ROOT / "templates"
 INPUT_XLSX = FIXTURES / "input-device-z00001.xlsx"
 TEMPLATE_XLSX = TEMPLATES / "入力用テンプレ_v0.2.xlsx"
+A0001_MASTER_XLSX = FIXTURES / "devices" / "A0001_塗布装置" / "マスター.xlsx"
 
 
 @pytest.fixture(scope="session")
@@ -28,6 +29,13 @@ def template_xlsx() -> Path:
     if not TEMPLATE_XLSX.is_file():
         pytest.skip("テンプレ未生成 — scripts/build_template.py を実行してください")
     return TEMPLATE_XLSX
+
+
+@pytest.fixture(scope="session")
+def a0001_master_xlsx() -> Path:
+    if not A0001_MASTER_XLSX.is_file():
+        pytest.skip("A0001 マスター未生成 — npm run excel:a0001:build")
+    return A0001_MASTER_XLSX
 
 
 def test_normalize_produces_bundle(input_xlsx: Path) -> None:
@@ -55,6 +63,23 @@ def test_template_normalizes(template_xlsx: Path) -> None:
     assert len(bundle["flows"]) == 4
     unit_labels = {u["label"] for u in bundle["units"]}
     assert unit_labels == {"供給ユニット", "加工ユニット"}
+
+
+def test_a0001_master_normalizes(a0001_master_xlsx: Path) -> None:
+    result = normalize_workbook(a0001_master_xlsx)
+    bundle = result.bundle
+
+    assert bundle["internal_code"] == "A0001"
+    assert bundle["display_name"] == "塗布装置"
+    assert len(bundle["units"]) == 2
+    assert len(bundle["flows"]) == 4
+
+    toridashi = next(f for f in bundle["flows"] if f["module_label"] == "取出")
+    assert toridashi["unit_label"] == "供給ユニット"
+    assert toridashi["payload"]["table"][1][6] == "ワーク取出"
+
+    module_labels = [m["label"] for u in bundle["units"] for m in u["modules"]]
+    assert module_labels == ["取出", "供給", "プレス", "離脱"]
 
 
 def test_normalize_writes_json_snapshot(input_xlsx: Path, tmp_path: Path) -> None:

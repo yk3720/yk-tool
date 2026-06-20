@@ -261,7 +261,7 @@ export const fcNavCollapseBtn = cn(
 export const fcNavDeleteBtn = cn(
   fcFocusRing,
   fcTargetMin,
-  "shrink-0 rounded-md p-1.5 text-flow-text-subtle hover:bg-flow-danger-muted hover:text-flow-danger-text"
+  "shrink-0 rounded-md p-1.5 text-flow-text-muted hover:bg-flow-danger-muted hover:text-flow-danger-text"
 );
 
 export const fcNavChevron = "size-4 shrink-0 text-flow-text-muted";
@@ -334,7 +334,6 @@ export const fcEmptyStateMd = cn(
 );
 
 export const fcEmptyHint = "text-xs text-flow-text-muted";
-export const fcEmptyHintSubtle = "text-xs text-flow-text-subtle";
 
 /* ── CSV / 表ペイン ── */
 
@@ -350,7 +349,7 @@ export const fcPasteTextarea = cn(
 
 export const fcStatusText = "text-flow-text-muted";
 export const fcStatusStaleLabel = "mr-2 font-medium text-flow-warning";
-export const fcStatusDraftHint = "ml-2 text-xs text-flow-text-subtle";
+export const fcStatusDraftHint = "ml-2 text-xs text-flow-text-muted";
 
 /* ── 表エディタ ── */
 

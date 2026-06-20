@@ -154,6 +154,15 @@ export const DEMO_DEVICES: Device[] = [
 /** @deprecated 互換 — プレス機 A */
 export const DEMO_DEVICE = DEMO_DEVICE_PRESS_A;
 
+/** 装置ドロップダウン — 社内番号：display_name */
+export function formatDeviceSelectLabel(device: {
+  name: string;
+  internalCode?: string;
+}): string {
+  const code = device.internalCode?.trim();
+  return code ? `${code}：${device.name}` : device.name;
+}
+
 export function findDevice(
   devices: readonly Device[],
   deviceId: string

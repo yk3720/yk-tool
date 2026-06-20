@@ -3,6 +3,7 @@ import {
   DEMO_DEVICE_PRESS_A,
   DEMO_DEVICE_PRESS_B,
   excludeModulesFromDevices,
+  formatDeviceSelectLabel,
   hasModuleInDevices,
   moduleStorageKey,
   resolveModuleDraftKeys,
@@ -12,6 +13,13 @@ describe("moduleHierarchy", () => {
   it("moduleStorageKey returns module uuid", () => {
     const uuid = "c0000001-0001-4001-8001-000000001001";
     expect(moduleStorageKey(uuid)).toBe(uuid);
+  });
+
+  it("formatDeviceSelectLabel prefixes internal code", () => {
+    expect(
+      formatDeviceSelectLabel({ name: "塗布装置", internalCode: "A0001" })
+    ).toBe("A0001：塗布装置");
+    expect(formatDeviceSelectLabel({ name: "装置のみ" })).toBe("装置のみ");
   });
 
   it("resolveModuleDraftKeys includes uuid and legacy keys for DEMO-001", () => {

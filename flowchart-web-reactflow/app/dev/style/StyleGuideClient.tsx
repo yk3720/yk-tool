@@ -69,7 +69,7 @@ function Swatch({ label, color }: { label: string; color: string }) {
         aria-hidden
       />
       <span className="font-mono text-flow-text-muted">{label}</span>
-      <span className="text-flow-text-subtle">{color}</span>
+      <span className="text-flow-text-muted">{color}</span>
     </div>
   );
 }
@@ -90,7 +90,7 @@ export function StyleGuideClient() {
           · トークン: <code className="font-mono text-xs">app/globals.css</code>{" "}
           の <code className="font-mono text-xs">--flow-*</code>
         </p>
-        <p className="text-xs text-flow-text-subtle">
+        <p className="text-xs text-flow-text-muted">
           本番ビルドでは <code className="font-mono">/dev/style</code> は 404
           です。
         </p>
@@ -228,7 +228,7 @@ export function StyleGuideClient() {
               <Swatch key={hint} label={label} color={fill} />
             ))}
           </div>
-          <p className="text-xs text-flow-text-subtle">
+          <p className="text-xs text-flow-text-muted">
             ノード枠太さ: {FLOW_NODE_FRAME_WIDTH}px（VISUAL_DESIGN_RULES §2）
           </p>
         </Section>

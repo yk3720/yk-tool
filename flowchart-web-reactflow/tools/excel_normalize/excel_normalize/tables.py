@@ -6,7 +6,8 @@ from openpyxl.utils import range_boundaries
 from openpyxl.workbook.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from .constants import FLOW_COLUMN_COUNT, FLOW_HEADERS
+from .constants import FLOW_COLUMN_COUNT, FLOW_HEADERS, RESERVED_SHEET_NAMES
+from .kosei import KoseiSheet
 
 
 @dataclass(frozen=True)
@@ -145,29 +146,30 @@ def extract_unit_sheet_tables(
     return blocks
 
 
-def list_unit_sheets(
-    workbook: Workbook, kosei_unit_labels: list[str]
-) -> dict[str, Worksheet]:
-    reserved = {"構成"}
+def list_unit_sheets(workbook: Workbook, kosei: KoseiSheet) -> dict[str, Worksheet]:
     sheets: dict[str, Worksheet] = {}
     for name in workbook.sheetnames:
-        if name in reserved:
+        if name in RESERVED_SHEET_NAMES:
             continue
         if name.startswith("_"):
             continue
         sheets[name] = workbook[name]
 
-    for unit in kosei_unit_labels:
-        if unit not in sheets:
+    unit_sheets: dict[str, Worksheet] = {}
+    for unit_label in kosei.unit_labels:
+        sheet_title = kosei.unit_sheet_title(unit_label)
+        if sheet_title not in sheets:
             raise ValueError(
-                f"構成のユニット「{unit}」に対応するシートがありません。"
-                f"シート名を構成のユニット列と完全一致させてください（既存: {', '.join(sheets.keys()) or 'なし'}）"
+                f"構成のユニット「{unit_label}」に対応するシート「{sheet_title}」がありません。"
+                f"（既存シート: {', '.join(sheets.keys()) or 'なし'}）"
             )
+        unit_sheets[unit_label] = sheets[sheet_title]
 
-    extra = set(sheets.keys()) - set(kosei_unit_labels)
+    mapped_titles = {kosei.unit_sheet_title(u) for u in kosei.unit_labels}
+    extra = set(sheets.keys()) - mapped_titles
     if extra:
         raise ValueError(
             f"構成に無いユニットシートがあります: {', '.join(sorted(extra))}"
         )
 
-    return sheets
+    return unit_sheets

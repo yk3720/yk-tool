@@ -53,7 +53,7 @@ def _build_payload(module_label: str, rows: list[list[str]]) -> dict:
 def normalize_workbook(workbook_path: Path) -> NormalizeResult:
     wb = load_workbook(workbook_path, data_only=True)
     kosei = parse_kosei_sheet(wb)
-    unit_sheets = list_unit_sheets(wb, kosei.unit_labels)
+    unit_sheets = list_unit_sheets(wb, kosei)
 
     flows: list[dict] = []
     for unit_label in kosei.unit_labels:

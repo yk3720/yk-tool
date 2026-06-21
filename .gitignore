@@ -55,5 +55,8 @@ venv/
 tmp/
 temp/
 
+# Microsoft Office ロック（ブックを開いている間の ~$*.xlsx 等）
+~$*
+
 # publish: 大量 HTML は必要に応じて LFS または除外方針を後で決める
 # （現状は追跡可。除外する場合はここに publish/**/*.html 等を追加）

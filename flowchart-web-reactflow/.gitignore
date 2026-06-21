@@ -42,3 +42,8 @@ next-env.d.ts
 
 # generated demo seed (npm run seed:demo-devices)
 /supabase/scripts/seed_demo_devices_run.sql
+
+# 作者 Excel（REACTFLOW_RULES §5.6-2b · tools/excel_normalize/.gitignore が詳細 SSOT）
+tools/excel_normalize/**/*.xlsx
+tools/excel_normalize/**/*.xls
+tools/excel_normalize/**/~$*

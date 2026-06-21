@@ -1,4 +1,4 @@
-"""新規装置フォルダ + マスター.xlsx を v0.2 構成で作成する。"""
+"""新規装置フォルダ + 装置 xlsx を v0.2 構成で作成する。"""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from excel_normalize.device_paths import device_workbook_path
 from excel_normalize.device_workbook import (
     DEFAULT_DEVICE_TEMPLATE,
     DeviceSpec,
@@ -29,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--import-json",
         action="store_true",
-        help="マスター.xlsx から import.json も生成する",
+        help="装置 xlsx から import.json も生成する",
     )
     return parser.parse_args()
 
@@ -62,7 +63,7 @@ def main() -> int:
     (device_dir / "archive").mkdir()
 
     spec = device_spec_from_template(code, name)
-    master_xlsx = device_dir / "マスター.xlsx"
+    master_xlsx = device_workbook_path(device_dir)
     build_device_workbook(spec).save(master_xlsx)
     print(f"Wrote {master_xlsx}")
 

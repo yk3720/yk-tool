@@ -48,7 +48,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install Python dev tools
-        run: pip install ruff pre-commit pytest openpyxl mypy
+        run: pip install -e "tools/excel_normalize[dev]" ruff pre-commit pytest mypy
 
       - name: Ruff (excel_normalize)
         run: npm run excel:lint
@@ -59,6 +59,9 @@ jobs:
       - name: pre-commit (security + Python hooks)
         working-directory: .
         run: pre-commit run --all-files --hook-stage pre-commit --config flowchart-web-reactflow/.pre-commit-config.yaml
+
+      - name: Generate Excel workbooks for pytest
+        run: npm run excel:template ; npm run excel:fixture
 
       - name: pytest (excel_normalize)
         run: npm run excel:test
@@ -94,6 +97,13 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate A0001 scratch xlsx for E2E
+        run: pip install -e "tools/excel_normalize[dev]" ; npm run excel:a0001:scratch
 
       - name: Next.js build (E2E)
         run: npm run build

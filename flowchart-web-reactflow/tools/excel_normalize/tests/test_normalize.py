@@ -7,6 +7,7 @@ import pytest
 from openpyxl import Workbook, load_workbook
 
 from excel_normalize.constants import KOSEI_HEADERS, KOSEI_SHEET
+from excel_normalize.device_paths import resolve_device_workbook
 from excel_normalize.normalize import normalize_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +15,7 @@ FIXTURES = ROOT / "fixtures"
 TEMPLATES = ROOT / "templates"
 INPUT_XLSX = FIXTURES / "input-device-z00001.xlsx"
 TEMPLATE_XLSX = TEMPLATES / "入力用テンプレ_v0.2.xlsx"
-A0001_MASTER_XLSX = FIXTURES / "devices" / "A0001_塗布装置" / "マスター.xlsx"
+A0001_DEVICE_DIR = FIXTURES / "devices" / "A0001_塗布装置"
 
 
 @pytest.fixture(scope="session")
@@ -33,9 +34,10 @@ def template_xlsx() -> Path:
 
 @pytest.fixture(scope="session")
 def a0001_master_xlsx() -> Path:
-    if not A0001_MASTER_XLSX.is_file():
-        pytest.skip("A0001 マスター未生成 — npm run excel:a0001:build")
-    return A0001_MASTER_XLSX
+    path = resolve_device_workbook(A0001_DEVICE_DIR)
+    if not path.is_file():
+        pytest.skip("A0001 装置 xlsx 未生成 — npm run excel:a0001:build")
+    return path
 
 
 def test_normalize_produces_bundle(input_xlsx: Path) -> None:
@@ -71,15 +73,37 @@ def test_a0001_master_normalizes(a0001_master_xlsx: Path) -> None:
 
     assert bundle["internal_code"] == "A0001"
     assert bundle["display_name"] == "塗布装置"
-    assert len(bundle["units"]) == 2
-    assert len(bundle["flows"]) == 4
+    assert len(bundle["units"]) == 10
+    assert len(bundle["flows"]) == 100
 
-    toridashi = next(f for f in bundle["flows"] if f["module_label"] == "取出")
-    assert toridashi["unit_label"] == "供給ユニット"
-    assert toridashi["payload"]["table"][1][6] == "ワーク取出"
+    unit0 = next(u for u in bundle["units"] if u["label"] == "ﾕﾆｯﾄ0")
+    assert len(unit0["modules"]) == 10
+    assert unit0["modules"][0]["label"] == "動作000"
 
-    module_labels = [m["label"] for u in bundle["units"] for m in u["modules"]]
-    assert module_labels == ["取出", "供給", "プレス", "離脱"]
+    flow000 = next(
+        f
+        for f in bundle["flows"]
+        if f["unit_label"] == "ﾕﾆｯﾄ0" and f["module_label"] == "動作000"
+    )
+    assert flow000["payload"]["table"][1][6] == "ワーク取出"
+
+
+def test_a0001_v03_builds_in_memory(tmp_path: Path) -> None:
+    from openpyxl import load_workbook
+
+    from excel_normalize.a0001_v03 import build_a0001_v03_workbook
+
+    path = tmp_path / "a0001.xlsx"
+    build_a0001_v03_workbook().save(path)
+    bundle = normalize_workbook(path).bundle
+    assert len(bundle["units"]) == 10
+    assert len(bundle["flows"]) == 100
+
+    wb = load_workbook(path, data_only=False)
+    ws = wb["構成"]
+    assert str(ws["D2"].value).startswith("=XLOOKUP(")
+    assert str(ws["F2"].value).startswith("=XLOOKUP(")
+    assert str(ws["C2"].value).startswith("=QUOTIENT(")
 
 
 def test_normalize_writes_json_snapshot(input_xlsx: Path, tmp_path: Path) -> None:

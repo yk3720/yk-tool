@@ -1,10 +1,11 @@
-"""ダミー装置 10 件（DEMO-003〜012）のマスター xlsx + import.json を生成する。"""
+"""ダミー装置 10 件（DEMO-003〜012）の装置 xlsx + import.json を生成する。"""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
+from excel_normalize.device_paths import device_workbook_path
 from excel_normalize.device_workbook import (
     DeviceSpec,
     ModuleSpec,
@@ -111,7 +112,7 @@ def write_device(spec: DeviceSpec) -> tuple[Path, Path]:
     device_dir.mkdir(parents=True, exist_ok=True)
     (device_dir / "archive").mkdir(exist_ok=True)
 
-    master_xlsx = device_dir / "マスター.xlsx"
+    master_xlsx = device_workbook_path(device_dir)
     import_json = device_dir / "import.json"
 
     build_device_workbook(spec).save(master_xlsx)

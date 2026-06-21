@@ -8,20 +8,34 @@
 
 **決定:** 2026-06-19 — 装置ごとの手書き xlsx は **`fixtures/devices/`** 以下に置く（`templates/` は空テンプレのみ · `yk-document/` は本アプリの取込 SSOT 外）。
 
+**Git（2026-06-21）:** 作者用 **`.xlsx` / `.xls` はコミットしない**（`.gitignore`）。リポジトリに載せるのは **`import.json`** と Python コード。テンプレ・pytest 用 xlsx は `npm run excel:template` / `excel:fixture` でローカルまたは CI 生成。
+
 | 種別               | パス（リポジトリルートから）                                                    |
 | ------------------ | ------------------------------------------------------------------------------- |
 | **装置ルート**     | `tools/excel_normalize/fixtures/devices/{社内番号}_{装置名}/`                   |
-| **装置一式の正本** | 上記 / `マスター.xlsx`                                                          |
+| **装置一式の正本** | 上記 / `{社内番号}_{装置名}.xlsx`（フォルダ名と同名）                           |
 | **正規化出力**     | 上記 / `import.json`                                                            |
 | **1 動作の試行**   | 上記 / `_scratch/{動作名}.xlsx`（1 シート · 10 列 · Web 表タブの Excel 取込用） |
 | **旧版退避**       | 上記 / `archive/`                                                               |
-| **空テンプレ**     | `tools/excel_normalize/templates/入力用テンプレ_v0.2.xlsx`                      |
+| **空テンプレ**     | `tools/excel_normalize/templates/入力用テンプレ_v0.2.xlsx`（v0.2 小規模用）     |
+
+### v0.3（大規模装置 · A0001 で採用）
+
+| シート                             | 内容                                                                 |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| **構成**                           | 6 列: 装置製番 · 装置名 · UinID · ユニット · MID · モジュール        |
+| **装置名 / ユニット / モジュール** | マスター表（正規化では参照のみ · 構成が SSOT）                       |
+| **U0〜U9**                         | ユニット別フロー表。テーブル名 = モジュール列と一致（例: `動作000`） |
+
+再生成: `npm run excel:a0001:build`（10 ユニット × 10 モジュール = 100 フロー）
+
+> **移行期:** 旧名 `マスター.xlsx` も `normalize_device.py` / pytest が読み取れます。新規作成・再生成は `{フォルダ名}.xlsx` のみ。
 
 **現在の実装置（手書き作業）:** `A0001_塗布装置/` — 一覧は [`fixtures/devices/README.md`](fixtures/devices/README.md)
 
 ```text
 c:/yk-tool/flowchart-web-reactflow/tools/excel_normalize/fixtures/devices/A0001_塗布装置/
-  マスター.xlsx
+  A0001_塗布装置.xlsx
   import.json
   _scratch/          ← 1 動作試行用（例: 取出.xlsx）
   archive/
@@ -61,7 +75,7 @@ python scripts/scaffold_device.py Z00002 プレス機D --import-json
 # または: npm run excel:new-device -- Z00002 プレス機D
 ```
 
-`fixtures/devices/Z00002_プレス機D/マスター.xlsx` と `archive/` ができます。
+`fixtures/devices/Z00002_プレス機D/Z00002_プレス機D.xlsx` と `archive/` ができます。
 
 ## 作者向けテンプレ v0.1（旧 · 供給 + 収納）
 

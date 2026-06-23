@@ -9,7 +9,7 @@ YK ワークスペースの **生成物・アプリ** 用リポジトリ。
 | `catalog.yaml` | ツール台帳（パス · status · 雛形） |
 | `diagram-manager-web/` | 図解管理ワークスペース（surge 図解の目次・検索） |
 | `workspace-ui-kit/` | Next.js ワークスペースひな形（採用管理サンプル） |
-| `flowchart-web-reactflow/` | フローチャート Web（React Flow） |
+| `flowchart-web-mermaid/` | フローチャート Web（Mermaid 比較用） |
 | `playwright-test/` | E2E テスト |
 
 ## 関連リポジトリ
@@ -18,6 +18,7 @@ YK ワークスペースの **生成物・アプリ** 用リポジトリ。
 |------|------|
 | `yk-skill` | スキル · `rule/` · 公開台帳 `metadata/` |
 | `yk-memo` | メモ · 企画（参考） |
+| `yk-application` | 本線アプリ（`flowchart-studio` 等 · 個別 Git） |
 
 ## Git
 

@@ -20,4 +20,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `yk-tool` モノレポへ移行（元: `yk-skill/playwright-test/`）
-- ui-kit / flowchart-web-reactflow 向け E2E ハーネス（catalog `notes`）
+- ui-kit / flowchart-studio 向け E2E ハーネス（catalog `notes`）

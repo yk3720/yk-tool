@@ -13,4 +13,4 @@
 - ADR-007: MZ0000 非参照・UX 調査を SSOT
 - ADR-008: P0 UX（stale PNG ブロック、タブ同期、エラー時プレビュー維持）
 - ADR-009: 調査項目一括（CSV・下書き・雛形・テーマ・SVG・列ヘルプ等）
-- ADR-010: 二系統比較（React Flow / Mermaid）、`flowchart-web-reactflow` リネーム
+- ADR-010: 二系統比較（React Flow / Mermaid）、`flowchart-studio`（旧 `flowchart-web-reactflow`）

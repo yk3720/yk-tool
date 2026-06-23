@@ -1,6 +1,6 @@
 ---
 description: flowchart-web 表駆動コード編集時は REACTFLOW_RULES・creating-reactflow-yk・ROUTER を入口とする
-globs: "**/flowchart-web-*/**/*.{ts,tsx}"
+globs: "**/flowchart-studio/**", "**/flowchart-web-mermaid/**"
 alwaysApply: false
 ---
 
@@ -8,7 +8,7 @@ alwaysApply: false
 
 **正本（内容更新時はこちらを先に直す）:** `c:/yk-skill/.cursor/rules/reactflow-dev-entry.mdc`
 
-`flowchart-web-reactflow` · `flowchart-web-mermaid` 配下の TS/TSX を編集するとき:
+`flowchart-web-mermaid` · `flowchart-studio`（`yk-application`）配下の TS/TSX を編集するとき:
 
 1. `c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md` — L1 SSOT
 2. `c:/yk-skill/.claude/skills/creating-reactflow-yk/SKILL.md` — 手順
@@ -18,8 +18,8 @@ alwaysApply: false
 - Next シェル（`app/` のみ）→ `creating-nextjs-yk` · `NEXTJS_RULES` §5（RSC）· §6（flowchart）
 - `components/flowchart` の React 一般 → `creating-react-yk` · `REACT_RULES`
 - shadcn 導入・`components/ui/**` · `components.json` → **`shadcn-dev-entry.mdc`**（`yk-skill`）· `creating-shadcn-yk` · `SHADCN_UI_RULES` §13
-- **UI 整理（機能削除）** → `flowchart-web-reactflow/.cursor/rules/ui-simplification-yk.mdc` · `REACTFLOW_RULES` §5.5
-- **操作 UI / スタイル変更** → `flowchart-web-reactflow/docs/design-system.md` · `REACTFLOW_RULES` §5.6-2a · ROUTER tag `chrome-ui`
-- **実用版 UX** → `flowchart-web-reactflow/.cursor/rules/flowchart-practical-ux-yk.mdc` · `REACTFLOW_RULES` §5.6
+- **UI 整理（機能削除）** → `flowchart-studio/.cursor/rules/ui-simplification-yk.mdc` · `REACTFLOW_RULES` §5.5
+- **操作 UI / スタイル変更** → `flowchart-studio/docs/design-system.md` · `REACTFLOW_RULES` §5.6-2a · ROUTER tag `chrome-ui`
+- **実用版 UX** → `flowchart-studio/.cursor/rules/flowchart-practical-ux-yk.mdc` · `REACTFLOW_RULES` §5.6
 - `.mmd` → `creating-mermaid-yk`（本入口非使用）
 - 完了報告: `REACTFLOW_RULES.md` §6〜§7 + **読んだ refs**

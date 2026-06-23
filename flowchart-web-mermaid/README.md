@@ -2,7 +2,7 @@
 
 表データから **Mermaid フローチャート**をプレビューする Web アプリ（**ADR-010 比較用** · `yk-tool` リポジトリ内）。
 
-**兄弟アプリ:** [`flowchart-web-reactflow`](../flowchart-web-reactflow/README.md)（React Flow 描画）
+**兄弟アプリ:** [`flowchart-studio`](c:/yk-application/flowchart-studio/README.md)（React Flow 本線 · `yk-application`）
 
 ## 図モダリティ（YK 横断）
 
@@ -13,7 +13,7 @@
 | やりたいこと | 選ぶもの | SSOT |
 |--------------|----------|------|
 | 表 · CSV · Mermaid プレビュー（**比較**） | **本アプリ** | 本 README · `lib/flowchart/toMermaid.ts` |
-| 表 · PNG/SVG（**React Flow レイアウト**） | **flowchart-web-reactflow** | [`README` §図モダリティ](c:/yk-tool/flowchart-web-reactflow/README.md#図モダリティyk-横断) · [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md) |
+| 表 · PNG/SVG（**React Flow レイアウト**） | **flowchart-studio** | [`README` §図モダリティ](c:/yk-application/flowchart-studio/README.md#図モダリティyk-横断) · [`REACTFLOW_RULES.md`](c:/yk-skill/rule/35_reactflow/REACTFLOW_RULES.md) |
 | テキスト版管理 · `.mmd` | **Mermaid DSL** | [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot) |
 
 **正本:** Excel / ブラウザ内の **8列表**（ADR-010）  
@@ -37,7 +37,7 @@ npm run build
 
 ## M003 比較手順（ADR-010）
 
-[`flowchart-web-reactflow`](../flowchart-web-reactflow/README.md#m003-比較手順adr-010) と同じ Excel を **Excel ファイル…** で取込み、localhost:3000（RF）と :3001（本アプリ）で再生成して分岐・合流を見比べる。
+[`flowchart-studio`](c:/yk-application/flowchart-studio/README.md#m003-比較手順adr-010) と同じ Excel を **Excel ファイル…** で取込み、localhost:3000（RF）と :3001（本アプリ）で再生成して分岐・合流を見比べる。
 
 ## ディレクトリ
 

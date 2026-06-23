@@ -24,15 +24,6 @@ tools:
     changelog: CHANGELOG.md
     notes: 採用管理サンプルひな形。図解管理は diagram-manager-web へ分離（2026-05-24）
 
-  - id: flowchart-web-reactflow
-    name: Flowchart Web (React Flow)
-    path: flowchart-web-reactflow/
-    kind: next-app
-    status: experimental
-    version_ref: package.json
-    changelog: CHANGELOG.md
-    notes: 旧 id flowchart-web。比較版 flowchart-web-mermaid と ADR-010 二系統
-
   - id: flowchart-web-mermaid
     name: Flowchart Web (Mermaid)
     path: flowchart-web-mermaid/
@@ -49,7 +40,7 @@ tools:
     status: experimental
     version_ref: package.json
     changelog: CHANGELOG.md
-    notes: ui-kit / flowchart-web-reactflow 向け E2E
+    notes: ui-kit / flowchart-studio（yk-application）向け E2E
 
   - id: commit-report-tool
     name: Commit Report Tool

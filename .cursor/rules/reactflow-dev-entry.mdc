@@ -16,7 +16,7 @@ alwaysApply: false
 4. **Ref Plan**（Write/StrReplace 前）→ ROUTER §7
 
 - Next シェル（`app/` のみ）→ `creating-nextjs-yk` · `NEXTJS_RULES` §5（RSC）· §6（flowchart）
-- `components/flowchart` の React 一般 → `creating-react-yk` · `REACT_RULES`
+- `frontend/src/components/flowchart`（studio）· `components/flowchart`（mermaid 版）の React 一般 → `creating-react-yk` · `REACT_RULES`
 - shadcn 導入・`components/ui/**` · `components.json` → **`shadcn-dev-entry.mdc`**（`yk-skill`）· `creating-shadcn-yk` · `SHADCN_UI_RULES` §13
 - **UI 整理（機能削除）** → `flowchart-studio/.cursor/rules/ui-simplification-yk.mdc` · `REACTFLOW_RULES` §5.5
 - **操作 UI / スタイル変更** → `flowchart-studio/docs/design-system.md` · `REACTFLOW_RULES` §5.6-2a · ROUTER tag `chrome-ui`

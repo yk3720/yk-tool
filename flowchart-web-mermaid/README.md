@@ -17,7 +17,7 @@
 | テキスト版管理 · `.mmd` | **Mermaid DSL** | [`MERMAID_RULES.md` §1.5](c:/yk-skill/rule/45_mermaid/MERMAID_RULES.md#15-方式選択図モダリティ--yk-横断-ssot) |
 
 **正本:** Excel / ブラウザ内の **8列表**（ADR-010）  
-**下書き:** `localStorage` キー `flowchart-web:draft-v1`（reactflow 版と互換）
+**下書き:** `localStorage` キー `flowchart-web:draft-v1`（本アプリ専用。`flowchart-studio` は `flowchart-studio:draft-v1` — 2026-06-24 以降非互換）
 
 ## 起動
 

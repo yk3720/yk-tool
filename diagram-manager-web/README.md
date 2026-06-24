@@ -2,7 +2,7 @@
 
 surge.sh に公開した図解を **探して見返す** ための 3 ペイン Web アプリ（Next.js 16 · shadcn/ui）。
 
-**正本:** `c:/yk-tool/diagram-manager-web/`（`yk-tool` リポジトリ内 · flowchart-web と同型の独立アプリ）
+**正本:** `c:/yk-tool/diagram-manager-web/`（`yk-tool` リポジトリ内 · flowchart-studio と同型の独立アプリ）
 
 **企画・画面仕様:** `c:/yk-memo/00.ai-driven-school/第四回月次課題_自分専用のワークスペース/案1_図解管理ワークスペース.md`
 

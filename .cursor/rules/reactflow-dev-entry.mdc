@@ -1,5 +1,5 @@
 ---
-description: flowchart-web 表駆動コード編集時は REACTFLOW_RULES・creating-reactflow-yk・ROUTER を入口とする
+description: flowchart-studio / flowchart-web-mermaid 表駆動コード編集時は REACTFLOW_RULES・creating-reactflow-yk・ROUTER を入口とする
 globs: "**/flowchart-studio/**", "**/flowchart-web-mermaid/**"
 alwaysApply: false
 ---

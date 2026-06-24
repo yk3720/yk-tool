@@ -1,9 +1,17 @@
-# yk-tool ツール台帳（論理レジストリ · 雛形）
+# yk-tool ツール台帳（論理レジストリ）
 # 方針: c:/yk-memo/handoffs/workspace-layout/HANDOFF.md §5-2
-# バージョン詳細は各ツールの package.json / CHANGELOG.md を正とする（CHANGELOG 雛形 2026-05-23 追加済）
+# スクリプト配置 SSOT: c:/yk-skill/rule/60_tooling/WORKSPACE_SCRIPTS_RULES.md
+#
+# 分離:
+#   tools:        アプリ・ハーネス（package.json / CHANGELOG あり）
+#   scripts:      yk-tool/scripts/ 内の横断ユーティリティ（正本パスは yk-tool 相対）
+#   hook_bindings: 利用側リポの hook 設定 → scripts を参照
+#   publish:      図解 HTML 正本
+#
+# yk-skill/.claude/skills/*/scripts/ はスキル専用 — 本台帳には載せない
 
 version: 1
-updated: "2026-05-24"
+updated: "2026-06-24"
 
 tools:
   - id: diagram-manager-web
@@ -22,6 +30,9 @@ tools:
     status: forked
     version_ref: package.json
     changelog: CHANGELOG.md
+    local_scripts:
+      - path: scripts/check-radius-drift.mjs
+        notes: UI 半径ドリフト検査（アプリ専用 · 台帳は tools 配下に記載）
     notes: 採用管理サンプルひな形。図解管理は diagram-manager-web へ分離（2026-05-24）
 
   - id: flowchart-web-mermaid
@@ -49,7 +60,53 @@ tools:
     status: experimental
     version_ref: package.json
     changelog: CHANGELOG.md
-    notes: GitHub コミット分析 → 図解 → Slack 投稿
+    notes: GitHub コミット分析 → 図解 → Slack 投稿。実行 scripts は apps 内スキル配下
+
+scripts:
+  - id: check-markdown-links
+    name: Markdown Link Checker
+    path: scripts/check-markdown-links.ps1
+    kind: validator
+    status: active
+    language: powershell
+    hooks: [manual, cursor-afterFileEdit]
+    consumers: [yk-memo, manual]
+    notes: ローカル · c:/ 絶対パス · 括弧入りファイル名。lychee 補完
+
+  - id: check-markdown-links-staged
+    name: Markdown Link Checker (staged)
+    path: scripts/check-markdown-links-staged.ps1
+    kind: validator
+    status: active
+    language: powershell
+    hooks: [git-pre-commit]
+    consumers: [yk-memo]
+    notes: ステージ済み .md のみ · archive 除外 · HTTP なし
+
+  - id: validate-catalog
+    name: Catalog Validator
+    path: scripts/validate-catalog.ps1
+    kind: validator
+    status: active
+    language: powershell
+    hooks: [manual]
+    consumers: [yk-tool]
+    notes: catalog.yaml の scripts パス存在確認
+
+hook_bindings:
+  - id: yk-memo-pre-commit-markdown-links
+    script_id: check-markdown-links-staged
+    consumer: yk-memo
+    hook: git-pre-commit
+    config_path: c:/yk-memo/.githooks/pre-commit
+    notes: YK_TOOL_ROOT または ../yk-tool から staged 版を実行
+
+  - id: yk-memo-cursor-after-markdown-edit
+    script_id: check-markdown-links
+    consumer: yk-memo
+    hook: cursor-afterFileEdit
+    config_path: c:/yk-memo/.cursor/hooks/after-markdown-edit.ps1
+    notes: 薄いラッパー · hooks.json から起動
 
 publish:
   path: publish/

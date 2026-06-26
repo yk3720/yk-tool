@@ -49,6 +49,7 @@
 | `check-markdown-links` | [check-markdown-links.ps1](./check-markdown-links.ps1) | MD ローカルリンク検証 |
 | `check-markdown-links-staged` | [check-markdown-links-staged.ps1](./check-markdown-links-staged.ps1) | git ステージ済み `.md` |
 | `validate-catalog` | [validate-catalog.ps1](./validate-catalog.ps1) | 台帳と実ファイルの整合 |
+| `audit-rule-line-counts` | [audit-rule-line-counts.ps1](./audit-rule-line-counts.ps1) | yk-skill/rule 行数監査（250 WARN · 500 FAIL） |
 
 ### hook 連携（`hook_bindings:` 参照）
 
@@ -65,6 +66,9 @@
 # 台帳検証
 powershell -NoProfile -ExecutionPolicy Bypass -File c:/yk-tool/scripts/validate-catalog.ps1 -FailOnError
 
+# ルール行数監査（500行超で exit 1 · WARN のみは通過）
+powershell -NoProfile -ExecutionPolicy Bypass -File c:/yk-tool/scripts/audit-rule-line-counts.ps1 -FailOnError
+
 # リンクチェック
 powershell -NoProfile -ExecutionPolicy Bypass -File c:/yk-tool/scripts/check-markdown-links.ps1 `
   -Path 'c:/yk-memo' -ExcludePath '99_アーカイブ','archive'
@@ -72,4 +76,4 @@ powershell -NoProfile -ExecutionPolicy Bypass -File c:/yk-tool/scripts/check-mar
 
 ---
 
-*最終更新: 2026-06-24*
+*最終更新: 2026-06-27*

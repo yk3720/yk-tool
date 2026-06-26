@@ -11,7 +11,7 @@
 # yk-skill/.claude/skills/*/scripts/ はスキル専用 — 本台帳には載せない
 
 version: 1
-updated: "2026-06-24"
+updated: "2026-06-27"
 
 tools:
   - id: diagram-manager-web
@@ -92,6 +92,16 @@ scripts:
     hooks: [manual]
     consumers: [yk-tool]
     notes: catalog.yaml の scripts パス存在確認
+
+  - id: audit-rule-line-counts
+    name: Rule Line Count Auditor
+    path: scripts/audit-rule-line-counts.ps1
+    kind: validator
+    status: active
+    language: powershell
+    hooks: [manual]
+    consumers: [yk-skill, manual]
+    notes: yk-skill/rule/**/*.md 行数 · 250超 WARN · 500超 FAIL · L1 分割前後の確認用
 
 hook_bindings:
   - id: yk-memo-pre-commit-markdown-links

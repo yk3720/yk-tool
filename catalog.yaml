@@ -51,7 +51,7 @@ tools:
     status: experimental
     version_ref: package.json
     changelog: CHANGELOG.md
-    notes: ui-kit / flowchart-studio（yk-application）向け E2E
+    notes: ui-kit / flowchart-studio（c:/yk-application/flowchart-studio）向け E2E
 
   - id: commit-report-tool
     name: Commit Report Tool

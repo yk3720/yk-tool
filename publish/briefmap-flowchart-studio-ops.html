@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>フローチャート作成ツール — 状況報告</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF', surface: '#F8FAFC', border: '#E2E8F0',
+              accent: '#3B82F6', text: '#1E293B', muted: '#64748B', dim: '#94A3B8', warning: '#F59E0B',
+            }
+          },
+          fontFamily: { sans: ['"Noto Sans JP"', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print { .no-print { display: none !important; } section { break-inside: avoid; } }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button type="button" onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i> PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-14">
+
+    <header class="mb-10">
+      <p class="text-xs text-ads-dim mb-2">面談前の概要 · 2026-07-05</p>
+      <h1 class="text-2xl md:text-3xl font-bold text-ads-text">フローチャート作成ツール — 状況報告</h1>
+      <p class="mt-4 text-sm text-ads-text leading-relaxed">
+        制御フロー図を、Excel のオートシェイプではなく<strong>表から自動で描く Web ツール</strong>として試作している（Flowchart Studio）。
+        装置の手順表を貼り付けるとフロー図ができ、保存 · 画像出力ができる。
+      </p>
+    </header>
+
+    <section id="preamble" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="list-ordered" class="w-5 h-5 text-ads-accent"></i>
+        報告の流れ
+      </h2>
+      <ol class="space-y-3 text-sm">
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <span class="font-semibold text-ads-text">1.</span>
+          フローチャート作成のやり方について調査し、<strong>自分がベストだと考える Web 版</strong>で叩き台を作成した（下記 URL で触れる）。
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <span class="font-semibold text-ads-text">2.</span>
+          この叩き台を<strong>課内で本番運用</strong>するには、外部の<strong>有償クラウドサービス</strong>（後述の 4 種）が必要になる、という調査結果。
+        </li>
+        <li class="rounded-lg border border-ads-accent/40 p-4 bg-ads-accent/5">
+          <span class="font-semibold text-ads-text">3.</span>
+          その<strong>有償サービスの利用が OK か</strong>、あわせてデータ保存 · 契約名義についてご判断いただきたい。
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <span class="font-semibold text-ads-text">4.</span>
+          有償が難しい場合は、<strong>無償でできる範囲に絞って</strong>運用方法を再検討するつもりである。
+        </li>
+      </ol>
+    </section>
+
+    <section id="status" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="info" class="w-5 h-5 text-ads-accent"></i>
+        いまの状況（叩き台）
+      </h2>
+      <ul class="space-y-2 text-sm bg-ads-surface rounded-xl p-5 border border-ads-border">
+        <li><span class="font-medium text-ads-text">進捗：</span>試作版は動いている。個人検証用の無料枠で公開中</li>
+        <li><span class="font-medium text-ads-text">位置づけ：</span>本番運用の前提はまだ決まっていない · 方針確定後に開発を進める</li>
+      </ul>
+      <p class="mt-3 text-sm">
+        触る：<a href="https://flowchart-studio-dun.vercel.app" class="text-ads-accent hover:underline" target="_blank" rel="noopener">flowchart-studio-dun.vercel.app</a>
+        <span class="text-ads-dim">（手順 · ログインは 02_触ってみる手順.txt）</span>
+      </p>
+    </section>
+
+    <section id="why-web" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="globe" class="w-5 h-5 text-ads-accent"></i>
+        なぜ Web アプリにしているか
+      </h2>
+      <p class="text-sm text-ads-muted mb-4">
+        Excel オートシェイプで作る案もあるが、調査の結果 Web 版を選んだ。
+      </p>
+      <ul class="space-y-3 text-sm">
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">所在 · 探しやすさ</p>
+          <p class="text-ads-muted">Excel 貼付はシートが散らばり、作った図がどこにあるかわからなくなりやすい。Web なら一か所に集約し、ブラウザから一覧できる。</p>
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">共有 · 参照</p>
+          <p class="text-ads-muted">他者が作ったフローを探しにくい。Web + 保存庫なら課内で参照しやすい。</p>
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">修正の手間</p>
+          <p class="text-ads-muted">オートシェイプは削除 · 貼付の手作業が多い。Web は表を直して再生成するだけで短い。</p>
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">配布 · 版の揃え</p>
+          <p class="text-ads-muted">PC ごとの配布 · 版揃えが大変。Web なら一か所修正で全員が同じ版を使える。</p>
+        </li>
+      </ul>
+    </section>
+
+    <section id="why-paid" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="wallet" class="w-5 h-5 text-ads-accent"></i>
+        なぜ有料サービスが必要か（本番運用の場合）
+      </h2>
+      <p class="text-sm text-ads-muted mb-4">
+        いまの URL は<strong>個人検証用の無料枠</strong>（月 0 円）。叩き台の確認には足りるが、課内の正式ツールとして使い続けるには向かない。
+      </p>
+
+      <h3 class="text-sm font-semibold text-ads-text mb-2">利用する外部サービス（有償版 · 本番想定）</h3>
+      <div class="overflow-x-auto rounded-xl border border-ads-border mb-5">
+        <table class="w-full text-sm">
+          <thead class="bg-ads-surface">
+            <tr>
+              <th class="text-left p-3 font-semibold text-ads-text">サービス名</th>
+              <th class="text-left p-3 font-semibold text-ads-text">何をするか（一言）</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ads-border">
+            <tr><td class="p-3 font-medium">GitHub</td><td class="p-3 text-ads-muted">プログラムの保管と変更履歴</td></tr>
+            <tr><td class="p-3 font-medium">Vercel</td><td class="p-3 text-ads-muted">Web 画面（ツール本体）を配信するサーバ</td></tr>
+            <tr><td class="p-3 font-medium">Supabase</td><td class="p-3 text-ads-muted">フローデータの保存とログイン管理</td></tr>
+            <tr><td class="p-3 font-medium">Railway</td><td class="p-3 text-ads-muted">装置 Excel の変換処理を動かすサーバ</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ul class="space-y-3 text-sm">
+        <li class="rounded-lg border border-ads-warning/30 p-4 bg-amber-50/60">
+          <p class="font-semibold text-ads-text mb-1">無料枠のまま本番にしない理由</p>
+          <ul class="list-disc pl-5 space-y-1 text-ads-muted">
+            <li>使わないとデータが止まる · バックアップがない</li>
+            <li>有給業務の本番利用は、利用規約上グレーな部分がある</li>
+          </ul>
+        </li>
+        <li class="rounded-lg border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">本番で追加で必要になること</p>
+          <ul class="list-disc pl-5 space-y-1 text-ads-muted">
+            <li>データを止まらず保存 · ログインで誰のデータか分ける</li>
+            <li>装置 Excel をブラウザから取込（現状は作者 PC 依存）</li>
+            <li>契約を会社名義に（現状は個人名義）</li>
+          </ul>
+        </li>
+      </ul>
+      <p class="text-sm text-ads-text mt-4">
+        上記を満たす有償プランの合計は、調査上<strong>月 約 7,500 円（$50 目安）が上限</strong>（ログイン認証あり · 本番推奨）。
+        <strong>ログイン認証が不要</strong>でよい場合は、<strong>約 3,750〜5,250 円（$25〜35 目安）</strong>程度まで抑えられる見込み（差は月 約 2,250〜3,750 円 · 面談で相談可）。
+        内訳の詳細は面談で説明する。
+      </p>
+    </section>
+
+    <section id="ask" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="help-circle" class="w-5 h-5 text-ads-accent"></i>
+        ご判断いただきたい点
+      </h2>
+      <p class="text-sm text-ads-muted mb-3">報告の流れ (3) に対応する確認事項。</p>
+      <ol class="list-decimal pl-5 space-y-3 text-sm text-ads-text">
+        <li>上記の<strong>有償クラウドサービス</strong>を、課内本番に使ってよいか（月 約 3,750〜7,500 円 · <strong>7,500 円は上限</strong>）</li>
+        <li><strong>社内設計データ</strong>（社内番号 · 装置名 · PLC コメント等）を、外部クラウドに保存してよいか</li>
+        <li>契約を<strong>会社名義</strong>で取れるか</li>
+      </ol>
+    </section>
+
+    <section id="choice" class="mb-10">
+      <h2 class="text-lg font-bold text-ads-text mb-3 flex items-center gap-2">
+        <i data-lucide="git-branch" class="w-5 h-5 text-ads-accent"></i>
+        判断の整理（大枠）
+      </h2>
+      <div class="grid gap-3 md:grid-cols-2 text-sm">
+        <div class="rounded-xl border border-ads-border p-4 bg-ads-surface">
+          <p class="font-semibold text-ads-text mb-1">有償が難しい場合</p>
+          <p class="text-ads-muted">無償でできる範囲（個人検証 · PC 上の従来方式など）に絞って再検討する。</p>
+        </div>
+        <div class="rounded-xl border border-ads-accent/40 p-4 bg-ads-accent/5">
+          <p class="font-semibold text-ads-text mb-1">有償 OK の場合</p>
+          <p class="text-ads-muted">課内共有 · 本番運用へ。月 約 3,750〜7,500 円（ログイン要否で変動 · 7,500 円は上限）。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="more" class="mb-6">
+      <p class="text-sm text-ads-muted border-t border-ads-border pt-6">
+        詳細資料：01_調査報告_概要.txt · 03_調査報告_詳細.txt（任意）<br>
+        図解の設計 · 議論ログ：<a href="図解_補足_設計メモ.md" class="text-ads-accent hover:underline">図解_補足_設計メモ.md</a>
+      </p>
+    </section>
+
+  </main>
+  <footer class="max-w-3xl mx-auto px-5 pb-8">
+    <p class="text-xs text-ads-dim text-center">図解補足 · 07_社内合意</p>
+  </footer>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

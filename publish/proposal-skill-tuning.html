@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="googlebot" content="noindex, nofollow">
+  <meta property="og:title" content="自分専用の提案スキル — チューニング前後">
+  <meta property="og:description" content="係長への現場ツール試用提案を題材に、配布スキルと自分用チューニング後の一発出しを比較した提出用図解。">
+  <meta property="og:type" content="article">
+  <title>自分専用の提案スキル — チューニング前後</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23FFFFFF'/><rect x='8' y='8' width='84' height='84' rx='14' fill='none' stroke='%233B82F6' stroke-width='4'/><circle cx='32' cy='40' r='10' fill='%233B82F6' opacity='0.8'/><circle cx='68' cy='40' r='10' fill='%2360A5FA' opacity='0.8'/><rect x='25' y='62' width='50' height='6' rx='3' fill='%2394A3B8' opacity='0.6'/><rect x='30' y='74' width='40' height='6' rx='3' fill='%2394A3B8' opacity='0.3'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ads: {
+              bg: '#FFFFFF',
+              surface: '#F8FAFC',
+              hover: '#F1F5F9',
+              border: '#E2E8F0',
+              accent: '#3B82F6',
+              'accent-light': '#2563EB',
+              text: '#1E293B',
+              muted: '#64748B',
+              dim: '#94A3B8',
+              positive: '#10B981',
+              negative: '#EF4444',
+              warning: '#F59E0B',
+            }
+          },
+          fontFamily: {
+            sans: ['"Noto Sans JP"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Yu Gothic UI"', '"Meiryo"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @media print {
+      .no-print { display: none !important; }
+      body { border-top: none !important; }
+      .rounded-xl { break-inside: avoid; }
+      .md\:flex-row { flex-direction: row !important; }
+      .md\:hidden { display: none !important; }
+      .hidden.md\:block { display: block !important; }
+      .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      .md\:mb-20 { margin-bottom: 5rem !important; }
+      .md\:py-16 { padding-top: 4rem !important; padding-bottom: 4rem !important; }
+      .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        color: #2563EB !important;
+        -webkit-text-fill-color: #2563EB !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ads-bg text-slate-600 antialiased leading-relaxed border-t-4 border-ads-accent">
+  <div class="no-print max-w-3xl mx-auto px-5 pt-2 flex justify-end">
+    <button onclick="window.print()" class="flex items-center gap-1.5 text-xs text-ads-dim hover:text-ads-accent transition-colors cursor-pointer">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i>
+      PDF
+    </button>
+  </div>
+  <main class="max-w-3xl mx-auto px-5 py-10 md:py-16">
+<!-- CONTENT_START -->
+
+<!-- HERO -->
+<div class="text-center mb-8 md:mb-10">
+  <div class="inline-flex items-center gap-2 bg-ads-accent/10 text-ads-accent-light px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+    <i data-lucide="wand-sparkles" class="w-4 h-4"></i>
+    開発ツール
+  </div>
+  <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-6">
+    自分専用の<br>
+    <span class="text-ads-accent-light">提案スキル</span>
+  </h1>
+  <p class="text-lg text-ads-muted max-w-xl mx-auto leading-relaxed">
+    出力を手直ししない。渡すもの（スキル）を直す。<br>
+    ひとことで言うと ──
+  </p>
+</div>
+
+<!-- ONE-PAGE SUMMARY -->
+<div class="bg-ads-surface border border-ads-border rounded-2xl p-6 md:p-10 mb-10 md:mb-14">
+  <div class="text-center mb-8 md:mb-10">
+    <p class="text-xl md:text-2xl font-black text-slate-900 mb-2">
+      配布のまま → <span class="text-ads-accent-light">自分の現場前提を教える</span> → 一発出し
+    </p>
+    <p class="text-sm text-ads-muted">
+      同じ題材でも、スキル側の前提が違うと「今日お願いする範囲」が変わる
+    </p>
+  </div>
+
+  <div class="flex flex-col md:flex-row items-stretch justify-center gap-3 md:gap-2 mb-8">
+    <div class="flex-1 bg-white border border-ads-border rounded-xl p-4 text-center">
+      <div class="w-12 h-12 rounded-xl bg-slate-100 border border-ads-border flex items-center justify-center mx-auto mb-2">
+        <i data-lucide="package" class="w-6 h-6 text-slate-500"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">配布スキル</div>
+      <div class="text-[11px] text-ads-muted mt-1">汎用の提案手順</div>
+    </div>
+    <div class="flex items-center justify-center md:px-1 text-ads-dim">
+      <i data-lucide="arrow-right" class="w-5 h-5 rotate-90 md:rotate-0"></i>
+    </div>
+    <div class="flex-1 bg-white border border-ads-accent/30 rounded-xl p-4 text-center">
+      <div class="w-12 h-12 rounded-xl bg-ads-accent/10 border border-ads-accent/20 flex items-center justify-center mx-auto mb-2">
+        <i data-lucide="sliders-horizontal" class="w-6 h-6 text-ads-accent"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">自分用に追記</div>
+      <div class="text-[11px] text-ads-muted mt-1">係長・試用・Go/No-Go</div>
+    </div>
+    <div class="flex items-center justify-center md:px-1 text-ads-dim">
+      <i data-lucide="arrow-right" class="w-5 h-5 rotate-90 md:rotate-0"></i>
+    </div>
+    <div class="flex-1 bg-white border border-ads-positive/30 rounded-xl p-4 text-center">
+      <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-2">
+        <i data-lucide="file-check-2" class="w-6 h-6 text-ads-positive"></i>
+      </div>
+      <div class="font-bold text-slate-900 text-sm">一発出し</div>
+      <div class="text-[11px] text-ads-muted mt-1">手直し禁止</div>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap justify-center gap-2">
+    <span class="inline-flex items-center gap-1.5 text-xs bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">
+      <i data-lucide="user" class="w-3.5 h-3.5 text-ads-accent"></i>
+      相手は係長
+    </span>
+    <span class="inline-flex items-center gap-1.5 text-xs bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">
+      <i data-lucide="workflow" class="w-3.5 h-3.5 text-ads-accent"></i>
+      題材は現場ツール試用
+    </span>
+    <span class="inline-flex items-center gap-1.5 text-xs bg-white border border-ads-border rounded-full px-3 py-1 text-ads-muted">
+      <i data-lucide="calendar-check" class="w-3.5 h-3.5 text-ads-accent"></i>
+      今日は方向性のみ
+    </span>
+  </div>
+</div>
+
+<!-- 必須1: 相手と変えたいこと -->
+<section class="mb-12 md:mb-16">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-lg bg-ads-accent/10 flex items-center justify-center">
+      <i data-lucide="target" class="w-4 h-4 text-ads-accent"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-black text-slate-900">誰に、何を変える提案か</h2>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4 mb-4">
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="text-xs font-bold text-ads-accent mb-2 tracking-wide">相手（承認者）</div>
+      <p class="text-lg font-black text-slate-900 mb-2">係長</p>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        忙しく Yes/No で答えたい相手。10分前後の面談で「進め方の方向性」を聞かれる場面を想定。
+      </p>
+    </div>
+    <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+      <div class="text-xs font-bold text-ads-accent mb-2 tracking-wide">変えたいこと</div>
+      <p class="text-lg font-black text-slate-900 mb-2">現場ツールの1か月試用</p>
+      <p class="text-sm text-ads-muted leading-relaxed">
+        表からフローチャートを作る Web ツールを、無料枠で試してよいか。本格導入や月額の決裁は今日お願いしない。
+      </p>
+    </div>
+  </div>
+
+  <div class="bg-white border border-ads-border rounded-xl p-5">
+    <div class="text-xs font-bold text-ads-dim mb-3">今日 Yes/No する範囲</div>
+    <div class="space-y-2 text-sm">
+      <div class="flex gap-3 items-start">
+        <span class="shrink-0 w-6 h-6 rounded-full bg-ads-positive/15 text-ads-positive text-xs font-bold flex items-center justify-center">1</span>
+        <p class="text-slate-700"><span class="font-bold text-slate-900">本丸:</span> 無料枠での1か月試用を開始してよいか</p>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="shrink-0 w-6 h-6 rounded-full bg-ads-accent/15 text-ads-accent text-xs font-bold flex items-center justify-center">2</span>
+        <p class="text-slate-700"><span class="font-bold text-slate-900">事前了承:</span> 成功したら有料移行を「検討フェーズ」へ進めてよいか</p>
+      </div>
+      <div class="flex gap-3 items-start">
+        <span class="shrink-0 w-6 h-6 rounded-full bg-ads-accent/15 text-ads-accent text-xs font-bold flex items-center justify-center">3</span>
+        <p class="text-slate-700"><span class="font-bold text-slate-900">事前了承:</span> 有料が難しければ DB なし構成へ切り替える方針でよいか</p>
+      </div>
+    </div>
+    <p class="text-xs text-ads-dim mt-4">後日（試用後）: 成功条件の確認 · 有料化・月額は係長と改めて相談</p>
+  </div>
+</section>
+
+<!-- スキルとは -->
+<section class="mb-12 md:mb-16">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-lg bg-ads-accent/10 flex items-center justify-center">
+      <i data-lucide="book-open" class="w-4 h-4 text-ads-accent"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-black text-slate-900">スキルとは何か</h2>
+  </div>
+  <p class="text-sm text-ads-muted mb-4 leading-relaxed">
+    AI エージェント向けの「手順書フォルダ」です。本体は <code class="text-xs bg-ads-hover px-1.5 py-0.5 rounded">SKILL.md</code>。必要なときだけ読み込まれ、細かい参照は別ファイルに分けておけるので、毎回同じ説明をチャットに書かなくて済みます。
+  </p>
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5 mb-3">
+    <div class="font-mono text-xs text-slate-700 space-y-1">
+      <div>writing-proposals/</div>
+      <div class="pl-4">SKILL.md <span class="text-ads-dim">← いつ・どう書くか</span></div>
+      <div class="pl-4">references/</div>
+      <div class="pl-8">yk-tuning.md <span class="text-ads-dim">← 係長・方向性</span></div>
+      <div class="pl-8">staged-rollout.md <span class="text-ads-dim">← 試用の Go/No-Go</span></div>
+      <div class="pl-8">examples.md <span class="text-ads-dim">← 模範回答（例4）</span></div>
+    </div>
+  </div>
+  <p class="text-xs text-ads-dim">
+    出典:
+    <a href="https://cursor.com/docs/skills" class="underline hover:text-ads-accent" target="_blank" rel="noopener">Cursor Skills 公式</a>
+    ·
+    <a href="https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills" class="underline hover:text-ads-accent" target="_blank" rel="noopener">Anthropic · Agent Skills</a>
+  </p>
+</section>
+
+<!-- 差分サマリー -->
+<section class="mb-12 md:mb-16">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-lg bg-ads-accent/10 flex items-center justify-center">
+      <i data-lucide="git-compare" class="w-4 h-4 text-ads-accent"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-black text-slate-900">チューニングで何が変わったか</h2>
+  </div>
+  <p class="text-sm text-ads-muted mb-4">同じ題材・同じ材料でも、スキル側の前提で出力の型が変わる。</p>
+
+  <div class="overflow-hidden border border-ads-border rounded-xl">
+    <div class="grid grid-cols-3 bg-ads-hover text-xs font-bold text-ads-muted">
+      <div class="p-3">観点</div>
+      <div class="p-3 border-l border-ads-border text-ads-negative/80">チューニング前</div>
+      <div class="p-3 border-l border-ads-border text-ads-positive">チューニング後</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs border-t border-ads-border">
+      <div class="p-3 font-bold text-slate-800">冒頭のお願い</div>
+      <div class="p-3 border-l border-ads-border text-ads-muted">方向性の「承認」</div>
+      <div class="p-3 border-l border-ads-border text-slate-700">進め方の方向性だけ「ご判断」</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs border-t border-ads-border bg-ads-surface">
+      <div class="p-3 font-bold text-slate-800">今日の範囲</div>
+      <div class="p-3 border-l border-ads-border text-ads-muted">選択肢 A/B/C 中心</div>
+      <div class="p-3 border-l border-ads-border text-slate-700">本日のお願い（1）本丸＋（2）（3）</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs border-t border-ads-border">
+      <div class="p-3 font-bold text-slate-800">Go/No-Go</div>
+      <div class="p-3 border-l border-ads-border text-ads-muted">成功条件が薄い</div>
+      <div class="p-3 border-l border-ads-border text-slate-700">成功条件3 · 1か月後に係長へ報告</div>
+    </div>
+    <div class="grid grid-cols-3 text-xs border-t border-ads-border bg-ads-surface">
+      <div class="p-3 font-bold text-slate-800">金額</div>
+      <div class="p-3 border-l border-ads-border text-ads-muted">切り分け言及のみ</div>
+      <div class="p-3 border-l border-ads-border text-slate-700">今日の判断に含めず・試用後相談</div>
+    </div>
+  </div>
+</section>
+
+<!-- 必須2+3: Before / After 全文 -->
+<section class="mb-12 md:mb-16">
+  <div class="flex items-center gap-2 mb-2">
+    <div class="w-8 h-8 rounded-lg bg-ads-accent/10 flex items-center justify-center">
+      <i data-lucide="files" class="w-4 h-4 text-ads-accent"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-black text-slate-900">提案文 Before / After</h2>
+  </div>
+  <p class="text-sm text-ads-muted mb-6">どちらも AI 一発出し。本文は手作業で書き換えていません。</p>
+
+  <div class="mb-6">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-red-50 text-ads-negative border border-red-100 rounded-full px-3 py-1">
+        <i data-lucide="circle-x" class="w-3.5 h-3.5"></i>
+        チューニング前（配布 Upstream）
+      </span>
+    </div>
+    <div class="bg-slate-900 rounded-xl p-4 md:p-5 overflow-x-auto">
+      <pre class="text-[11px] md:text-xs leading-relaxed text-slate-200 whitespace-pre-wrap font-sans">【提案】フローチャート作成ツール（Flowchart Studio）を、まず1か月の試用として使い始めてよいか、方向性の承認をお願いします。
+
+Excelでフローを管理してきた延長で、フローが増えた装置ではファイルとシートを探す負担が先に立ち、本体の修正に入りにくい場面が出ています。Webの表駆動で一覧・再描画できる試作があるので、無料の範囲で現場適合を確認したいです。
+
+◎ 現状の課題
+・試験装置のフローが約100個、最終的にExcelが5ファイルに分かれたことがある
+・自動運転の動作変更に合わせてフローも直そうとしたとき、「どのファイルのどのシートか」を特定する段階で手が止まった
+・作る側だけでなく、見る側にも同じ探索の負担がかかる
+
+◎ 提案する理由
+・Excelでの作成自体は有効だが、フローとファイルが増えた段階では探索と反映がボトルネックになりやすい
+・Webでは表を直して再描画でき、装置・ユニットごとに探しやすい形に寄せられる
+・すでに無料枠で保存・再編集・再描画まで試せる状態があるため、小さく始められる
+
+◎ 選択肢と推奨
+・A: 1か月、無料枠で試用し、使えるか・続けられるかを確認する
+・B: 試用せず、本格導入や有料前提の判断を先に求める
+・C: 現状のExcel運用のまま、Web化は見送り
+→推奨：A（可逆で、現場の実感を先に取れる）
+
+◎ リスクと対策
+・データを外部に置く不安 → 試用中は機密度の低いデータに限定する
+・結局いくらかかるか → 本格化時は外部クラウドの有料利用が論点になる（目安は別途説明可）。試用の可否判断とは切り分ける
+・運用が増えて大変になる不安 → 当面は既存のExcel→変換→取込の流れで回し、試用で負荷を見る</pre>
+    </div>
+  </div>
+
+  <div>
+    <div class="flex items-center gap-2 mb-3">
+      <span class="inline-flex items-center gap-1.5 text-xs font-bold bg-emerald-50 text-ads-positive border border-emerald-100 rounded-full px-3 py-1">
+        <i data-lucide="circle-check" class="w-3.5 h-3.5"></i>
+        チューニング後（一発出し）
+      </span>
+    </div>
+    <div class="bg-slate-900 rounded-xl p-4 md:p-5 overflow-x-auto">
+      <pre class="text-[11px] md:text-xs leading-relaxed text-slate-200 whitespace-pre-wrap font-sans">【提案】係長、フローチャート作成ツールを無料枠で1か月試用してよいか、進め方の方向性だけご判断をお願いします。本日は導入の最終承認や月額の決裁はお願いしません。
+
+Excelでのフロー作成はこれまでどおり有効です。フローとファイルが増えた段階では、修正の前に「どのファイルのどのシートか」を探す負担が先に立ちやすくなっています。Webの表駆動で一覧・再描画できる試作があるので、小さく試して実感を取りたいです。
+
+◎ 現状の課題
+・フローが約100個、Excelが5ファイルに分かれた装置があった
+・自動運転の動作変更に合わせてフローも直そうとしたとき、保存場所の特定で手が止まった
+・探す工程が増えると、改善の実装に回す時間が削られる
+
+◎ 提案する理由
+・人数やファイルが増えた今の段階では、探索と反映がボトルネックになりやすい
+・Webなら表を直してすぐ再描画でき、装置・ユニットごとに探しやすい形に寄せられる
+・すでに無料枠で保存・再編集・再描画まで試せる状態がある
+
+◎ 本日のお願い（Yes/No）
+・（1）無料枠での1か月試用を開始してよいか ← 本丸
+・（2）成功条件を満たしたら、有料移行を「検討フェーズ」に進めてよいか（今日は方針の事前了承）
+・（3）有料が難しい場合、DBを使わない構成へ切り替える方針でよいか（同上）
+
+◎ 試用の成功条件（1か月後に係長へ報告）
+・フローの保存・再編集が現場で滞りなくできる
+・「どのファイルか探す」作業が、試用前より明らかに楽（探索時間は試用中に計測）
+・Excelから取り込む経路が想定どおり回る
+
+◎ リスクと対策
+・データを外部に置く不安 → 試用中は機密度の低いデータに限定。個人アカウントは暫定、本番は会社アカウント前提
+・運用が増える不安 → 当面は既存のExcel→変換→取込で回し、試用で負荷を見る
+・金額の不安 → 本格化の月額は目安・変動あり。今日の判断には含めず、試用後に係長と改めて相談する</pre>
+    </div>
+  </div>
+</section>
+
+<!-- 必須4: 工夫と苦戦 -->
+<section class="mb-12 md:mb-16">
+  <div class="flex items-center gap-2 mb-4">
+    <div class="w-8 h-8 rounded-lg bg-ads-accent/10 flex items-center justify-center">
+      <i data-lucide="lightbulb" class="w-4 h-4 text-ads-accent"></i>
+    </div>
+    <h2 class="text-xl md:text-2xl font-black text-slate-900">工夫と苦戦</h2>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-4 mb-4">
+    <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <i data-lucide="sparkles" class="w-4 h-4 text-ads-positive"></i>
+        <h3 class="font-black text-slate-900">工夫したポイント</h3>
+      </div>
+      <ul class="space-y-2 text-sm text-slate-700">
+        <li class="flex gap-2"><span class="text-ads-positive shrink-0">・</span><span>Upstream の素スキルで Before を取り、差分をはっきりさせた</span></li>
+        <li class="flex gap-2"><span class="text-ads-positive shrink-0">・</span><span>模範回答（例4）を先に磨き、<code class="text-xs bg-white px-1 rounded">examples.md</code> に入れてから一発出しした</span></li>
+        <li class="flex gap-2"><span class="text-ads-positive shrink-0">・</span><span>「今日のお願い／後日の判断」を staged-rollout でスキルに固定した</span></li>
+        <li class="flex gap-2"><span class="text-ads-positive shrink-0">・</span><span>冒頭を「承認」ではなく「方向性のご判断」に寄せた</span></li>
+      </ul>
+    </div>
+    <div class="bg-amber-50/40 border border-amber-100 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <i data-lucide="mountain" class="w-4 h-4 text-ads-warning"></i>
+        <h3 class="font-black text-slate-900">苦戦したポイント</h3>
+      </div>
+      <ul class="space-y-2 text-sm text-slate-700">
+        <li class="flex gap-2"><span class="text-ads-warning shrink-0">・</span><span>すでに部分チューニング済みだったため、「配布のまま」を取るのに Upstream 再取得が必要だった</span></li>
+        <li class="flex gap-2"><span class="text-ads-warning shrink-0">・</span><span>材料を厚く渡すと素スキルでも形が整い、差分が「文章の上手さ」より「自動で踏む前提」の差になりやすい</span></li>
+        <li class="flex gap-2"><span class="text-ads-warning shrink-0">・</span><span>手直し禁止の線引き: 本文は触らず、気になる点はスキル／模範／材料だけ直して全文を出し直す</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-ads-surface border border-ads-border rounded-xl p-5">
+    <div class="text-xs font-bold text-ads-accent mb-2">ルールの線引き（自分基準）</div>
+    <p class="text-sm text-slate-700 leading-relaxed">
+      提案文本文のタイピング修正は禁止。メタ情報（差分メモ・ファイルの表）の追記は、提出する提案文そのものではないので可、とした。
+    </p>
+  </div>
+</section>
+
+<!-- たとえ -->
+<section class="mb-8">
+  <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 rounded-2xl p-6 md:p-8 text-center">
+    <i data-lucide="chef-hat" class="w-8 h-8 text-ads-accent mx-auto mb-3"></i>
+    <p class="text-base md:text-lg font-black text-slate-900 mb-2">たとえ話</p>
+    <p class="text-sm text-ads-muted max-w-md mx-auto leading-relaxed">
+      毎回「うちは辛口で、塩は控えめ」と注文し直すより、<strong class="text-slate-800 font-bold">お店のレシピ帳に自分用の味を書いておく</strong>方が、次の一皿も同じ味になる。スキルのチューニングは、そのレシピ帳を直す作業です。
+    </p>
+  </div>
+</section>
+
+<p class="text-center text-xs text-ads-dim mt-8">
+  AI-Driven School · 第5回月次課題 · 2026-08-09
+</p>
+
+<!-- CONTENT_END -->
+  </main>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

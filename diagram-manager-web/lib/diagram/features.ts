@@ -1,6 +1,6 @@
 export const diagramFeatures = {
   cardDelete: false,
-  memoEdit: false,
+  memoEdit: true,
   surgeCommands: true,
   surgeCommandsCollapsedDefault: true,
   seriesRelatedPane: true,

@@ -18,11 +18,34 @@ npm run dev
 
 ブラウザで http://localhost:3000 を開く（ルートが図解管理画面）。
 
+## データの記憶（Neon）
+
+| 項目 | 内容 |
+|------|------|
+| **保存するもの** | 図解メタ（一覧）と **メモ** |
+| **保存先** | Neon（Postgres）· `DATABASE_URL` |
+| **未設定時** | `data/figures.ts` のモック（ヘッダーに「モック」表示） |
+
+### セットアップ（ローカル）
+
+1. [Vercel Dashboard](https://vercel.com) → 対象プロジェクト → **Storage** → **Neon** を Free で追加
+2. Project → **Settings** → **Environment Variables** の `DATABASE_URL` をコピー
+3. `diagram-manager-web/.env.local` を作り、次を書く:
+
+```env
+DATABASE_URL=（コピーした接続文字列）
+```
+
+4. `npm run dev` → ヘッダーが「Neon（永続）」になる
+5. 初回アクセスで表作成＋シード投入。メモを編集して保存 → リロードで残ることを確認
+
+手動 SQL 正本: `database/schema.sql`
+
 ## Vercel
 
 - Git リポジトリ: `yk-tool`
 - **Root Directory:** `diagram-manager-web`
-- 環境変数: MVP 段階では不要（データは `data/figures.ts` ハードコード）
+- **Environment Variables:** Neon 連携で `DATABASE_URL` が自動注入される想定（未連携なら手動追加）
 
 ## 図解 HTML との関係
 

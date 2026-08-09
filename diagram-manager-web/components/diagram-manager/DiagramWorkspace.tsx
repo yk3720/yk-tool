@@ -2,16 +2,23 @@
 
 import { useMemo, useState } from "react";
 
-import { CATEGORIES, FIGURES, type CategoryId, type Figure } from "@/data/figures";
+import { CATEGORIES, type CategoryId, type Figure } from "@/data/figures";
 import { getTopicById, type TopicId } from "@/data/topics";
 import { CategoryPane } from "@/components/diagram-manager/CategoryPane";
 import { DiagramCardPane } from "@/components/diagram-manager/DiagramCardPane";
 import { DiagramDetailPane } from "@/components/diagram-manager/DiagramDetailPane";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import type { FigureStorageKind } from "@/lib/diagram/repository-types";
 
 type FigureSelectionSource = "primary" | "related";
 
-export function DiagramWorkspace() {
+type DiagramWorkspaceProps = {
+  initialFigures: Figure[];
+  storage: FigureStorageKind;
+};
+
+export function DiagramWorkspace({ initialFigures, storage }: DiagramWorkspaceProps) {
+  const [figures, setFigures] = useState<Figure[]>(initialFigures);
   const [selectedCategoryId, setSelectedCategoryId] = useState<CategoryId>(CATEGORIES[0].id);
   const [selectedTopicId, setSelectedTopicId] = useState<TopicId | null>(null);
   const [selectedFigureId, setSelectedFigureId] = useState<string | null>(null);
@@ -19,39 +26,39 @@ export function DiagramWorkspace() {
     useState<FigureSelectionSource | null>(null);
 
   const filteredFigures = useMemo(() => {
-    let list = FIGURES.filter((f) => f.categoryId === selectedCategoryId);
+    let list = figures.filter((f) => f.categoryId === selectedCategoryId);
     if (selectedTopicId !== null) {
       list = list.filter((f) => f.topicId === selectedTopicId);
     }
     return list;
-  }, [selectedCategoryId, selectedTopicId]);
+  }, [figures, selectedCategoryId, selectedTopicId]);
 
   const selectedFigure: Figure | null = useMemo(() => {
     if (selectedFigureId === null) {
       return null;
     }
     if (figureSelectionSource === "related") {
-      return FIGURES.find((f) => f.id === selectedFigureId) ?? null;
+      return figures.find((f) => f.id === selectedFigureId) ?? null;
     }
     return (
-      FIGURES.find(
+      figures.find(
         (f) =>
           f.id === selectedFigureId &&
           f.categoryId === selectedCategoryId &&
           (selectedTopicId === null || f.topicId === selectedTopicId),
       ) ?? null
     );
-  }, [selectedFigureId, figureSelectionSource, selectedCategoryId, selectedTopicId]);
+  }, [figures, selectedFigureId, figureSelectionSource, selectedCategoryId, selectedTopicId]);
 
   const figureCountByCategory = useMemo(() => {
     return ([...CATEGORIES] as const).reduce<Record<CategoryId, number>>(
       (acc, category) => {
-        acc[category.id] = FIGURES.filter((f) => f.categoryId === category.id).length;
+        acc[category.id] = figures.filter((f) => f.categoryId === category.id).length;
         return acc;
       },
       {} as Record<CategoryId, number>,
     );
-  }, []);
+  }, [figures]);
 
   const handleSelectCategory = (id: CategoryId) => {
     setSelectedCategoryId(id);
@@ -81,6 +88,19 @@ export function DiagramWorkspace() {
     // cardDelete 有効化時に repository.remove を接続
   };
 
+  const handleSaveMemo = async (id: string, memo: string) => {
+    const response = await fetch(`/api/figures/${encodeURIComponent(id)}/memo`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ memo }),
+    });
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: string } | null;
+      throw new Error(data?.error ?? "メモの保存に失敗しました");
+    }
+    setFigures((prev) => prev.map((figure) => (figure.id === id ? { ...figure, memo } : figure)));
+  };
+
   const selectedCategory = CATEGORIES.find((c) => c.id === selectedCategoryId) ?? CATEGORIES[0];
   const selectedTopicLabel =
     selectedTopicId !== null ? (getTopicById(selectedTopicId)?.label ?? null) : null;
@@ -100,6 +120,7 @@ export function DiagramWorkspace() {
   }, [selectedFigure, selectedTopicLabel]);
 
   const cardPaneKey = `${selectedCategoryId}-${selectedTopicId ?? "all"}`;
+  const storageLabel = storage === "neon" ? "Neon（永続）" : "モック（再起動で戻る）";
 
   return (
     <SidebarProvider
@@ -108,7 +129,7 @@ export function DiagramWorkspace() {
     >
       <CategoryPane
         categories={CATEGORIES}
-        figures={FIGURES}
+        figures={figures}
         selectedCategoryId={selectedCategoryId}
         selectedTopicId={selectedTopicId}
         onSelectCategory={handleSelectCategory}
@@ -133,13 +154,14 @@ export function DiagramWorkspace() {
               <span className="truncate text-sm text-muted-foreground">{selectedFigure.title}</span>
             </>
           ) : null}
+          <span className="ml-auto shrink-0 text-xs text-muted-foreground">{storageLabel}</span>
         </header>
 
         <div className="flex min-h-0 flex-1">
           <DiagramCardPane
             key={cardPaneKey}
             figures={filteredFigures}
-            allFigures={FIGURES}
+            allFigures={figures}
             selectedFigureId={selectedFigureId}
             onSelectFigure={handleSelectPrimaryFigure}
             onSelectRelatedFigure={handleSelectRelatedFigure}
@@ -150,11 +172,12 @@ export function DiagramWorkspace() {
 
           <DiagramDetailPane
             figure={selectedFigure}
-            allFigures={FIGURES}
+            allFigures={figures}
             categoryLabel={detailCategoryLabel}
             topicLabel={detailTopicLabel}
             selectedFigureId={selectedFigureId}
             onSelectFigure={handleSelectRelatedFigure}
+            onSaveMemo={storage === "neon" ? handleSaveMemo : undefined}
           />
         </div>
       </SidebarInset>
